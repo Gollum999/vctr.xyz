@@ -10,10 +10,10 @@
 import NodeEditor from '@/components/NodeEditor';
 
 export default {
-  name: 'VecViz',
-  components: {
-    NodeEditor,
-  },
+    name: 'VecViz',
+    components: {
+        NodeEditor,
+    },
 };
 </script>
 

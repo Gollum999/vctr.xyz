@@ -32,6 +32,6 @@ module.exports = {
       'asyncArrow': 'always',
     }],
     'semi': ['error', 'always'], // require semicolons
-    'indent': 0, // ignore indentation warnings
+    'indent': ['error', 4], // 4 space indentation
   }
 }
