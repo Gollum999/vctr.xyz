@@ -1,8 +1,8 @@
 <template>
-  <div id="app">
+  <b-container id="app">
     <img src="./assets/logo.png">
     <router-view/>
-  </div>
+  </b-container>
 </template>
 
 <script>
@@ -19,5 +19,10 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  height: 100%;
+}
+
+.container {
+    min-height: 100vh;
 }
 </style>
