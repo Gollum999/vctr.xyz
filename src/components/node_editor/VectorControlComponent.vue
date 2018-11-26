@@ -1,15 +1,15 @@
 <template>
   <b-container class="vector-control-container">
-    <b-row>
+    <b-form-row>
       <b-col>X</b-col>
       <b-col>Y</b-col>
       <b-col>Z</b-col>
-    </b-row>
-    <b-row>
+    </b-form-row>
+    <b-form-row>
       <b-col><input type="number" :value="value[0]" :readonly="readonly" @input="onChange($event, 0)" /></b-col>
       <b-col><input type="number" :value="value[1]" :readonly="readonly" @input="onChange($event, 1)" /></b-col>
       <b-col><input type="number" :value="value[2]" :readonly="readonly" @input="onChange($event, 2)" /></b-col>
-    </b-row>
+    </b-form-row>
   </b-container>
 </template>
 
