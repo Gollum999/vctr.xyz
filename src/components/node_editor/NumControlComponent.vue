@@ -16,11 +16,6 @@ export default {
     },
 
     methods: {
-        /* onChange(event) {
-         *     this.value = parseInt(event.target.value);
-         *     console.log(`set value to ${this.value} (${typeof this.value})`);
-         *     this.update();
-         * }, */
         update() {
             if (this.vkey) {
                 console.log(`NumControlComponent putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);

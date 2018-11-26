@@ -6,9 +6,9 @@
       <b-col>Z</b-col>
     </b-form-row>
     <b-form-row>
-      <b-col><input type="number" :value="value[0]" :readonly="readonly" @input="onChange($event, 0)" /></b-col>
-      <b-col><input type="number" :value="value[1]" :readonly="readonly" @input="onChange($event, 1)" /></b-col>
-      <b-col><input type="number" :value="value[2]" :readonly="readonly" @input="onChange($event, 2)" /></b-col>
+      <b-col><input type="number" v-model.number="value[0]" :readonly="readonly" @input="update" /></b-col>
+      <b-col><input type="number" v-model.number="value[1]" :readonly="readonly" @input="update" /></b-col>
+      <b-col><input type="number" v-model.number="value[2]" :readonly="readonly" @input="update" /></b-col>
     </b-form-row>
   </b-container>
 </template>
@@ -29,11 +29,6 @@ export default {
     },
 
     methods: {
-        onChange(event, idx) {
-            this.value[idx] = +event.target.value;
-            console.log(`set value[${idx}] to ${this.value} (${typeof this.value})`);
-            this.update();
-        },
         update() {
             if (this.vkey) {
                 console.log(`NumControlComponent putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
@@ -55,6 +50,6 @@ export default {
 
 <style>
 .vector input {
-    width: 40px;
+    width: 3em;
 }
 </style>
