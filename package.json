@@ -14,6 +14,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "gl-matrix": "^2.8.1",
     "rete": "^1.0.0-beta.5",
     "rete-connection-plugin": "^0.3.2",
     "rete-vue-render-plugin": "^0.2.5",

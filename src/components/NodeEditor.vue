@@ -9,15 +9,17 @@ import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import components from '@/components/node_editor/components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
+import { vec3 } from 'gl-matrix';
 
 export default {
     name: 'NodeEditor',
     mounted() {
         console.log('NodeEditor.vue mounted()');
         const container = document.getElementById('rete');
-        const componentList = [
+        const componentList = [ // TODO this is gross
             new components.NumComponent(),
             new components.AddComponent(),
+            new components.VectorComponent(),
         ];
 
         const editor = new Rete.NodeEditor('name@0.1.0', container);
@@ -46,13 +48,16 @@ export default {
             var in1 = await componentList[0].createNode({'numctl': 5});
             var in2 = await componentList[0].createNode({'numctl': 4});
             var out = await componentList[1].createNode();
+            var vec = await componentList[2].createNode({'vecctl': vec3.fromValues(3, 2, 1)});
             in1.position = [20, 20];
             in2.position = [20, 170];
             out.position = [280, 75];
+            vec.position = [480, 75];
 
             editor.addNode(in1);
             editor.addNode(in2);
             editor.addNode(out);
+            editor.addNode(vec);
             editor.connect(in1.outputs.get('num'), out.inputs.get('num1'));
             editor.connect(in2.outputs.get('num'), out.inputs.get('num2'));
         })();
