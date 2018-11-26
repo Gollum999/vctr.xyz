@@ -1,6 +1,5 @@
 <template>
   <b-container id="app">
-    <img src="./assets/logo.png">
     <router-view/>
   </b-container>
 </template>
@@ -22,7 +21,7 @@ export default {
   height: 100%;
 }
 
-.container {
+.container #app {
     min-height: 100vh;
 }
 </style>
