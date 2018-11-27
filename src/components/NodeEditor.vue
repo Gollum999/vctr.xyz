@@ -1,5 +1,9 @@
 <template>
-  <div id="rete" class="node-editor">
+  <div>
+    <div id="rete" class="node-editor" />
+    <div>
+      {{ editorJson }}
+    </div>
   </div>
 </template>
 
@@ -13,36 +17,44 @@ import { vec3 } from 'gl-matrix';
 
 export default {
     name: 'NodeEditor',
+    data() {
+        return {
+            container: null,
+            editor: null,
+            editorJson: '',
+        };
+    },
     mounted() {
         console.log('NodeEditor.vue mounted()');
-        const container = document.getElementById('rete');
+        this.container = document.getElementById('rete');
+        /* console.log(this.container); */
+        this.editor = new Rete.NodeEditor('name@0.1.0', this.container);
+
         const componentList = [ // TODO this is gross
             new components.NumComponent(),
             new components.AddComponent(),
             new components.VectorComponent(),
         ];
 
-        const editor = new Rete.NodeEditor('name@0.1.0', container);
-        editor.use(ConnectionPlugin);
-        editor.use(VueRenderPlugin);
+        this.editor.use(ConnectionPlugin);
+        this.editor.use(VueRenderPlugin);
 
         const engine = new Rete.Engine('name@0.1.0');
 
         componentList.map(c => {
-            editor.register(c);
+            this.editor.register(c);
             engine.register(c);
         });
 
-        console.log('before on');
-        editor.on('process nodecreated noderemoved connectioncreated connectionremoved',
+        this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved',
             async () => {
                 console.log('editor processing');
-                console.log(editor.toJSON());
+                console.log(this.editor.toJSON());
                 await engine.abort(); // Stop old job if running
-                await engine.process(editor.toJSON());
+                await engine.process(this.editor.toJSON());
+                this.editorJson = this.editor.toJSON();
             });
 
-        console.log('before async');
         (async () => {
             console.log('creating nodes');
             var in1 = await componentList[0].createNode({'numctl': 5});
@@ -52,19 +64,18 @@ export default {
             in1.position = [20, 20];
             in2.position = [20, 170];
             out.position = [280, 75];
-            vec.position = [480, 75];
+            vec.position = [420, 75];
 
-            editor.addNode(in1);
-            editor.addNode(in2);
-            editor.addNode(out);
-            editor.addNode(vec);
-            editor.connect(in1.outputs.get('num'), out.inputs.get('num1'));
-            editor.connect(in2.outputs.get('num'), out.inputs.get('num2'));
+            this.editor.addNode(in1);
+            this.editor.addNode(in2);
+            this.editor.addNode(out);
+            this.editor.addNode(vec);
+            this.editor.connect(in1.outputs.get('num'), out.inputs.get('num1'));
+            this.editor.connect(in2.outputs.get('num'), out.inputs.get('num2'));
         })();
-        console.log('after async');
 
-        /* editor.view.resize() */
-        editor.trigger('process');
+        /* this.editor.view.resize() */
+        this.editor.trigger('process');
     },
 };
 </script>
@@ -74,9 +85,5 @@ export default {
     width: 100%;
     height: 400px; /* TODO use bootstrap grids */
     border: 1px solid black;
-}
-
-.socket.number {
-    background: #96b38a;
 }
 </style>
