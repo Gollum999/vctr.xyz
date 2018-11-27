@@ -1,5 +1,6 @@
 import Rete from 'rete';
 import controls from '@/components/node_editor/controls';
+import { vec3 } from 'gl-matrix';
 
 const numSocket = new Rete.Socket('Number value');
 const vectorSocket = new Rete.Socket('Vector value');
@@ -57,6 +58,62 @@ class VectorComponent extends Rete.Component {
     }
 }
 
+class VectorOperationComponent extends Rete.Component {
+    constructor() {
+        super('Vector Operation');
+        console.log('VectorOperationComponent constructor');
+    }
+
+    builder(node) {
+        console.log('VectorOperationComponent builder');
+        let in1 = new Rete.Input('vec1', 'Vector 1', vectorSocket);
+        let in2 = new Rete.Input('vec2', 'Vector 2', vectorSocket);
+        let out = new Rete.Output('vec', 'Vector', vectorSocket);
+        let control = new controls.VectorOperationControl(this.editor, 'vecctl');
+        node.addInput(in1);
+        node.addInput(in2);
+        node.addOutput(out);
+        node.addControl(control);
+        return node;
+    }
+
+    worker(node, inputs, outputs) {
+        const thisNode = this.editor.nodes.find(n => n.id === node.id);
+        const opFn = (() => {
+            console.log('VectorOperationComponent worker');
+            console.log(thisNode);
+            console.log(thisNode.controls);
+            console.log(thisNode.controls.get('vecctl').getValue);
+            console.log(thisNode.controls.get('vecctl').getValue());
+            switch (thisNode.controls.get('vecctl').getValue()) {
+            case 'Add':
+                return vec3.add;
+            case 'Subtract':
+                return vec3.subtract;
+            case 'Dot':
+                return vec3.dot; // TODO output sockets change
+            case 'Cross':
+                return vec3.cross;
+            default:
+                throw new Error(`Invalid operation selected in VectorOperationControl node (id ${node.id})`);
+            }
+        })();
+        console.log(`VectorOperationControl using op: ${opFn}`);
+
+        function getInput(name) { // TODO assumes only one input per socket
+            return inputs[name].length ? inputs[name][0] : node.data[name];
+        }
+
+        const vec1 = getInput('vec1');
+        const vec2 = getInput('vec2');
+        const out = vec3.create();
+        opFn(out, vec1, vec2); // TODO assign?
+        console.log(out);
+
+        outputs['vec'] = out;
+    }
+}
+
 class AddComponent extends Rete.Component {
     constructor() {
         super('Add');
@@ -83,7 +140,10 @@ class AddComponent extends Rete.Component {
         console.log(inputs);
         console.log(`${inputs['num1']} (${typeof inputs['num1']}) (${typeof inputs['num1'][0]})`);
         console.log(`${inputs['num2']} (${typeof inputs['num2']}) (${typeof inputs['num2'][0]})`);
-        // TODO when should I use node.data over inputs?  why do I have to search for this node by id?
+        // TODO when should I use node.data over inputs?
+        //   inputs is empty if no connections
+        //   node.data is just a sane default?
+        // TODO why do I have to search for this node by id?
         console.log(node.data);
         console.log(typeof node.data.numctl);
         /* console.log(node.controls); */
@@ -96,4 +156,4 @@ class AddComponent extends Rete.Component {
     }
 }
 
-export default { NumComponent, VectorComponent, AddComponent };
+export default { NumComponent, VectorComponent, VectorOperationComponent, AddComponent };

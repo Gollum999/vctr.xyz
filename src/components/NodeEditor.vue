@@ -34,6 +34,7 @@ export default {
             new components.NumComponent(),
             new components.AddComponent(),
             new components.VectorComponent(),
+            new components.VectorOperationComponent(),
         ];
 
         this.editor.use(ConnectionPlugin);
@@ -61,15 +62,18 @@ export default {
             var in2 = await componentList[0].createNode({'numctl': 4});
             var out = await componentList[1].createNode();
             var vec = await componentList[2].createNode({'vecctl': vec3.fromValues(3, 2, 1)});
+            var vecOp = await componentList[3].createNode();
             in1.position = [20, 20];
             in2.position = [20, 170];
             out.position = [280, 75];
             vec.position = [420, 75];
+            vecOp.position = [680, 75];
 
             this.editor.addNode(in1);
             this.editor.addNode(in2);
             this.editor.addNode(out);
             this.editor.addNode(vec);
+            this.editor.addNode(vecOp);
             this.editor.connect(in1.outputs.get('num'), out.inputs.get('num1'));
             this.editor.connect(in2.outputs.get('num'), out.inputs.get('num2'));
         })();
