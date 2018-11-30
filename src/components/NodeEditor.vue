@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div id="rete" class="node-editor" />
+  <div class="node-editor">
+    <div class="rete" id="rete" />
   </div>
 </template>
 
@@ -23,8 +23,10 @@ export default {
     mounted() {
         console.log('NodeEditor.vue mounted()');
         this.container = document.getElementById('rete');
-        /* console.log(this.container); */
         this.editor = new Rete.NodeEditor('name@0.1.0', this.container);
+
+        // TODO testing this... double click zoom is annoying
+        // this.editor.view.container.removeEventListener('dblclick', this.editor.view.area._zoom.dblclick);
 
         const componentList = [ // TODO this is gross
             new components.NumComponent(),
@@ -104,9 +106,28 @@ export default {
 
 <style>
 .node-editor {
+    display: block;
     width: 100%;
-    height: 400px; /* TODO use bootstrap grids */
+    /* height: 400px; /* TODO use bootstrap grids */ */
+    /* height: 100%; */
+    min-height: 100px;
     border: 1px solid black;
+    /* overflow-x: hidden; */
+    overflow-y: hidden;
+}
+.rete {
+    display: block;
+    /* width: 100%; */
+    /* height: 200px; /* TODO use bootstrap grids */ */
+    height: 100%;
+    min-height: 100vh;
+    border: 1px solid purple;
+    /* overflow-x: hidden; */
+    /* overflow-y: hidden; */
+}
+.split {
+    overflow-y: hidden;
+}
 
 /* Global overrides for Rete style */
 #app .node {

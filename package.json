@@ -11,7 +11,8 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "debug": "node-nightly --inspect-brk build/webpack.dev.conf.js"
   },
   "dependencies": {
     "bootstrap-vue": "^2.0.0-rc.11",
@@ -20,7 +21,8 @@
     "rete-connection-plugin": "^0.3.2",
     "rete-vue-render-plugin": "^0.2.5",
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "vue-split-panel": "^1.0.4"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
@@ -78,7 +80,7 @@
     "vue-template-compiler": "^2.5.2",
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.9.0",
-    "webpack-dev-server": "^2.9.1",
+    "webpack-dev-server": "^2.11.3",
     "webpack-merge": "^4.1.0"
   },
   "engines": {

@@ -23,5 +23,6 @@ export default {
 
 .container #app {
     min-height: 100vh;
+    /* max-height: 100vh; */
 }
 </style>

@@ -1,14 +1,20 @@
 <template>
-  <div class="vec-viz">
-    <div>
-      <NodeEditor @process="editorJson = $event"/>
-    </div>
+  <div>
+    <Split class="vec-viz" direction="vertical" :gutterSize="8">
+      <SplitArea :size="50" :minSize="50">
+        <Viewport />
+      </SplitArea>
+      <SplitArea :size="50" :minSize="50">
+        <NodeEditor @process="editorJson = $event"/>
+      </SplitArea>
+    </Split>
     <p>{{editorJson}}</p>
   </div>
 </template>
 
 <script>
-import NodeEditor from '@/components/NodeEditor';
+import Viewport from './Viewport';
+import NodeEditor from './NodeEditor';
 
 export default {
     name: 'VecViz',
@@ -18,6 +24,7 @@ export default {
         };
     },
     components: {
+        Viewport,
         NodeEditor,
     },
 };
@@ -25,6 +32,8 @@ export default {
 
 <style>
 .vec-viz {
-    height: 100%;
+    /* height: 100%; */
+    height: 800px; /* TODO viewport height - margin */
+    border: 1px solid yellow;
 }
 </style>
