@@ -29,8 +29,9 @@ export default {
         const componentList = [ // TODO this is gross
             new components.NumComponent(),
             new components.AddComponent(),
-            new components.VectorComponent(),
+            new components.VectorComponent(true),
             new components.VectorOperationComponent(),
+            new components.VectorComponent(false),
         ];
 
         this.editor.use(ConnectionPlugin);
@@ -48,9 +49,14 @@ export default {
                 console.log('editor processing');
                 console.log(this.editor.toJSON());
                 await engine.abort(); // Stop old job if running
+                console.log('calling engine.process');
                 await engine.process(this.editor.toJSON());
                 this.$emit('process', this.editor.toJSON());
             });
+        engine.on('error', ({message, data}) => {
+            console.warn(`Error in Rete engine: ${message}`);
+            console.info(data);
+        });
 
         (async () => {
             console.log('creating nodes');
@@ -58,24 +64,40 @@ export default {
             var in2 = await componentList[0].createNode({'numctl': 4});
             var out = await componentList[1].createNode();
             var vec = await componentList[2].createNode({'vecctl': vec3.fromValues(3, 2, 1)});
+            var vec2 = await componentList[2].createNode({'vecctl': vec3.fromValues(2, 2, 2)});
             var vecOp = await componentList[3].createNode();
+            var vecOut = await componentList[4].createNode();
             in1.position = [20, 20];
             in2.position = [20, 170];
-            out.position = [280, 75];
-            vec.position = [420, 75];
-            vecOp.position = [680, 75];
+            out.position = [180, 75];
+            vec.position = [320, 75];
+            vec2.position = [320, 300];
+            vecOp.position = [560, 75];
+            vecOut.position = [740, 75];
 
             this.editor.addNode(in1);
             this.editor.addNode(in2);
             this.editor.addNode(out);
             this.editor.addNode(vec);
+            this.editor.addNode(vec2);
             this.editor.addNode(vecOp);
+            this.editor.addNode(vecOut);
             this.editor.connect(in1.outputs.get('num'), out.inputs.get('num1'));
             this.editor.connect(in2.outputs.get('num'), out.inputs.get('num2'));
+            this.editor.connect(vec.outputs.get('vec'), vecOp.inputs.get('vec1'));
+            this.editor.connect(vec2.outputs.get('vec'), vecOp.inputs.get('vec2'));
+            this.editor.connect(vecOp.outputs.get('vec'), vecOut.inputs.get('vec'));
+            console.log('done creating nodes');
+            console.log(vec);
+            console.log(vecOut);
+            console.log(componentList[2]);
+            console.log(componentList[4]);
         })();
 
         /* this.editor.view.resize() */
+        console.log('MAIN process');
         this.editor.trigger('process');
+        console.log('MAIN end process');
     },
 };
 </script>
