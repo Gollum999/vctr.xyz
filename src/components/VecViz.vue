@@ -1,8 +1,9 @@
 <template>
   <div class="vec-viz">
     <div>
-      <NodeEditor />
+      <NodeEditor @process="editorJson = $event"/>
     </div>
+    <p>{{editorJson}}</p>
   </div>
 </template>
 
@@ -11,6 +12,11 @@ import NodeEditor from '@/components/NodeEditor';
 
 export default {
     name: 'VecViz',
+    data() {
+        return {
+            editorJson: '',
+        };
+    },
     components: {
         NodeEditor,
     },

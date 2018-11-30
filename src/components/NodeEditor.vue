@@ -1,9 +1,6 @@
 <template>
   <div>
     <div id="rete" class="node-editor" />
-    <div>
-      {{ editorJson }}
-    </div>
   </div>
 </template>
 
@@ -21,7 +18,6 @@ export default {
         return {
             container: null,
             editor: null,
-            editorJson: '',
         };
     },
     mounted() {
@@ -53,7 +49,7 @@ export default {
                 console.log(this.editor.toJSON());
                 await engine.abort(); // Stop old job if running
                 await engine.process(this.editor.toJSON());
-                this.editorJson = this.editor.toJSON();
+                this.$emit('process', this.editor.toJSON());
             });
 
         (async () => {
