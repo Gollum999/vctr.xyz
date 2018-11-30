@@ -6,9 +6,9 @@
       <b-col>Z</b-col>
     </b-form-row>
     <b-form-row>
-      <b-col><input type="number" v-model.number="value[0]" :readonly="readonly" @input="update" /></b-col>
-      <b-col><input type="number" v-model.number="value[1]" :readonly="readonly" @input="update" /></b-col>
-      <b-col><input type="number" v-model.number="value[2]" :readonly="readonly" @input="update" /></b-col>
+      <b-col><input v-if="value" type="number" v-model.number="value[0]" :readonly="readOnly" @input="update" /></b-col>
+      <b-col><input v-if="value" type="number" v-model.number="value[1]" :readonly="readOnly" @input="update" /></b-col>
+      <b-col><input v-if="value" type="number" v-model.number="value[2]" :readonly="readOnly" @input="update" /></b-col>
     </b-form-row>
   </b-container>
 </template>
@@ -19,7 +19,7 @@ import { vec3 } from 'gl-matrix';
 export default {
     props: [
         'vkey', 'emitter', 'getData', 'putData', // required
-        'readonly',
+        'readOnly',
     ],
 
     data() {
@@ -31,16 +31,16 @@ export default {
     methods: {
         update() {
             if (this.vkey) {
-                console.log(`NumControlComponent putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
+                console.log(`VectorControlComponent putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
                 this.putData(this.vkey, this.value);
             }
-            console.log('NumControlComponent triggering process');
+            console.log('VectorControlComponent triggering process');
             this.emitter.trigger('process');
         },
     },
 
     mounted() {
-        console.log('NumControlComponent mounted');
+        console.log(`VectorControlComponent mounted`);
         console.log(this);
         this.value = this.getData(this.vkey);
         console.log(`mounted set value for key ${this.vkey} to ${this.value}`);

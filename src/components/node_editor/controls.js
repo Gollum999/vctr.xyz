@@ -5,11 +5,11 @@ import VectorOperationComponent from './VectorOperationComponent';
 
 // TODO can I make a generic wrapper to avoid this boilerplate?
 class NumControl extends Rete.Control {
-    constructor(emitter, key, readonly = false) {
+    constructor(emitter, key, readOnly = false) {
         super(key);
         this.render = 'vue';
         this.component = NumControlComponent;
-        this.props = { emitter, vkey: key, readonly };
+        this.props = { emitter, vkey: key, readOnly };
     }
 
     setValue(val) {
@@ -19,11 +19,12 @@ class NumControl extends Rete.Control {
 }
 
 class VectorControl extends Rete.Control {
-    constructor(emitter, key, readonly = false) {
+    constructor(emitter, key, readOnly = false) {
+        console.log(`VectorControl constrtuctor, read only: ${readOnly}`);
         super(key);
         this.render = 'vue';
         this.component = VectorControlComponent;
-        this.props = { emitter, vkey: key, readonly };
+        this.props = { emitter, vkey: key, readOnly };
     }
 
     setValue(val) {
