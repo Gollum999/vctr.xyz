@@ -1,10 +1,10 @@
 <template>
   <div>
     <Split class="vec-viz" direction="vertical" :gutterSize="8">
-      <SplitArea :size="50" :minSize="50">
+      <SplitArea :size="50" :minSize="150">
         <Viewport />
       </SplitArea>
-      <SplitArea :size="50" :minSize="50">
+      <SplitArea :size="50" :minSize="150">
         <NodeEditor @process="editorJson = $event"/>
       </SplitArea>
     </Split>
