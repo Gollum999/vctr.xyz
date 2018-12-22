@@ -108,22 +108,14 @@ export default {
 .node-editor {
     display: block;
     width: 100%;
-    /* height: 400px; /* TODO use bootstrap grids */ */
-    /* height: 100%; */
     min-height: 100px;
-    border: 1px solid black;
-    /* overflow-x: hidden; */
     overflow-y: hidden;
 }
 .rete {
     display: block;
-    /* width: 100%; */
-    /* height: 200px; /* TODO use bootstrap grids */ */
     height: 100%;
     min-height: 100vh;
-    border: 1px solid purple;
-    /* overflow-x: hidden; */
-    /* overflow-y: hidden; */
+    border: 2px solid #dddddd;
 }
 .split {
     overflow-y: hidden;
