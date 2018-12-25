@@ -1,29 +1,52 @@
 <template>
   <div class="quad-viewport">
-    <div class="flex-row">
-      <div class="viewport-container">
-        a
+    <vgl-namespace class="vgl-namespace">
+      <vgl-scene name="main_scene">
+        <vgl-box-geometry name="cube" width=1 height=2 depth=3 />
+        <vgl-mesh-standard-material name="std" />
+        <vgl-mesh geometry="cube" material="std" />
+        <vgl-ambient-light color="#ffeecc" />
+        <vgl-directional-light position="0 1 1" />
+        <vgl-axes-helper size="5" />
+      </vgl-scene>
+
+      <div class="flex-row">
+        <div class="viewport-container">
+          <Viewport view="top" scene="main_scene" />
+        </div>
+        <div class="viewport-container">
+          <Viewport view="free" scene="main_scene" />
+        </div>
       </div>
-      <div class="viewport-container">
-        b
+      <div class="flex-row">
+        <div class="viewport-container">
+          <Viewport view="front" scene="main_scene" />
+        </div>
+        <div class="viewport-container">
+          <Viewport view="side" scene="main_scene" />
+        </div>
       </div>
-    </div>
-    <div class="flex-row">
-      <div class="viewport-container">
-        c
-      </div>
-      <div class="viewport-container">
-        d
-      </div>
-    </div>
+    </vgl-namespace>
   </div>
 </template>
 
 <script>
+import Viewport from './Viewport';
+
+export default {
+    name: 'QuadViewport',
+    components: {
+        Viewport,
+    },
+};
 </script>
 
 <style>
 .quad-viewport {
+    width: 100%;
+    height: 100%;
+}
+.vgl-namespace {
     display: flex;
     flex-direction: column;
     width: 100%;
