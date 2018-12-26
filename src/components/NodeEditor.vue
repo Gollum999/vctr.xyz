@@ -54,6 +54,7 @@ export default {
                 console.log('calling engine.process');
                 await engine.process(this.editor.toJSON());
                 this.$emit('process', this.editor.toJSON());
+                this.$root.$emit('node_engine_processed', this.editor.toJSON());
             });
         engine.on('error', ({message, data}) => {
             console.warn(`Error in Rete engine: ${message}`);

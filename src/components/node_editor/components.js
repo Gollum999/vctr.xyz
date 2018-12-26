@@ -92,8 +92,10 @@ class VectorComponent extends Rete.Component {
             if (_.isEmpty(node.inputs)) {
                 throw new Error('VectorComponent worker: both outputs and inputs were empty!');
             }
-            console.log(`VectorComponent worker reading input: ${getInput('vec')}`);
-            thisNode.controls.get('vecctl').setValue(getInput('vec'));
+            const input = getInput('vec');
+            console.log(`VectorComponent worker reading input: ${input}`);
+            node.data.vecctl = input;
+            thisNode.controls.get('vecctl').setValue(input);
         }
         console.log('end VectorComponent worker');
         // debugger;

@@ -62,6 +62,18 @@ export default {
     },
     mounted() {
         console.log(`Viewport mounted ${this.view} ${this.scene}`);
+
+        this.$refs.camera.inst.layers.set(0);
+        if (this.view === 'free') {
+            this.$refs.camera.inst.layers.enable(1);
+        } else if (this.view === 'top') {
+            this.$refs.camera.inst.layers.enable(2);
+        } else if (this.view === 'front') {
+            this.$refs.camera.inst.layers.enable(3);
+        } else if (this.view === 'side') {
+            this.$refs.camera.inst.layers.enable(4);
+        }
+
         // TODO maybe separate these into two components
         if (this.view === 'free') {
             const controls = new OrbitControls(this.$refs.camera.inst, this.$refs.renderer.inst.domElement);
