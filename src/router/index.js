@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import HelloWorld from '@/components/HelloWorld';
-import VecViz from '@/components/VecViz';
+import HelloWorld from '@/HelloWorld';
+import VecViz from '@/VecViz';
 
 Vue.use(Router);
 

@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import QuadViewport from './QuadViewport';
-import NodeEditor from './NodeEditor';
+import QuadViewport from './visualizer/QuadViewport';
+import NodeEditor from './node_editor/NodeEditor';
 
 export default {
     name: 'VecViz',

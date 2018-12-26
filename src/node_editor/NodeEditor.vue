@@ -8,7 +8,7 @@
 import Rete from 'rete';
 import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
-import components from '@/components/node_editor/components';
+import components from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { vec3 } from 'gl-matrix';
 

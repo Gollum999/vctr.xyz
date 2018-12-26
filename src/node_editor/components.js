@@ -1,5 +1,5 @@
 import Rete from 'rete';
-import controls from '@/components/node_editor/controls';
+import controls from './controls';
 import { vec3 } from 'gl-matrix';
 import _ from 'lodash';
 
