@@ -1,6 +1,12 @@
 <template>
   <div class="node-editor">
     <div class="rete" id="rete" />
+
+    <div class="buttons">
+      <input class="add-input" type="button" value="Add Input" @click="addNode('input')" />
+      <input class="add-operation" type="button" value="Add Operation" @click="addNode('operation')" />
+      <input class="add-output" type="button" value="Add Output" @click="addNode('output')" />
+    </div>
   </div>
 </template>
 
@@ -8,7 +14,7 @@
 import Rete from 'rete';
 import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
-import components from './components';
+import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { vec3 } from 'gl-matrix';
 
@@ -18,8 +24,40 @@ export default {
         return {
             container: null,
             editor: null,
+            components: {
+                'num':           new allComponents.NumComponent(),
+                'add':           new allComponents.AddComponent(),
+                'vec_input':     new allComponents.VectorComponent(true),
+                'vec_operation': new allComponents.VectorOperationComponent(),
+                'vec_output':    new allComponents.VectorComponent(false),
+            },
         };
     },
+
+    methods: {
+        async addNode(nodeType) {
+            console.log(`Add node (type ${nodeType})`);
+
+            var node = null;
+            switch (nodeType) {
+            case 'input':
+                node = await this.components['vec_input'].createNode({'vecctl': vec3.fromValues(0, 0, 0)});
+                break;
+            case 'operation':
+                node = await this.components['vec_operation'].createNode();
+                break;
+            case 'output':
+                node = await this.components['vec_output'].createNode();
+                break;
+            default:
+                throw new Error(`Cannot add node of type ${nodeType}`);
+            }
+            node.position = [100, 100];
+
+            this.editor.addNode(node);
+        },
+    },
+
     mounted() {
         console.log('NodeEditor.vue mounted()');
         this.container = document.getElementById('rete');
@@ -28,22 +66,16 @@ export default {
         // TODO testing this... double click zoom is annoying
         // this.editor.view.container.removeEventListener('dblclick', this.editor.view.area._zoom.dblclick);
 
-        const componentList = [ // TODO this is gross
-            new components.NumComponent(),
-            new components.AddComponent(),
-            new components.VectorComponent(true),
-            new components.VectorOperationComponent(),
-            new components.VectorComponent(false),
-        ];
-
         this.editor.use(ConnectionPlugin);
         this.editor.use(VueRenderPlugin);
 
         const engine = new Rete.Engine('name@0.1.0');
 
-        componentList.map(c => {
-            this.editor.register(c);
-            engine.register(c);
+        console.log(this.components);
+        Object.keys(this.components).map(key => {
+            console.log('inside map');
+            this.editor.register(this.components[key]);
+            engine.register(this.components[key]);
         });
 
         this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved',
@@ -63,13 +95,13 @@ export default {
 
         (async () => {
             console.log('creating nodes');
-            var in1 = await componentList[0].createNode({'numctl': 5});
-            var in2 = await componentList[0].createNode({'numctl': 4});
-            var out = await componentList[1].createNode();
-            var vec = await componentList[2].createNode({'vecctl': vec3.fromValues(3, 2, 1)});
-            var vec2 = await componentList[2].createNode({'vecctl': vec3.fromValues(2, 2, 2)});
-            var vecOp = await componentList[3].createNode();
-            var vecOut = await componentList[4].createNode();
+            var in1 = await this.components['num'].createNode({'numctl': 5});
+            var in2 = await this.components['num'].createNode({'numctl': 4});
+            var out = await this.components['add'].createNode();
+            var vec = await this.components['vec_input'].createNode({'vecctl': vec3.fromValues(3, 2, 1)});
+            var vec2 = await this.components['vec_input'].createNode({'vecctl': vec3.fromValues(2, 2, 2)});
+            var vecOp = await this.components['vec_operation'].createNode();
+            var vecOut = await this.components['vec_output'].createNode();
             in1.position = [20, 20];
             in2.position = [20, 170];
             out.position = [180, 75];
@@ -93,8 +125,8 @@ export default {
             console.log('done creating nodes');
             console.log(vec);
             console.log(vecOut);
-            console.log(componentList[2]);
-            console.log(componentList[4]);
+            console.log(this.components['vec_input']);
+            console.log(this.components['vec_output']);
         })();
 
         /* this.editor.view.resize() */
@@ -107,6 +139,7 @@ export default {
 
 <style>
 .node-editor {
+    position: relative;
     display: block;
     width: 100%;
     min-height: 100px;
@@ -180,5 +213,11 @@ export default {
 }
 #app .socket.vector-value {
     background: #ff4444;
+}
+
+.node-editor .buttons {
+    position: absolute;
+    left: 5px;
+    top: 5px;
 }
 </style>

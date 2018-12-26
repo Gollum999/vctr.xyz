@@ -9,37 +9,37 @@
             ref="grid_free"
             :size="20"
             :divisions="20"
-            :color-center-line="'#999999'"
-            :color-grid="'#555555'"
+            :color-center-line="'#888888'"
+            :color-grid="'#444444'"
         />
         <vgl-grid-helper
             ref="grid_top"
             :size="200"
             :divisions="200"
-            :color-center-line="'#999999'"
-            :color-grid="'#555555'"
+            :color-center-line="'#888888'"
+            :color-grid="'#444444'"
         />
         <vgl-grid-helper
             ref="grid_front"
             :rotation="`${Math.PI / 2} 0 0`"
             :size="200"
             :divisions="200"
-            :color-center-line="'#999999'"
-            :color-grid="'#555555'"
+            :color-center-line="'#888888'"
+            :color-grid="'#444444'"
         />
         <vgl-grid-helper
             ref="grid_side"
             :rotation="`0 0 ${Math.PI / 2}`"
             :size="200"
             :divisions="200"
-            :color-center-line="'#999999'"
-            :color-grid="'#555555'"
+            :color-center-line="'#888888'"
+            :color-grid="'#444444'"
         />
         <vgl-arrow-helper v-for="(v, idx) in vectors" v-if="v && vec3.length(v)"
             :key="idx"
             :position="'0 0 0'"
             :dir="`${v[0]} ${v[1]} ${v[2]}`"
-            :color="'#ff0000'"
+            :color="'#ffff00'"
             :length="`${vec3.length(v)}`"
             :head-length="0.5"
             :head-width="0.5"
@@ -95,12 +95,12 @@ export default {
         this.$refs.grid_front.inst.layers.set(3);
         this.$refs.grid_side.inst.layers.set(4);
 
-        this.$root.$on('node_engine_processed', editor_json => {
+        this.$root.$on('node_engine_processed', editorJson => {
             console.log('QuadViewport handling process event');
             this.vectors = [];
             // TODO may be a more ideomatic way to write this (filter?)
-            for (const key in editor_json.nodes) {
-                const node = editor_json.nodes[key];
+            for (const key in editorJson.nodes) {
+                const node = editorJson.nodes[key];
                 if (node.name === 'Vector Output') {
                     /* console.log(node); */
                     this.vectors.push(node.data.vecctl); // TODO need to figure out best practicies for handling data in engine
