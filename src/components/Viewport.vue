@@ -62,6 +62,7 @@ export default {
     },
     mounted() {
         console.log(`Viewport mounted ${this.view} ${this.scene}`);
+        // TODO maybe separate these into two components
         if (this.view === 'free') {
             const controls = new OrbitControls(this.$refs.camera.inst, this.$refs.renderer.inst.domElement);
             controls.addEventListener('change', this.render); // call this only in static scenes (i.e., if there is no animation loop)

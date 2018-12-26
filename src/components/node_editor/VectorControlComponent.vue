@@ -49,7 +49,18 @@ export default {
 </script>
 
 <style>
-.vector input {
+.vector-input input {
     width: 3em;
+}
+.vector-output input {
+    width: 3em;
+}
+#app .node.vector-input .title {
+    background-color: #5f5fb9;
+    border-radius: 10px 10px 0 0;
+}
+#app .node.vector-output .title {
+    background-color: #3fb73f;
+    border-radius: 10px 10px 0 0;
 }
 </style>

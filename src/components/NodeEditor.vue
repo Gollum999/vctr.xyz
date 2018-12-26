@@ -73,7 +73,7 @@ export default {
             in2.position = [20, 170];
             out.position = [180, 75];
             vec.position = [320, 75];
-            vec2.position = [320, 300];
+            vec2.position = [320, 230];
             vecOp.position = [560, 75];
             vecOut.position = [740, 75];
 
@@ -134,6 +134,8 @@ export default {
 }
 #app .node .title {
     padding: 6px;
+    background-color: #888888;
+    border-radius: 10px 10px 0 0;
 }
 #app .node .control {
     padding: 8px;

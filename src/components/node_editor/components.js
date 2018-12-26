@@ -30,7 +30,10 @@ class NumComponent extends Rete.Component {
 
 class VectorComponent extends Rete.Component {
     constructor(isInput) {
-        super('Vector'); // TODO The node name affects the element class
+        /* super('Vector'); // TODO The node name affects the element class as well as the node title */
+        // TODO should consider patching Rete to allow specifying extra attributes or something
+        // TODO   not sure of the best design since render plugin is entirely separate from components
+        super(`Vector ${isInput ? 'Input' : 'Output'}`); // TODO The node name affects the element class as well as the node title
         console.log(`VectorComponent constructor, input: ${isInput}`);
         this.isInput = isInput;
     }
@@ -39,9 +42,9 @@ class VectorComponent extends Rete.Component {
         console.log(`VectorComponent builder, input = ${this.isInput}`);
         if (this.isInput) { // TODO I think using members like this is wrong... rete is doing something weird under the covers that breaks in 'worker'
             node.addOutput(new Rete.Output('vec', 'Vector', vectorSocket));
-            node.addOutput(new Rete.Output('x', 'X', numSocket));
-            node.addOutput(new Rete.Output('y', 'Y', numSocket));
-            node.addOutput(new Rete.Output('z', 'Z', numSocket));
+            /* node.addOutput(new Rete.Output('x', 'X', numSocket)); */
+            /* node.addOutput(new Rete.Output('y', 'Y', numSocket)); */
+            /* node.addOutput(new Rete.Output('z', 'Z', numSocket)); */
             node.addControl(new controls.VectorControl(this.editor, 'vecctl', false));
         } else {
             node.addInput(new Rete.Input('vec', 'Vector', vectorSocket));
@@ -82,9 +85,9 @@ class VectorComponent extends Rete.Component {
             console.log(`VectorComponent worker setting output to ${node.data.vecctl} (${typeof node.data.vecctl})`);
             console.log(node.data);
             outputs['vec'] = node.data.vecctl;
-            outputs['x'] = node.data.vecctl[0];
-            outputs['y'] = node.data.vecctl[1];
-            outputs['z'] = node.data.vecctl[2];
+            /* outputs['x'] = node.data.vecctl[0]; */
+            /* outputs['y'] = node.data.vecctl[1]; */
+            /* outputs['z'] = node.data.vecctl[2]; */
         } else {
             if (_.isEmpty(node.inputs)) {
                 throw new Error('VectorComponent worker: both outputs and inputs were empty!');
