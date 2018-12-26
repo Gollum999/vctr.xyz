@@ -20,6 +20,7 @@
     "rete": "^1.0.0-beta.5",
     "rete-connection-plugin": "^0.3.2",
     "rete-vue-render-plugin": "^0.2.5",
+    "three-orbit-controls": "^82.1.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "vue-split-panel": "^1.0.4"
