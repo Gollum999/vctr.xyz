@@ -2,10 +2,14 @@
   <div class="node-editor">
     <div class="rete" id="rete" />
 
-    <div class="buttons">
+    <div class="buttons-add-nodes">
       <input class="add-input" type="button" value="Add Input" @click="addNode('input')" />
       <input class="add-operation" type="button" value="Add Operation" @click="addNode('operation')" />
       <input class="add-output" type="button" value="Add Output" @click="addNode('output')" />
+    </div>
+
+    <div class="buttons-delete-nodes">
+      <input class="clear-nodes" type="button" value="Clear" @click="clearAllNodes" />
     </div>
 
     <context-menu id="context-menu" ref="ctxMenu">
@@ -62,7 +66,7 @@ export default {
                 throw new Error(`Cannot add node of type ${nodeType}`);
             }
 
-            node.position = this.newNodePosition;
+            node.position = this.newNodePosition.slice();
             const nodeEditorWidth = this.editor.view.container.parentElement.parentElement.clientWidth;
             const nodeEditorHeight = this.editor.view.container.parentElement.parentElement.clientHeight;
             const nodeOffset = 20;
@@ -78,6 +82,13 @@ export default {
             this.editor.selected.each(node => {
                 this.editor.removeNode(node);
             });
+        },
+
+        clearAllNodes() {
+            console.log('clearAllNodes');
+            if (window.confirm('Are you sure you want to clear all nodes?')) {
+                this.editor.clear();
+            }
         },
 
         async createDemoNodes() {
@@ -269,9 +280,15 @@ export default {
     background: #ff4444;
 }
 
-.node-editor .buttons {
+.node-editor .buttons-add-nodes {
     position: absolute;
     left: 5px;
+    top: 5px;
+}
+
+.node-editor .buttons-delete-nodes {
+    position: absolute;
+    right: 5px;
     top: 5px;
 }
 </style>
