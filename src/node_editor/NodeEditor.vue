@@ -7,6 +7,10 @@
       <input class="add-operation" type="button" value="Add Operation" @click="addNode('operation')" />
       <input class="add-output" type="button" value="Add Output" @click="addNode('output')" />
     </div>
+
+    <context-menu id="context-menu" ref="ctxMenu">
+      <li class="ctx-item" @click="deleteNode">Delete</li>
+    </context-menu>
   </div>
 </template>
 
@@ -17,9 +21,13 @@ import VueRenderPlugin from 'rete-vue-render-plugin';
 import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { vec3 } from 'gl-matrix';
+import contextMenu from 'vue-context-menu';
 
 export default {
     name: 'NodeEditor',
+    components: {
+        contextMenu,
+    },
     data() {
         return {
             container: null,
@@ -35,6 +43,12 @@ export default {
     },
 
     methods: {
+        deleteNode() {
+            console.log('deleteNode');
+            this.editor.selected.each(node => {
+                this.editor.removeNode(node);
+            });
+        },
         async addNode(nodeType) {
             console.log(`Add node (type ${nodeType})`);
 
@@ -84,11 +98,21 @@ export default {
                 console.log('calling engine.process');
                 await engine.process(this.editor.toJSON());
 
+                // TODO should I save during more events?
                 window.localStorage.setItem('node_editor', JSON.stringify(this.editor.toJSON()));
 
                 this.$emit('process', this.editor.toJSON());
                 this.$root.$emit('node_engine_processed', this.editor.toJSON());
             });
+        this.editor.on('nodecreated', node => {
+            Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
+                nodeView.addEventListener('contextmenu', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.$refs.ctxMenu.open(event, {node: node, nodeView: nodeView});
+                });
+            });
+        });
         engine.on('error', ({message, data}) => {
             console.warn(`Error in Rete engine: ${message}`);
             console.info(data);

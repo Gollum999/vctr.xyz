@@ -22,6 +22,7 @@
     "rete-vue-render-plugin": "^0.2.5",
     "three-orbit-controls": "^82.1.0",
     "vue": "^2.5.2",
+    "vue-context-menu": "^2.0.6",
     "vue-router": "^3.0.1",
     "vue-split-panel": "^1.0.4"
   },
