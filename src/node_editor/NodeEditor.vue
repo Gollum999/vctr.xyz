@@ -30,6 +30,7 @@ export default {
     },
     data() {
         return {
+            newNodePosition: [50, 50],
             container: null,
             editor: null,
             components: {
@@ -43,12 +44,6 @@ export default {
     },
 
     methods: {
-        deleteNode() {
-            console.log('deleteNode');
-            this.editor.selected.each(node => {
-                this.editor.removeNode(node);
-            });
-        },
         async addNode(nodeType) {
             console.log(`Add node (type ${nodeType})`);
 
@@ -66,9 +61,56 @@ export default {
             default:
                 throw new Error(`Cannot add node of type ${nodeType}`);
             }
-            node.position = [100, 100];
+
+            node.position = this.newNodePosition;
+            const nodeEditorWidth = this.editor.view.container.parentElement.parentElement.clientWidth;
+            const nodeEditorHeight = this.editor.view.container.parentElement.parentElement.clientHeight;
+            const nodeOffset = 20;
+            const wrapMargin = 50;
+            this.newNodePosition[0] = (this.newNodePosition[0] + nodeOffset) % (nodeEditorWidth - wrapMargin);
+            this.newNodePosition[1] = (this.newNodePosition[1] + nodeOffset) % (nodeEditorHeight - wrapMargin);
 
             this.editor.addNode(node);
+        },
+
+        deleteNode() {
+            console.log('deleteNode');
+            this.editor.selected.each(node => {
+                this.editor.removeNode(node);
+            });
+        },
+
+        async createDemoNodes() {
+            const [in1, in2, out, vec, vec2, vecOp, vecOut] = await Promise.all([
+                this.components['num'].createNode({'numctl': 5}),
+                this.components['num'].createNode({'numctl': 4}),
+                this.components['add'].createNode(),
+                this.components['vec_input'].createNode({'vecctl': vec3.fromValues(3, 2, 1)}),
+                this.components['vec_input'].createNode({'vecctl': vec3.fromValues(2, 2, 2)}),
+                this.components['vec_operation'].createNode(),
+                this.components['vec_output'].createNode(),
+            ]);
+            in1.position = [20, 20];
+            in2.position = [20, 170];
+            out.position = [180, 75];
+            vec.position = [320, 75];
+            vec2.position = [320, 230];
+            vecOp.position = [560, 75];
+            vecOut.position = [740, 75];
+
+            this.editor.addNode(in1);
+            this.editor.addNode(in2);
+            this.editor.addNode(out);
+            this.editor.addNode(vec);
+            this.editor.addNode(vec2);
+            this.editor.addNode(vecOp);
+            this.editor.addNode(vecOut);
+
+            this.editor.connect(in1.outputs.get('num'), out.inputs.get('num1'));
+            this.editor.connect(in2.outputs.get('num'), out.inputs.get('num2'));
+            this.editor.connect(vec.outputs.get('vec'), vecOp.inputs.get('vec1'));
+            this.editor.connect(vec2.outputs.get('vec'), vecOp.inputs.get('vec2'));
+            this.editor.connect(vecOp.outputs.get('vec'), vecOut.inputs.get('vec'));
         },
     },
 
@@ -104,6 +146,7 @@ export default {
                 this.$emit('process', this.editor.toJSON());
                 this.$root.$emit('node_engine_processed', this.editor.toJSON());
             });
+
         this.editor.on('nodecreated', node => {
             Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
                 nodeView.addEventListener('contextmenu', event => {
@@ -113,9 +156,17 @@ export default {
                 });
             });
         });
+
         engine.on('error', ({message, data}) => {
-            console.warn(`Error in Rete engine: ${message}`);
+            const msg = `Error in Rete engine: ${message}`;
+            alert(msg);
+            console.error(msg);
             console.info(data);
+        });
+
+        engine.on('warn', (exc) => {
+            console.warn(`Warning from Rete engine`);
+            console.warn(exc);
         });
 
         (async () => {
@@ -127,39 +178,8 @@ export default {
                 console.log(savedEditorJson);
                 await this.editor.fromJSON(savedEditorJson);
             } else {
-                console.log('creating nodes');
-                var in1 = await this.components['num'].createNode({'numctl': 5});
-                var in2 = await this.components['num'].createNode({'numctl': 4});
-                var out = await this.components['add'].createNode();
-                var vec = await this.components['vec_input'].createNode({'vecctl': vec3.fromValues(3, 2, 1)});
-                var vec2 = await this.components['vec_input'].createNode({'vecctl': vec3.fromValues(2, 2, 2)});
-                var vecOp = await this.components['vec_operation'].createNode();
-                var vecOut = await this.components['vec_output'].createNode();
-                in1.position = [20, 20];
-                in2.position = [20, 170];
-                out.position = [180, 75];
-                vec.position = [320, 75];
-                vec2.position = [320, 230];
-                vecOp.position = [560, 75];
-                vecOut.position = [740, 75];
-
-                this.editor.addNode(in1);
-                this.editor.addNode(in2);
-                this.editor.addNode(out);
-                this.editor.addNode(vec);
-                this.editor.addNode(vec2);
-                this.editor.addNode(vecOp);
-                this.editor.addNode(vecOut);
-                this.editor.connect(in1.outputs.get('num'), out.inputs.get('num1'));
-                this.editor.connect(in2.outputs.get('num'), out.inputs.get('num2'));
-                this.editor.connect(vec.outputs.get('vec'), vecOp.inputs.get('vec1'));
-                this.editor.connect(vec2.outputs.get('vec'), vecOp.inputs.get('vec2'));
-                this.editor.connect(vecOp.outputs.get('vec'), vecOut.inputs.get('vec'));
-                console.log('done creating nodes');
-                console.log(vec);
-                console.log(vecOut);
-                console.log(this.components['vec_input']);
-                console.log(this.components['vec_output']);
+                console.log('Creating demo nodes');
+                await this.createDemoNodes();
             }
         })();
 
