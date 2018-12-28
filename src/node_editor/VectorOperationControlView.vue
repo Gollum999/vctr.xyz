@@ -24,19 +24,19 @@ export default {
 
     methods: {
         update() {
-            /* console.log(`VectorOperationComponent update:`); */
+            /* console.log(`VectorOperationControlView update:`); */
             /* console.log(this.selected); */
             if (this.vkey) {
-                console.log(`VectorOperationComponent putData key: ${this.vkey} selected: ${this.selected} type: ${typeof this.selected}`);
+                console.log(`VectorOperationControlView putData key: ${this.vkey} selected: ${this.selected} type: ${typeof this.selected}`);
                 this.putData(this.vkey, this.selected);
             }
-            /* console.log('VectorOperationComponent triggering process'); */
+            /* console.log('VectorOperationControlView triggering process'); */
             this.emitter.trigger('process');
         },
     },
 
     mounted() {
-        /* console.log('VectorOperationComponent mounted'); */
+        /* console.log('VectorOperationControlView mounted'); */
         /* console.log(this); */
         /* console.log(this.selected); */
         this.selected = this.getData(this.vkey) || 'Add'; // TODO was this mentioned somewhere in the docs?

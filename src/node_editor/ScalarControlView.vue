@@ -18,16 +18,16 @@ export default {
     methods: {
         update() {
             if (this.vkey) {
-                console.log(`NumControlComponent putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
+                console.log(`ScalarControlView putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
                 this.putData(this.vkey, this.value);
             }
-            console.log('NumControlComponent triggering process');
+            console.log('ScalarControlView triggering process');
             this.emitter.trigger('process');
         },
     },
 
     mounted() {
-        console.log('NumControlComponent mounted');
+        console.log('ScalarControlView mounted');
         console.log(this);
         this.value = this.getData(this.vkey);
         console.log(`mounted set value for key ${this.vkey} to ${this.value}`);

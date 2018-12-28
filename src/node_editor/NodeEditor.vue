@@ -38,11 +38,11 @@ export default {
             container: null,
             editor: null,
             components: {
-                'num':           new allComponents.NumComponent(),
+                'num':           new allComponents.ScalarComponent(),
                 'add':           new allComponents.AddComponent(),
-                'vec_input':     new allComponents.VectorComponent(true),
+                'vec_input':     new allComponents.VectorInputComponent(),
                 'vec_operation': new allComponents.VectorOperationComponent(),
-                'vec_output':    new allComponents.VectorComponent(false),
+                'vec_output':    new allComponents.VectorOutputComponent(),
             },
         };
     },

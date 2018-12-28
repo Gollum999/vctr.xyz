@@ -31,16 +31,16 @@ export default {
     methods: {
         update() {
             if (this.vkey) {
-                console.log(`VectorControlComponent putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
+                console.log(`VectorControlView putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
                 this.putData(this.vkey, this.value);
             }
-            console.log('VectorControlComponent triggering process');
+            console.log('VectorControlView triggering process');
             this.emitter.trigger('process');
         },
     },
 
     mounted() {
-        console.log(`VectorControlComponent mounted`);
+        console.log(`VectorControlView mounted`);
         console.log(this);
         this.value = this.getData(this.vkey);
         console.log(`mounted set value for key ${this.vkey} to ${this.value}`);
