@@ -1,3 +1,4 @@
+import NodeRenderer from './NodeRenderer.vue';
 import Rete from 'rete';
 import sockets from './sockets';
 import { ScalarControl } from './ScalarControl.js';
@@ -5,6 +6,7 @@ import { ScalarControl } from './ScalarControl.js';
 export class ScalarComponent extends Rete.Component {
     constructor() {
         super('Scalar');
+        this.data.component = NodeRenderer;
         console.log('ScalarComponent constructor');
     }
 

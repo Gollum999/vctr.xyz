@@ -1,5 +1,5 @@
 <template>
-  <b-container class="vector-control-container">
+  <div class="vector-control-container">
     <b-form-row>
       <b-col>X</b-col>
       <b-col>Y</b-col>
@@ -10,7 +10,16 @@
       <b-col><input v-if="value" type="number" v-model.number="value[1]" :readonly="readOnly" @input="update" /></b-col>
       <b-col><input v-if="value" type="number" v-model.number="value[2]" :readonly="readOnly" @input="update" /></b-col>
     </b-form-row>
-  </b-container>
+
+    <!-- <template v-if="readOnly"> -->
+    <!--   <label v-b-toggle.display-options>Display options</label> -->
+    <!--   <b-collapse id="display-options"> -->
+    <!--     <p> -->
+    <!--       this is a test -->
+    <!--     </p> -->
+    <!--   </b-collapse> -->
+    <!-- </template> -->
+  </div>
 </template>
 
 <script>

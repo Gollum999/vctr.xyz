@@ -1,3 +1,4 @@
+import NodeRenderer from './NodeRenderer.vue';
 import Rete from 'rete';
 import sockets from './sockets';
 import { vec3 } from 'gl-matrix';
@@ -6,14 +7,15 @@ import { VectorOperationControl } from './VectorOperationControl';
 export class VectorOperationComponent extends Rete.Component {
     constructor() {
         super('Vector Operation');
+        this.data.component = NodeRenderer;
         console.log('VectorOperationComponent constructor');
     }
 
     builder(node) {
         console.log('VectorOperationComponent builder');
-        let in1 = new Rete.Input('vec1', 'Vector 1', sockets.vector);
-        let in2 = new Rete.Input('vec2', 'Vector 2', sockets.vector);
-        let out = new Rete.Output('vec', 'Vector', sockets.vector);
+        let in1 = new Rete.Input('vec1', 'Left', sockets.vector);
+        let in2 = new Rete.Input('vec2', 'Right', sockets.vector);
+        let out = new Rete.Output('vec', 'Result', sockets.vector);
         let control = new VectorOperationControl(this.editor, 'vecctl');
         node.addInput(in1);
         node.addInput(in2);

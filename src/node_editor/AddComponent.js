@@ -1,3 +1,4 @@
+import NodeRenderer from './NodeRenderer.vue';
 import Rete from 'rete';
 import sockets from './sockets';
 import { ScalarControl } from './ScalarControl';
@@ -5,6 +6,7 @@ import { ScalarControl } from './ScalarControl';
 export class AddComponent extends Rete.Component {
     constructor() {
         super('Add');
+        this.data.component = NodeRenderer;
         /* console.log('AddComponent constructor'); */
         /* console.log(this.editor); */
         /* this.node = this.editor.nodes.find(n => n.id == node.id); */

@@ -221,28 +221,8 @@ export default {
 }
 
 /* Global overrides for Rete style */
-#app .node {
-    min-width: 100px;
-    padding-bottom: 0px;
-    background: #aaaaaa;
-    border: 1px solid #555555;
-}
-#app .node.selected {
-    background: #cccccc;
-    border: 1px solid #555555;
-}
-#app .node .title {
-    padding: 6px;
-    background-color: #888888;
-    border-radius: 10px 10px 0 0;
-}
 #app .node .control {
     padding: 8px;
-}
-#app .node input {
-    border: 1px solid #555555;
-    border-radius: 6px;
-    padding-left: 4px;
 }
 #app .node .input-title {
     margin: 2px;

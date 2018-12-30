@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import NodeRenderer from './NodeRenderer';
 import Rete from 'rete';
 import sockets from './sockets';
 import { VectorControl } from './VectorControl';
@@ -9,6 +10,7 @@ class VectorComponent extends Rete.Component {
         // TODO should consider patching Rete to allow specifying extra attributes or something
         // TODO   not sure of the best design since render plugin is entirely separate from components
         super(`Vector ${isInput ? 'Input' : 'Output'}`); // TODO The node name affects the element class as well as the node title
+        this.data.component = NodeRenderer;
         console.log(`VectorComponent constructor, input: ${isInput}`);
         this.isInput = isInput;
     }
@@ -16,13 +18,13 @@ class VectorComponent extends Rete.Component {
     builder(node) {
         console.log(`VectorComponent builder, input = ${this.isInput}`);
         if (this.isInput) { // TODO I think using members like this is wrong... rete is doing something weird under the covers that breaks in 'worker'
-            node.addOutput(new Rete.Output('vec', 'Vector', sockets.vector));
+            node.addOutput(new Rete.Output('vec', 'Value', sockets.vector));
             /* node.addOutput(new Rete.Output('x', 'X', sockets.scalar)); */
             /* node.addOutput(new Rete.Output('y', 'Y', sockets.scalar)); */
             /* node.addOutput(new Rete.Output('z', 'Z', sockets.scalar)); */
             node.addControl(new VectorControl(this.editor, 'vecctl', false));
         } else {
-            node.addInput(new Rete.Input('vec', 'Vector', sockets.vector));
+            node.addInput(new Rete.Input('vec', 'Value', sockets.vector));
             /* node.addInput(new Rete.Input('x', 'X', sockets.scalar));
              * node.addInput(new Rete.Input('y', 'Y', sockets.scalar));
              * node.addInput(new Rete.Input('z', 'Z', sockets.scalar)); */
