@@ -1,25 +1,18 @@
 <template>
-  <div class="vector-control-container">
-    <b-form-row>
-      <b-col>X</b-col>
-      <b-col>Y</b-col>
-      <b-col>Z</b-col>
-    </b-form-row>
-    <b-form-row>
-      <b-col><input v-if="value" type="number" v-model.number="value[0]" :readonly="readOnly" @input="update" /></b-col>
-      <b-col><input v-if="value" type="number" v-model.number="value[1]" :readonly="readOnly" @input="update" /></b-col>
-      <b-col><input v-if="value" type="number" v-model.number="value[2]" :readonly="readOnly" @input="update" /></b-col>
-    </b-form-row>
+<div class="vector-control-container" :style="{'grid-row': rowIdx}">
+  <input v-if="value" type="number" v-model.number="value[0]" :readonly="readOnly" @input="update" />
+  <input v-if="value" type="number" v-model.number="value[1]" :readonly="readOnly" @input="update" />
+  <input v-if="value" type="number" v-model.number="value[2]" :readonly="readOnly" @input="update" />
+</div>
 
-    <!-- <template v-if="readOnly"> -->
-    <!--   <label v-b-toggle.display-options>Display options</label> -->
-    <!--   <b-collapse id="display-options"> -->
-    <!--     <p> -->
-    <!--       this is a test -->
-    <!--     </p> -->
-    <!--   </b-collapse> -->
-    <!-- </template> -->
-  </div>
+<!-- <template v-if="readOnly"> -->
+<!--   <label v-b-toggle.display-options>Display options</label> -->
+<!--   <b-collapse id="display-options"> -->
+<!--     <p> -->
+<!--       this is a test -->
+<!--     </p> -->
+<!--   </b-collapse> -->
+<!-- </template> -->
 </template>
 
 <script>
@@ -28,7 +21,7 @@ import { vec3 } from 'gl-matrix';
 export default {
     props: [
         'vkey', 'emitter', 'getData', 'putData', // required
-        'readOnly',
+        'readOnly', 'rowIdx',
     ],
 
     data() {
@@ -58,6 +51,10 @@ export default {
 </script>
 
 <style>
+.vector-control-container {
+    grid-column: controls;
+    display: flex;
+}
 .vector-input input {
     width: 3em;
 }

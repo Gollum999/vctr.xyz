@@ -1,26 +1,23 @@
 <template lang="pug">
 .node(:class="[selected(), node.name] | kebab")
+  // TODO editable titles
   .title {{node.name}}
 
-  // Outputs
-  .output(v-for='output in outputs()' :key="output.key")
-    .output-title {{output.name}}
-    Socket(v-socket:output="output", type="output", :socket="output.socket")
+  .node-body
+    // Inputs
+    // 0 indexed
+    .input(v-for='(input, idx) in inputs()' :key="input.key" :style="{'grid-row': idx + 1}")
+      Socket(v-socket:input="input" type="input" :socket="input.socket")
+      .input-title(v-show='!input.showControl()') {{input.name}}
+      .input-control(v-show='input.showControl()' v-control="input.control")
 
-  // Controls
-  .control(
-    v-for='control in controls()',
-    v-control="control"
-  )
+    // Controls
+    .control(v-for='(control, idx) in controls()' v-control="control")
 
-  // Inputs
-  .input(v-for='input in inputs()' :key="input.key")
-    Socket(v-socket:input="input", type="input", :socket="input.socket")
-    .input-title(v-show='!input.showControl()') {{input.name}}
-    .input-control(
-      v-show='input.showControl()'
-      v-control="input.control"
-    )
+    // Outputs
+    .output(v-for='(output, idx) in outputs()' :key="output.key" :style="{'grid-row': idx + 1}")
+      .output-title {{output.name}}
+      Socket(v-socket:output="output" type="output" :socket="output.socket")
 </template>
 
 <script>
@@ -81,6 +78,12 @@ $node-width: 100px
   box-sizing: content-box
   position: relative
   user-select: none
+  .node-body
+    display: inline-grid
+    grid-template-columns: [inputs] auto [controls] auto [outputs] auto [end]
+    grid-template-rows: auto
+    .item
+      border: 1px solid black
   &:hover
     background: lighten($node-color,4%)
   &.selected
@@ -94,8 +97,10 @@ $node-width: 100px
     border-radius: 10px 10px 0 0
   .output
     text-align: right
+    grid-column: outputs
   .input
     text-align: left
+    grid-column: inputs
   .input-title,.output-title
     vertical-align: ref
     color: white
@@ -111,4 +116,6 @@ $node-width: 100px
     display: inline-block
   .control
     padding: $socket-margin $socket-size/2 + $socket-margin
+    grid-column: controls
+    display: contents
 </style>

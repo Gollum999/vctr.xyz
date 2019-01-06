@@ -8,7 +8,7 @@
         <NodeEditor @process="editorJson = $event"/>
       </SplitArea>
     </Split>
-    <p>{{editorJson}}</p>
+    <p style="color: white">{{editorJson}}</p>
   </div>
 </template>
 

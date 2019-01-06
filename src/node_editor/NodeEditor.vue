@@ -215,6 +215,7 @@ export default {
     height: 100%;
     min-height: 100vh;
     border: 2px solid #dddddd;
+    background-color: #bbbbbb;
 }
 .split {
     overflow-y: hidden;

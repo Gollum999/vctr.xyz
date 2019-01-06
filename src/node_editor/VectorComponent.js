@@ -3,6 +3,8 @@ import NodeRenderer from './NodeRenderer';
 import Rete from 'rete';
 import sockets from './sockets';
 import { VectorControl } from './VectorControl';
+import { VectorLabelControl } from './VectorLabelControl';
+import { ColorControl } from './ColorControl';
 
 class VectorComponent extends Rete.Component {
     constructor(isInput) {
@@ -22,13 +24,16 @@ class VectorComponent extends Rete.Component {
             /* node.addOutput(new Rete.Output('x', 'X', sockets.scalar)); */
             /* node.addOutput(new Rete.Output('y', 'Y', sockets.scalar)); */
             /* node.addOutput(new Rete.Output('z', 'Z', sockets.scalar)); */
-            node.addControl(new VectorControl(this.editor, 'vecctl', false));
+            node.addControl(new VectorLabelControl(this.editor, 'label', -999));
+            node.addControl(new VectorControl(this.editor, 'vecctl', 1, false));
         } else {
             node.addInput(new Rete.Input('vec', 'Value', sockets.vector));
             /* node.addInput(new Rete.Input('x', 'X', sockets.scalar));
              * node.addInput(new Rete.Input('y', 'Y', sockets.scalar));
              * node.addInput(new Rete.Input('z', 'Z', sockets.scalar)); */
-            node.addControl(new VectorControl(this.editor, 'vecctl', true));
+            node.addControl(new VectorLabelControl(this.editor, 'label', -999));
+            node.addControl(new VectorControl(this.editor, 'vecctl', 1, true));
+            node.addControl(new ColorControl(this.editor, 'color', 2));
         }
         return node;
     }
