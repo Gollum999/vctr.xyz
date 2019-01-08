@@ -17,6 +17,7 @@ export default {
 
 <style scoped>
 .vector-label-container {
+    margin: 2px 4px;
     display: flex;
     grid-column: controls;
 }

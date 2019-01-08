@@ -6,13 +6,17 @@ import VueSplit from 'vue-split-panel';
 import App from './App';
 import router from './router';
 import * as VueGL from 'vue-gl';
+import VueMaterial from 'vue-material';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
+import 'vue-material/dist/vue-material.min.css';
+import 'vue-material/dist/theme/default.css';
 
 Vue.config.productionTip = false;
 Vue.use(BootstrapVue);
 Vue.use(VueSplit);
+Vue.use(VueMaterial);
 
 console.log('Initializing VueGL components');
 Object.keys(VueGL).forEach(name => {

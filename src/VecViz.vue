@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Split class="vec-viz" direction="vertical" :gutterSize="8">
+    <Split class="vec-viz" direction="vertical" :gutterSize="8" @onDragStart="onDragStart" @onDragEnd="onDragEnd">
       <SplitArea :size="50" :minSize="150">
         <QuadViewport />
       </SplitArea>
@@ -26,6 +26,14 @@ export default {
     components: {
         QuadViewport,
         NodeEditor,
+    },
+    methods: {
+        onDragStart() {
+            console.log('split drag start');
+        },
+        onDragEnd() {
+            console.log('split drag end');
+        },
     },
 };
 </script>

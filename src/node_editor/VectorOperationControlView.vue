@@ -1,7 +1,11 @@
 <template>
-  <div class="vector-operation-component">
-    <b-form-select v-model="selected" :options="options" class="mb-3" @input="update" />
-  </div>
+<div class="vector-operation-component">
+  <md-field>
+    <md-select md-dense v-model="selected" @input="update">
+      <md-option v-for="option in options" :key="option" :value="option">{{option}}</md-option>
+    </md-select>
+  </md-field>
+</div>
 </template>
 
 <script>
@@ -46,7 +50,10 @@ export default {
 </script>
 
 <style>
+.vector-operation-component {
+    margin: 2px 4px;
+}
 .vector-operation input {
-    width: 10em;
+    width: 5em;
 }
 </style>

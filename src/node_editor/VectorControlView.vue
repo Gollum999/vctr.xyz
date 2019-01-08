@@ -1,8 +1,8 @@
 <template>
 <div class="vector-control-container" :style="{'grid-row': rowIdx}">
-  <input v-if="value" type="number" v-model.number="value[0]" :readonly="readOnly" @input="update" />
-  <input v-if="value" type="number" v-model.number="value[1]" :readonly="readOnly" @input="update" />
-  <input v-if="value" type="number" v-model.number="value[2]" :readonly="readOnly" @input="update" />
+  <md-field><md-input v-if="value" type="number" v-model.number="value[0]" :readonly="readOnly" @input="update" /></md-field>
+  <md-field><md-input v-if="value" type="number" v-model.number="value[1]" :readonly="readOnly" @input="update" /></md-field>
+  <md-field><md-input v-if="value" type="number" v-model.number="value[2]" :readonly="readOnly" @input="update" /></md-field>
 </div>
 
 <!-- <template v-if="readOnly"> -->
@@ -52,6 +52,7 @@ export default {
 
 <style>
 .vector-control-container {
+    margin: 2px 4px;
     grid-column: controls;
     display: flex;
 }
@@ -62,11 +63,11 @@ export default {
     width: 3em;
 }
 #app .node.vector-input .title {
-    background-color: #5f5fb9;
-    border-radius: 10px 10px 0 0;
+    /* background-color: #5f5fb9; */
+    /* border-radius: 10px 10px 0 0; */
 }
 #app .node.vector-output .title {
-    background-color: #3fb73f;
-    border-radius: 10px 10px 0 0;
+    /* background-color: #3fb73f; */
+    /* border-radius: 10px 10px 0 0; */
 }
 </style>

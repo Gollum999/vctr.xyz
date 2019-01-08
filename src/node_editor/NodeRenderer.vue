@@ -1,5 +1,5 @@
 <template lang="pug">
-.node(:class="[selected(), node.name] | kebab")
+md-card.node(md-with-hover :class="[selected(), node.name] | kebab")
   // TODO editable titles
   .title {{node.name}}
 
@@ -7,9 +7,10 @@
     // Inputs
     // 0 indexed
     .input(v-for='(input, idx) in inputs()' :key="input.key" :style="{'grid-row': idx + 1}")
-      Socket(v-socket:input="input" type="input" :socket="input.socket")
-      .input-title(v-show='!input.showControl()') {{input.name}}
-      .input-control(v-show='input.showControl()' v-control="input.control")
+      .input-wrapper
+        Socket(v-socket:input="input" type="input" :socket="input.socket")
+        .input-title(v-show='!input.showControl()') {{input.name}}
+        .input-control(v-show='input.showControl()' v-control="input.control")
 
     // Controls
     .control(v-for='(control, idx) in controls()' v-control="control")
@@ -23,6 +24,7 @@
 <script>
 import mixin from '@/../node_modules/rete-vue-render-plugin/src/mixin';
 import Socket from '@/../node_modules/rete-vue-render-plugin/src/Socket.vue';
+// import '@/../node_modules/@material/card/mdc-card.scss';
 
 export default {
     mixins: [mixin],
@@ -35,29 +37,38 @@ export default {
 <style lang="sass">
 // These will propogate down to sockets and controls
 .node
-  input
-    border: 1px solid #555555
-    border-radius: 6px
+  .md-input
+    // border: 1px solid #555555
+    // border-radius: 6px
     padding-left: 4px
-
+    #app &
+      font-size: 14px
+  .md-field
+    background-color: #eeeeee
+    padding-top: 0px
+    margin: 0px 2px
+    min-height: 12px
 // TODO this doesn't work, Socket is overriding
 // .socket // TODO This is just a hack to avoid customizing Socket, but I may have to do that anyway
+//   .number-value
+//     background: #7777dd
+//   .vector-value
+//     background: #ff4444
 //   width: 16px
 //   height: 16px
 //   .input
 //     margin-left: -8px
 //   .output
 //     margin-right: -8px
-//   .number-value
-//     background: #7777dd
-//   .vector-value
-//     background: #ff4444
 </style>
 
 <style lang="sass" scoped>
+// @import "@material/card/mdc-card.scss"
+
 // @import "../../node_modules/rete-vue-render-plugin/src/vars"
-$node-color: #aaaaaa;
-$node-color-selected: #cccccc;
+// $node-color: #aaaaaa
+$node-color: #ffffff
+// $node-color-selected: #cccccc
 // I don't use the node group plugin...
 $group-color: rgba(15, 80, 255, 0.2)
 $group-handler-size: 40px
@@ -69,15 +80,16 @@ $node-width: 100px
 
 .node
   background: $node-color
-  border: 1px solid #555555
-  border-radius: 10px
+  // border: 1px solid #555555
+  // border-radius: 10px
   cursor: pointer
   min-width: $node-width
   height: auto
-  padding-bottom: 0px
+  padding: 4px 0px
   box-sizing: content-box
   position: relative
   user-select: none
+  // box-shadow:
   .node-body
     display: inline-grid
     grid-template-columns: [inputs] auto [controls] auto [outputs] auto [end]
@@ -87,26 +99,43 @@ $node-width: 100px
   &:hover
     background: lighten($node-color,4%)
   &.selected
-    background: $node-color-selected
+    // background: $node-color-selected
+    // border: 1px solid black // TODO temp, figure out a better indicator
   .title
-    background-color: #888888
-    color: white
-    font-family: sans-serif
-    font-size: 18px
-    padding: 6px
-    border-radius: 10px 10px 0 0
+    // background-color: #888888
+    // color: white
+    // font-family: sans-serif
+    font-size: 14px
+    padding: 4px
+    margin: 0px 16px 4px
+    border-bottom: 1px solid lightgray
+    // border-radius: 10px 10px 0 0
   .output
     text-align: right
     grid-column: outputs
   .input
-    text-align: left
     grid-column: inputs
+    //*
+    //border: 1px solid black
+    // display: flex
+    // flex-direction: column
+    // justify-content: center
+    // align-items: center
+    // position: relative
+  .input-wrapper
+    height: 100%
+    text-align: left
+    // margin: auto 0px
   .input-title,.output-title
-    vertical-align: ref
-    color: white
+    vertical-align: middle
+    text-align: left
+    // position: absolute
+    // top: 50%
+    // transform: translateY(-50%)
+    color: black
     display: inline-block
-    font-family: sans-serif
-    font-size: 14px
+    // font-family: sans-serif
+    // font-size: 12px
     margin: $socket-margin
     line-height: $socket-size
   .input-control

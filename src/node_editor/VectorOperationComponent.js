@@ -47,7 +47,7 @@ export class VectorOperationComponent extends Rete.Component {
             case 'Cross':
                 return vec3.cross;
             default:
-                throw new Error(`Invalid operation selected in VectorOperationComponent node (id ${node.id})`);
+                throw new Error(`Invalid operation "${thisNode.controls.get('vecctl').getValue()}" selected in VectorOperationComponent node (id ${node.id})`);
             }
         })();
         console.log(`VectorOperationComponent using op: ${opFn}`);

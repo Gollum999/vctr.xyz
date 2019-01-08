@@ -3,13 +3,13 @@
     <div class="rete" id="rete" />
 
     <div class="buttons-add-nodes">
-      <input class="add-input" type="button" value="Add Input" @click="addNode('input')" />
-      <input class="add-operation" type="button" value="Add Operation" @click="addNode('operation')" />
-      <input class="add-output" type="button" value="Add Output" @click="addNode('output')" />
+      <md-button class="md-raised add-input" type="button" @click="addNode('input')">Add Input</md-button>
+      <md-button class="md-raised add-operation" type="button" @click="addNode('operation')">Add Operation</md-button>
+      <md-button class="md-raised add-output" type="button" @click="addNode('output')">Add Output</md-button>
     </div>
 
     <div class="buttons-delete-nodes">
-      <input class="clear-nodes" type="button" value="Clear" @click="clearAllNodes" />
+      <md-button class="md-raised clear-nodes" type="button" @click="clearAllNodes">Clear</md-button>
     </div>
 
     <context-menu id="context-menu" ref="ctxMenu">
