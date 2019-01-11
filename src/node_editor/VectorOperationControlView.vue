@@ -49,7 +49,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .vector-operation-component {
     margin: 2px 4px;
 }

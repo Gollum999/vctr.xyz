@@ -30,3 +30,9 @@ new Vue({
     components: { App },
     template: '<App/>',
 });
+
+// TODO maybe keep this in debug only
+Vue.config.errorHandler = (err, vm, info) => {
+    console.error('Error caught in global error handler');
+    console.error((err, vm, info));
+};

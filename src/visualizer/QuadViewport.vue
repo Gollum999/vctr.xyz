@@ -51,18 +51,22 @@
 
       <div class="flex-row">
         <div class="viewport-container">
-          <Viewport view="top" scene="main_scene" />
+          A
+          <!-- <Viewport view="top" scene="main_scene" /> -->
         </div>
         <div class="viewport-container">
-          <Viewport view="free" scene="main_scene" />
+          B
+          <!-- <Viewport view="free" scene="main_scene" /> -->
         </div>
       </div>
       <div class="flex-row">
         <div class="viewport-container">
-          <Viewport view="front" scene="main_scene" />
+          C
+          <!-- <Viewport view="front" scene="main_scene" /> -->
         </div>
         <div class="viewport-container">
-          <Viewport view="side" scene="main_scene" />
+          D
+          <!-- <Viewport view="side" scene="main_scene" /> -->
         </div>
       </div>
     </vgl-namespace>
@@ -114,7 +118,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .quad-viewport {
     width: 100%;
     height: 100%;

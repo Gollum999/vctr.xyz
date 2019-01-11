@@ -194,7 +194,7 @@ export default {
             }
         })();
 
-        /* this.editor.view.resize() */
+        this.editor.view.resize();
         console.log('MAIN process');
         this.editor.trigger('process');
         console.log('MAIN end process');
@@ -202,74 +202,59 @@ export default {
 };
 </script>
 
-<style>
-.node-editor {
-    position: relative;
-    display: block;
-    width: 100%;
-    min-height: 100px;
-    overflow-y: hidden;
-}
-.rete {
-    display: block;
-    height: 100%;
-    min-height: 100vh;
-    border: 2px solid #dddddd;
-    background-color: #bbbbbb;
-}
-.split {
-    overflow-y: hidden;
-}
+<style lang="sass" scoped>
+.node-editor
+  position: relative
+  display: block
+  width: 100%
+  min-height: 100px
+  overflow-y: hidden
+  .buttons-add-nodes
+    position: absolute
+    left: 5px
+    top: 5px
+  .buttons-delete-nodes
+    position: absolute
+    right: 5px
+    top: 5px
+.rete
+  display: block
+  height: 100%
+  min-height: 100vh
+  border: 2px solid #dddddd
+  background-color: #bbbbbb
+.split
+  overflow-y: hidden
 
 /* Global overrides for Rete style */
-#app .node .control {
-    padding: 8px;
-}
-#app .node .input-title {
-    margin: 2px;
-}
-#app .node .output-title {
-    margin: 2px;
-}
+#app
+  .node
+    .control
+      padding: 8px
+    .input-title
+      margin: 2px
+    .output-title
+      margin: 2px
 
-#app .connection {
+  .connection
     /* Fix display bug with connections */
     /* TODO I think something with bootstrap causes the svg element to be aligned to center */
-    position: absolute;
-    left: 0px;
-    z-index: -5;
-}
-#app .connection .main-path {
-    stroke: black;
-    stroke-width: 3px;
-}
+    position: absolute
+    left: 0px
+    z-index: -5
+    .main-path
+      stroke: black
+      stroke-width: 3px
 
-#app .socket {
-    width: 16px;
-    height: 16px;
-}
-#app .socket.input {
-    margin-left: -8px;
-}
-#app .socket.output {
-    margin-right: -8px;
-}
-#app .socket.number-value {
-    background: #7777dd;
-}
-#app .socket.vector-value {
-    background: #ff4444;
-}
-
-.node-editor .buttons-add-nodes {
-    position: absolute;
-    left: 5px;
-    top: 5px;
-}
-
-.node-editor .buttons-delete-nodes {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-}
+  .socket
+    width: 16px
+    height: 16px
+    &.input
+      margin-left: -8px
+    &.output
+      margin-right: -8px
+    &.number-value
+      background: #7777dd
+    &.vector-value
+      background: #ff4444
 </style>

@@ -50,7 +50,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .vector-control-container {
     margin: 2px 4px;
     grid-column: controls;

@@ -124,7 +124,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .viewport {
     position: relative;
     height: 100%;

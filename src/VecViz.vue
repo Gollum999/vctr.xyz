@@ -5,7 +5,8 @@
         <QuadViewport />
       </SplitArea>
       <SplitArea :size="50" :minSize="150">
-        <NodeEditor @process="editorJson = $event"/>
+        <!-- <NodeEditor @process="editorJson = $event"/> -->
+        split B
       </SplitArea>
     </Split>
     <p style="color: white">{{editorJson}}</p>
@@ -38,7 +39,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .vec-viz {
     /* height: 100%; */
     height: 800px; /* TODO viewport height - margin */

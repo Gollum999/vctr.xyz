@@ -35,7 +35,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .number input {
     /* Smaller default size but stretch to fill */
     width: 5em;
