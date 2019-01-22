@@ -36,18 +36,24 @@ export default {
 
 <style lang="sass">
 // These will propogate down to sockets and controls
-.node
-  .md-input
-    // border: 1px solid #555555
-    // border-radius: 6px
-    padding-left: 4px
-    #app &
-      font-size: 14px
-  .md-field
-    background-color: #eeeeee
-    padding-top: 0px
-    margin: 0px 2px
-    min-height: 12px
+#app
+  .node
+    .md-input
+      // border: 1px solid #555555
+      // border-radius: 6px
+      flex: 0 1 auto // Fixes extra-wide number inputs in Firefox
+      font-size: 12px
+    .md-field
+      width: auto // Prevents control from overflowing grid cell... not sure why this is necessary or if there is a better way
+      box-sizing: border-box
+      padding-left: 4px
+      background-color: #eeeeee
+      padding-top: 0px
+      margin: 0px 2px
+      min-height: 12px
+      .md-input,.md-textarea
+        height: 28px
+        line-height: 28px
 // TODO this doesn't work, Socket is overriding
 // .socket // TODO This is just a hack to avoid customizing Socket, but I may have to do that anyway
 //   .number-value
@@ -73,7 +79,7 @@ $node-color: #ffffff
 $group-color: rgba(15, 80, 255, 0.2)
 $group-handler-size: 40px
 $group-handler-offset: -10px
-$socket-size: 24px
+$socket-size: 20px
 $socket-margin: 6px
 $socket-color: #96b38a
 $node-width: 100px
@@ -110,11 +116,9 @@ $node-width: 100px
     margin: 0px 16px 4px
     border-bottom: 1px solid lightgray
     // border-radius: 10px 10px 0 0
-  .output
-    text-align: right
-    grid-column: outputs
   .input
     grid-column: inputs
+    margin-right: 4px
     //*
     //border: 1px solid black
     // display: flex
@@ -126,6 +130,20 @@ $node-width: 100px
     height: 100%
     text-align: left
     // margin: auto 0px
+  .input-control
+    z-index: 1
+    width: calc(100% - #{$socket-size + 2*$socket-margin})
+    vertical-align: middle
+    display: inline-block
+  .control
+    padding: $socket-margin $socket-size/2 + $socket-margin
+    grid-column: controls
+    display: contents
+    // margin: 0px 4px // TODO doesn't work because display: contents
+  .output
+    text-align: right
+    grid-column: outputs
+    margin-left: 4px
   .input-title,.output-title
     vertical-align: middle
     text-align: left
@@ -138,13 +156,4 @@ $node-width: 100px
     // font-size: 12px
     margin: $socket-margin
     line-height: $socket-size
-  .input-control
-    z-index: 1
-    width: calc(100% - #{$socket-size + 2*$socket-margin})
-    vertical-align: middle
-    display: inline-block
-  .control
-    padding: $socket-margin $socket-size/2 + $socket-margin
-    grid-column: controls
-    display: contents
 </style>

@@ -12,17 +12,22 @@
     min-height: 100vh;
     // max-height: 100vh;
 }
+/* #app input.md-input {
+   flex: 0 1 auto;
+} */
 
-.md-select-menu {
+body, html.md-theme-default {
+    background-color: #333333;
+}
+
+// These are outside of the #app div
+body .md-select-menu {
     font-family: Ubuntu, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 12px;
     // TODO hack, not sure why the default style is transparent for material select menu
     background-color: white;
 }
-.md-select-menu .md-menu-content {
+body .md-select-menu.md-menu-content {
     width: initial;
     // min-width: 100px;
-}
-
-html.md-theme-default, body {
-    background-color: #333333;
 }

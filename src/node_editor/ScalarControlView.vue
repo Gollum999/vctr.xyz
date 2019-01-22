@@ -1,5 +1,5 @@
 <template>
-  <input type="number" v-model.number="value" :readonly="readonly" @input="update" />
+  <md-field><md-input type="number" v-model.number="value" :readonly="readonly" @input="update" /></md-field>
 </template>
 
 <script>
@@ -36,13 +36,13 @@ export default {
 </script>
 
 <style scoped>
-.number input {
+.scalar .md-input {
     /* Smaller default size but stretch to fill */
-    width: 5em;
+    width: 3em;
     min-width: 100%;
 }
-.add input {
-    width: 5em;
+.add .md-input {
+    width: 3em;
     min-width: 100%;
 }
 </style>

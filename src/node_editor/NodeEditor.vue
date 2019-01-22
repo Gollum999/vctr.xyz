@@ -202,6 +202,40 @@ export default {
 };
 </script>
 
+<style lang="sass">
+/* Global overrides for Rete style */
+#app
+  .node
+    .control
+      padding: 8px // TODO doesn't work because of display: contents
+    .input-title
+      margin: 2px
+    .output-title
+      margin: 2px
+
+  .connection
+    /* Fix display bug with connections */
+    /* TODO I think something with bootstrap causes the svg element to be aligned to center */
+    position: absolute
+    left: 0px
+    z-index: -5
+    .main-path
+      stroke: black
+      stroke-width: 3px
+
+  .socket
+    width: 14px
+    height: 14px
+    &.input
+      margin-left: -8px
+    &.output
+      margin-right: -8px
+    &.number-value
+      background: #7777dd
+    &.vector-value
+      background: #ff4444
+</style>
+
 <style lang="sass" scoped>
 .node-editor
   position: relative
@@ -225,36 +259,4 @@ export default {
   background-color: #bbbbbb
 .split
   overflow-y: hidden
-
-/* Global overrides for Rete style */
-#app
-  .node
-    .control
-      padding: 8px
-    .input-title
-      margin: 2px
-    .output-title
-      margin: 2px
-
-  .connection
-    /* Fix display bug with connections */
-    /* TODO I think something with bootstrap causes the svg element to be aligned to center */
-    position: absolute
-    left: 0px
-    z-index: -5
-    .main-path
-      stroke: black
-      stroke-width: 3px
-
-  .socket
-    width: 16px
-    height: 16px
-    &.input
-      margin-left: -8px
-    &.output
-      margin-right: -8px
-    &.number-value
-      background: #7777dd
-    &.vector-value
-      background: #ff4444
 </style>

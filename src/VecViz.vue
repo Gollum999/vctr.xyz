@@ -5,8 +5,7 @@
         <QuadViewport />
       </SplitArea>
       <SplitArea :size="50" :minSize="150">
-        <!-- <NodeEditor @process="editorJson = $event"/> -->
-        split B
+        <NodeEditor @process="editorJson = $event"/>
       </SplitArea>
     </Split>
     <p style="color: white">{{editorJson}}</p>
