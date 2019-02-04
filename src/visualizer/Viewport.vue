@@ -22,10 +22,10 @@ function clamp(val, low, high) {
 }
 
 export default {
-    props: [
-        'view', // 'side', 'front', 'top', or 'free'
-        'scene',
-    ],
+    props: {
+        view:  { type: String, required: true, validator: (value) => { return ['side', 'front', 'top', 'free'].indexOf(value) !== -1; } },
+        scene: { type: String, required: true },
+    },
     data() {
         return {
             zoom_speed: 1,

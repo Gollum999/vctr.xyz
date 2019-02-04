@@ -1,13 +1,16 @@
 <template>
-  <md-field><md-input type="number" v-model.number="value" :readonly="readonly" @input="update" /></md-field>
+  <md-field><md-input type="number" v-model.number="value" :readonly="readOnly" @input="update" /></md-field>
 </template>
 
 <script>
 export default {
-    props: [
-        'vkey', 'emitter', 'getData', 'putData', // required
-        'readonly',
-    ],
+    props: {
+        vkey:     { type: String,   required: true },
+        emitter:  { type: Object,   required: true },
+        getData:  { type: Function, required: true },
+        putData:  { type: Function, required: true },
+        readOnly: { type: Boolean,  default: false },
+    },
 
     data() {
         return {

@@ -8,10 +8,13 @@
 
 <script>
 export default {
-    props: [
-        'vkey', 'emitter', 'getData', 'putData', // required
-        'rowIdx',
-    ],
+    props: {
+        vkey:     { type: String,   required: true },
+        emitter:  { type: Object,   required: true },
+        getData:  { type: Function, required: true },
+        putData:  { type: Function, required: true },
+        rowIdx:   { type: Number,   required: true },
+    },
 };
 </script>
 

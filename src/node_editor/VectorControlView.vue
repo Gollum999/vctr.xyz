@@ -19,10 +19,14 @@
 import { vec3 } from 'gl-matrix';
 
 export default {
-    props: [
-        'vkey', 'emitter', 'getData', 'putData', // required
-        'readOnly', 'rowIdx',
-    ],
+    props: {
+        vkey:     { type: String,   required: true },
+        emitter:  { type: Object,   required: true },
+        getData:  { type: Function, required: true },
+        putData:  { type: Function, required: true },
+        rowIdx:   { type: Number,   required: true },
+        readOnly: { type: Boolean,  default: false },
+    },
 
     data() {
         return {
