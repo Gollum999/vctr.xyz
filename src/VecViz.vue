@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Split class="vec-viz" direction="vertical" :gutterSize="8" @onDragStart="onDragStart" @onDragEnd="onDragEnd">
+    <Split class="vec-viz" direction="vertical" :gutterSize="8" @onDragStart="onDragStart" @onDrag="onDrag" @onDragEnd="onDragEnd">
       <SplitArea :size="50" :minSize="150">
         <QuadViewport />
       </SplitArea>
@@ -15,6 +15,7 @@
 <script>
 import QuadViewport from './visualizer/QuadViewport';
 import NodeEditor from './node_editor/NodeEditor';
+import { EventBus } from './EventBus';
 
 export default {
     name: 'VecViz',
@@ -28,11 +29,14 @@ export default {
         NodeEditor,
     },
     methods: {
-        onDragStart() {
-            console.log('split drag start');
+        onDrag(size) {
+            EventBus.$emit('split-resized', size);
         },
-        onDragEnd() {
-            console.log('split drag end');
+        onDragStart(size) {
+            console.log(`split drag start ${size}`);
+        },
+        onDragEnd(size) {
+            console.log(`split drag end ${size}`);
         },
     },
 };

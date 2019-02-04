@@ -26,6 +26,7 @@ import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { vec3 } from 'gl-matrix';
 import contextMenu from 'vue-context-menu';
+import { EventBus } from '../EventBus';
 
 export default {
     name: 'NodeEditor',
@@ -127,6 +128,9 @@ export default {
 
     mounted() {
         console.log('NodeEditor.vue mounted()');
+        EventBus.$on('split-resized', () => {
+            this.editor.view.resize();
+        });
         this.container = document.getElementById('rete');
         this.editor = new Rete.NodeEditor('name@0.1.0', this.container);
 
@@ -198,6 +202,11 @@ export default {
         console.log('MAIN process');
         this.editor.trigger('process');
         console.log('MAIN end process');
+
+        this.$nextTick(() => {
+            // For some reason the initial render has a scroll bar, so need to force resize again to take up whole container
+            this.editor.view.resize();
+        });
     },
 };
 </script>
