@@ -51,22 +51,18 @@
 
       <div class="flex-row">
         <div class="viewport-container">
-          A
-          <!-- <Viewport view="top" scene="main_scene" /> -->
+          <Viewport view="top" scene="main_scene" />
         </div>
         <div class="viewport-container">
-          B
-          <!-- <Viewport view="free" scene="main_scene" /> -->
+          <Viewport view="free" scene="main_scene" />
         </div>
       </div>
       <div class="flex-row">
         <div class="viewport-container">
-          C
-          <!-- <Viewport view="front" scene="main_scene" /> -->
+          <Viewport view="front" scene="main_scene" />
         </div>
         <div class="viewport-container">
-          D
-          <!-- <Viewport view="side" scene="main_scene" /> -->
+          <Viewport view="side" scene="main_scene" />
         </div>
       </div>
     </vgl-namespace>
