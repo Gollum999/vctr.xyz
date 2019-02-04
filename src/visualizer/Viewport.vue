@@ -126,6 +126,7 @@ export default {
 
 <style scoped>
 .viewport {
+    overflow: hidden; /* Prevents flickering scroll bars when resizing */
     position: relative;
     height: 100%;
 }
@@ -134,5 +135,18 @@ export default {
     left: 0.4em;
     top: 0.2em;
     color: white;
+}
+</style>
+
+<style>
+#app .viewport canvas {
+    height: 100%;
+}
+#app .viewport iframe {
+    visibility: visible !important; /* This fixes getting 'resize' callbacks on Firefox */
+
+    /* These two make the resize behavior a bit more responsive/less jumpy on Firefox */
+    /* margin-right: initial; */
+    position: absolute; /* This positions the iframe on top of the canvas to avoid weird flow issues */
 }
 </style>

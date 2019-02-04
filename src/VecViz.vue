@@ -4,7 +4,7 @@
       <SplitArea :size="50" :minSize="150">
         <QuadViewport />
       </SplitArea>
-      <SplitArea :size="50" :minSize="150">
+      <SplitArea class="bottom-split" :size="50" :minSize="150">
         <NodeEditor @process="editorJson = $event"/>
       </SplitArea>
     </Split>
@@ -39,10 +39,13 @@ export default {
 </script>
 
 <style scoped>
+.bottom-split {
+    overflow-y: hidden;
+}
 .vec-viz {
     /* height: 100%; */
     height: 800px; /* TODO viewport height - margin */
     border: 1px solid #dddddd;
-    border-bottom: 3px solid #dddddd; /* TODO this is a hack to work around the overflow on NodeEditor */
+    border-bottom: 3px solid #dddddd; /* TODO this is a hack to put a bottom border despite NodeEditor's hidden overflow */
 }
 </style>
