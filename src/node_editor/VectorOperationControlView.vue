@@ -53,7 +53,10 @@ export default {
 .vector-operation-component {
     margin: 2px 4px;
 }
-.vector-operation input {
+</style>
+
+<style>
+#app .vector-operation-component input {
     width: 5em;
 }
 </style>
