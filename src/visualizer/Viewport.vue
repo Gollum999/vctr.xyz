@@ -102,9 +102,24 @@ export default {
                 this.render();
             });
         }
+
+        // For some reason on Firefox, the iframe inside VglRenderer does not get an initial 'resize' callback after it loads;
+        //   fake one to get viewports to render with the correct size.
+        // TODO Maybe VglRenderer should be modified to do this
+        for (const iframe of this.$refs.renderer.$el.querySelectorAll('iframe')) {
+            iframe.onload = () => {
+                // TODO internet says this won't work in IE, need to do block below?  depends if bug affects more than just Firefox
+                console.log('Viewport forcing resize event for VueGL renderer');
+                iframe.contentWindow.dispatchEvent(new Event('resize'));
+                // var resizeEvent = window.document.createEvent('UIEvents');
+                // resizeEvent .initUIEvent('resize', true, false, window, 0);
+                // window.dispatchEvent(resizeEvent);
+            };
+        };
     },
     methods: {
         render() {
+            console.log('Viewport render');
             this.$refs.renderer.inst.render(this.$parent.$parent.$refs.scene.inst, this.$refs.camera.inst);
         },
 
