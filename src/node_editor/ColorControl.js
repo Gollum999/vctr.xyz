@@ -9,4 +9,9 @@ export class ColorControl extends Rete.Control {
         this.component = ColorControlView;
         this.props = { emitter, vkey: key, rowIdx };
     }
+
+    setValue(val) {
+        console.log(`ColorControl setValue to ${val}`);
+        this.vueContext.color = val;
+    }
 };

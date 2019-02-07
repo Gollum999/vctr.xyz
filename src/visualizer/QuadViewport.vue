@@ -2,9 +2,9 @@
   <div class="quad-viewport">
     <vgl-namespace class="vgl-namespace">
       <vgl-scene name="main_scene" ref="scene">
-        <!-- <template v-for="(v, idx) in vectors">
-             {{idx}} {{v}}
-             </template> -->
+        <!-- <template v-for="(v, idx) in vectors"> -->
+        <!--   {{idx}} {{v}} {{v.value}} {{v.color}} -->
+        <!-- </template> -->
         <vgl-grid-helper
             ref="grid_free"
             :size="20"
@@ -35,12 +35,12 @@
             :color-center-line="'#888888'"
             :color-grid="'#444444'"
         />
-        <vgl-arrow-helper v-for="(v, idx) in vectors" v-if="v && vec3.length(v)"
+        <vgl-arrow-helper v-for="(v, idx) in vectors" v-if="v && vec3.length(v.value)"
             :key="idx"
             :position="'0 0 0'"
-            :dir="`${v[0]} ${v[1]} ${v[2]}`"
-            :color="'#ffff00'"
-            :length="`${vec3.length(v)}`"
+            :dir="`${v.value[0]} ${v.value[1]} ${v.value[2]}`"
+            :color="v.color"
+            :length="`${vec3.length(v.value)}`"
             :head-length="0.5"
             :head-width="0.5"
         />
@@ -74,6 +74,13 @@
 import Viewport from './Viewport';
 import { vec3 } from 'gl-matrix';
 
+class VectorView {
+    constructor(value, color) {
+        this.value = value;
+        this.color = color;
+    }
+};
+
 export default {
     name: 'QuadViewport',
     components: {
@@ -103,7 +110,7 @@ export default {
                 const node = editorJson.nodes[key];
                 if (node.name === 'Vector Output') {
                     /* console.log(node); */
-                    this.vectors.push(node.data.vecctl); // TODO need to figure out best practicies for handling data in engine
+                    this.vectors.push(new VectorView(node.data.vecctl, node.data.color)); // TODO need to figure out best practices for handling data in engine
                 }
                 /* console.log(node.name); */
                 /* console.log(typeof(node)); */
