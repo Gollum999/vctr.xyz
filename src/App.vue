@@ -1,7 +1,7 @@
 <template>
-  <b-container id="app">
+  <div id="app">
     <router-view/>
-  </b-container>
+  </div>
 </template>
 
 <script>
@@ -11,7 +11,7 @@ export default {
 </script>
 
 <style lang="sass">
-@import url('https://fonts.googleapis.com/css?family=Ubuntu')
-
 // NOTE: Do not use this block for global styling.  Styles will be applied in a different order once deployed.
+
+@import url('https://fonts.googleapis.com/css?family=Ubuntu')
 </style>

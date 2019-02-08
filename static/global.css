@@ -5,12 +5,7 @@
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    margin-top: 60px;
-    height: 100%;
-}
-#app .container {
-    min-height: 100vh;
-    // max-height: 100vh;
+    padding: 60px 60px 60px;
 }
 /* #app input.md-input {
    flex: 0 1 auto;

@@ -47,9 +47,26 @@ export default {
     overflow-y: hidden;
 }
 .vec-viz {
-    /* height: 100%; */
-    height: 800px; /* TODO viewport height - margin */
     border: 1px solid #dddddd;
     border-bottom: 3px solid #dddddd; /* TODO this is a hack to put a bottom border despite NodeEditor's hidden overflow */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media screen and (max-height: 920px) {
+    .vec-viz { height: 800px; }
+}
+@media screen and (min-height: 921px) {
+    .vec-viz { height: calc(100vh - 120px); } /* 60px on top + bottom */
+}
+
+@media screen and (max-width: 720px) {
+    .vec-viz { width: 600px; }
+}
+@media screen and (min-width: 721px) and (max-width: 1720px) {
+    .vec-viz { width: calc(100vw - 120px); } /* 60px on left + right */
+}
+@media screen and (min-width: 1721px) {
+    .vec-viz { width: 1600px; }
 }
 </style>
