@@ -10,6 +10,7 @@
       </template>
     </vgl-renderer>
     <span class="viewport-label">{{view | capitalize}}</span>
+    <i class="viewport-expand-icon material-icons md-24 md-light" @click="expandThis">{{expanded ? 'fullscreen_exit' : 'fullscreen'}}</i>
   </div>
 </template>
 
@@ -23,8 +24,9 @@ function clamp(val, low, high) {
 
 export default {
     props: {
-        view:  { type: String, required: true, validator: (value) => { return ['side', 'front', 'top', 'free'].indexOf(value) !== -1; } },
-        scene: { type: String, required: true },
+        view:     { type: String, required: true, validator: (value) => { return ['side', 'front', 'top', 'free'].indexOf(value) !== -1; } },
+        scene:    { type: String, required: true },
+        expanded: { type: Boolean, default: false },
     },
     data() {
         return {
@@ -135,6 +137,11 @@ export default {
             this.ortho_zoom = clamp(this.ortho_zoom / this.getZoomScale(), this.zoom_min, this.zoom_max);
         },
 
+        expandThis() {
+            // TODO expanding viewport resets camera (I guess because they are seperate components?)
+            console.log(`Expand viewport ${this.view}`);
+            this.$emit('expand-viewport', this.view);
+        },
     },
 };
 </script>
@@ -150,6 +157,11 @@ export default {
     left: 0.4em;
     top: 0.2em;
     color: white;
+}
+.viewport-expand-icon {
+    position: absolute;
+    right: 0.2em;
+    bottom: 0.2em;
 }
 </style>
 

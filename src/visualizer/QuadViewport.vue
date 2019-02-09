@@ -49,22 +49,28 @@
         <vgl-axes-helper size="5" />
       </vgl-scene>
 
-      <div class="flex-row">
-        <div class="viewport-container">
-          <Viewport view="top" scene="main_scene" />
-        </div>
-        <div class="viewport-container">
-          <Viewport view="free" scene="main_scene" />
-        </div>
+      <div v-if="expandedView" class="viewport-container viewport-container-expanded">
+        <Viewport :view="expandedView" scene="main_scene" @expand-viewport="expandViewport" expanded />
       </div>
-      <div class="flex-row">
-        <div class="viewport-container">
-          <Viewport view="front" scene="main_scene" />
+      <template v-else>
+        <div class="flex-row">
+          <!-- TODO its probably better to use a dynamic class rather than style -->
+          <div class="viewport-container" :style="getStyle('top')">
+            <Viewport view="top" scene="main_scene" @expand-viewport="expandViewport" />
+          </div>
+          <div class="viewport-container" :style="getStyle('free')">
+            <Viewport view="free" scene="main_scene" @expand-viewport="expandViewport" />
+          </div>
         </div>
-        <div class="viewport-container">
-          <Viewport view="side" scene="main_scene" />
+        <div class="flex-row">
+          <div class="viewport-container" :style="getStyle('front')">
+            <Viewport view="front" scene="main_scene" @expand-viewport="expandViewport" />
+          </div>
+          <div class="viewport-container" :style="getStyle('side')">
+            <Viewport view="side" scene="main_scene" @expand-viewport="expandViewport" />
+          </div>
         </div>
-      </div>
+      </template>
     </vgl-namespace>
   </div>
 </template>
@@ -90,6 +96,7 @@ export default {
         return {
             vectors: [],
             vec3: vec3, // For use in render
+            expandedView: null,
         };
     },
     mounted() {
@@ -118,6 +125,26 @@ export default {
             /* this.vectors = */
         });
     },
+    methods: {
+        expandViewport(view) {
+            if (this.expandedView) {
+                console.log(`un-expanding ${view}`);
+                this.expandedView = null;
+            } else {
+                console.log(`expanding ${view}`);
+                this.expandedView = view;
+            }
+        },
+        getStyle(view) {
+            let vis = 'hidden';
+            if (this.expandedView === null || this.expandedView === view) {
+                vis = 'visible';
+            }
+            return {
+                visibility: vis,
+            };
+        },
+    },
 };
 </script>
 
@@ -138,7 +165,11 @@ export default {
     height: 50%;
 }
 .viewport-container {
+    box-sizing: border-box;
     border: 2px solid #dddddd;
     width: 100%;
+}
+.viewport-container-expanded {
+    height: 100%;
 }
 </style>
