@@ -3,9 +3,8 @@
     <div class="rete" id="rete" />
 
     <div class="buttons-add-nodes">
-      <md-button class="md-raised add-input" type="button" @click="addNode('input')">Add Input</md-button>
+      <md-button class="md-raised add-vector" type="button" @click="addNode('vector')">Add Vector</md-button>
       <md-button class="md-raised add-operation" type="button" @click="addNode('operation')">Add Operation</md-button>
-      <md-button class="md-raised add-output" type="button" @click="addNode('output')">Add Output</md-button>
     </div>
 
     <div class="buttons-delete-nodes">
@@ -41,9 +40,8 @@ export default {
             components: {
                 'num':           new allComponents.ScalarComponent(),
                 'add':           new allComponents.AddComponent(),
-                'vec_input':     new allComponents.VectorInputComponent(),
+                'vec':           new allComponents.VectorComponent(),
                 'vec_operation': new allComponents.VectorOperationComponent(),
-                'vec_output':    new allComponents.VectorOutputComponent(),
             },
         };
     },
@@ -54,14 +52,11 @@ export default {
 
             var node = null;
             switch (nodeType) {
-            case 'input':
-                node = await this.components['vec_input'].createNode({'vecctl': vec3.fromValues(0, 0, 0)});
+            case 'vector':
+                node = await this.components['vec'].createNode({'vecctl': vec3.fromValues(0, 0, 0)});
                 break;
             case 'operation':
                 node = await this.components['vec_operation'].createNode();
-                break;
-            case 'output':
-                node = await this.components['vec_output'].createNode();
                 break;
             default:
                 throw new Error(`Cannot add node of type ${nodeType}`);
@@ -97,10 +92,10 @@ export default {
                 this.components['num'].createNode({'numctl': 5}),
                 this.components['num'].createNode({'numctl': 4}),
                 this.components['add'].createNode(),
-                this.components['vec_input'].createNode({'vecctl': vec3.fromValues(3, 2, 1)}),
-                this.components['vec_input'].createNode({'vecctl': vec3.fromValues(2, 2, 2)}),
+                this.components['vec'].createNode({'vecctl': vec3.fromValues(3, 2, 1)}),
+                this.components['vec'].createNode({'vecctl': vec3.fromValues(2, 2, 2)}),
                 this.components['vec_operation'].createNode(),
-                this.components['vec_output'].createNode(),
+                this.components['vec'].createNode({'vecctl': vec3.fromValues(2, 2, 2)}),
             ]);
             in1.position = [20, 20];
             in2.position = [20, 170];

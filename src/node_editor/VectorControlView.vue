@@ -1,8 +1,8 @@
 <template>
 <div class="vector-control-container" :style="{'grid-row': rowIdx}">
-  <md-field><md-input v-if="value" type="number" v-model.number="value[0]" :readonly="readOnly" @input="update" /></md-field>
-  <md-field><md-input v-if="value" type="number" v-model.number="value[1]" :readonly="readOnly" @input="update" /></md-field>
-  <md-field><md-input v-if="value" type="number" v-model.number="value[2]" :readonly="readOnly" @input="update" /></md-field>
+  <md-field><md-input type="number" v-model.number="value[0]" :readonly="readOnly" @input="updateData" /></md-field>
+  <md-field><md-input type="number" v-model.number="value[1]" :readonly="readOnly" @input="updateData" /></md-field>
+  <md-field><md-input type="number" v-model.number="value[2]" :readonly="readOnly" @input="updateData" /></md-field>
 </div>
 
 <!-- <template v-if="readOnly"> -->
@@ -25,17 +25,18 @@ export default {
         getData:  { type: Function, required: true },
         putData:  { type: Function, required: true },
         rowIdx:   { type: Number,   required: true },
-        readOnly: { type: Boolean,  default: false },
     },
 
     data() {
         return {
             value: vec3.create(),
+            readOnly: false,
         };
     },
 
     methods: {
-        update() {
+        updateData() {
+            console.log('VectorControlView updateData');
             if (this.vkey) {
                 console.log(`VectorControlView putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
                 this.putData(this.vkey, this.value);
@@ -48,8 +49,9 @@ export default {
     mounted() {
         console.log(`VectorControlView mounted`);
         console.log(this);
+
         this.value = this.getData(this.vkey);
-        console.log(`mounted set value for key ${this.vkey} to ${this.value}`);
+        console.log(`VectorControlView mounted set value for key ${this.vkey} to ${this.value}`);
     },
 };
 </script>
@@ -60,17 +62,14 @@ export default {
     grid-column: controls;
     display: flex;
 }
-.vector-input input {
+.vector input {
     width: 3em;
 }
-.vector-output input {
-    width: 3em;
-}
-#app .node.vector-input .title {
+#app .node.vector .title {
     /* background-color: #5f5fb9; */
     /* border-radius: 10px 10px 0 0; */
 }
-#app .node.vector-output .title {
+#app .node.vector .title {
     /* background-color: #3fb73f; */
     /* border-radius: 10px 10px 0 0; */
 }

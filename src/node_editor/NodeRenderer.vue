@@ -6,7 +6,8 @@ md-card.node(md-with-hover :class="[selected(), node.name] | kebab")
   .node-body
     // Inputs
     // 0 indexed
-    .input(v-for='(input, idx) in inputs()' :key="input.key" :style="{'grid-row': idx + 1}")
+    // TODO there was some warning here about duplicate key 'vec', fixed by adding idx to key but I'm not entirely sure how that worked or whether that is correct
+    .input(v-for='(input, idx) in inputs()' :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
       .input-wrapper
         Socket(v-socket:input="input" type="input" :socket="input.socket")
         .input-title(v-show='!input.showControl()') {{input.name}}
