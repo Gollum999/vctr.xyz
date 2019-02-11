@@ -24,11 +24,11 @@ import { Chrome } from 'vue-color';
 
 export default {
     props: {
-        vkey:    { type: String,   required: true },
-        emitter: { type: Object,   required: true },
-        getData: { type: Function, required: true },
-        putData: { type: Function, required: true },
-        rowIdx:  { type: Number,   required: true },
+        vkey:    { type: String,   required: true }, // injected by Rete
+        emitter: { type: Object,   required: true }, // injected by Rete
+        getData: { type: Function, required: true }, // injected by Rete
+        putData: { type: Function, required: true }, // injected by Rete
+        rowIdx:  { type: Number,   required: true }, // used to position control within parent grid
     },
 
     data() {

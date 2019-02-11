@@ -5,10 +5,10 @@
 <script>
 export default {
     props: {
-        vkey:     { type: String,   required: true },
-        emitter:  { type: Object,   required: true },
-        getData:  { type: Function, required: true },
-        putData:  { type: Function, required: true },
+        vkey:     { type: String,   required: true }, // injected by Rete
+        emitter:  { type: Object,   required: true }, // injected by Rete
+        getData:  { type: Function, required: true }, // injected by Rete
+        putData:  { type: Function, required: true }, // injected by Rete
         readOnly: { type: Boolean,  default: false },
     },
 
