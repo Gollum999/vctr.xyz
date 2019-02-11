@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import NodeRenderer from './NodeRenderer.vue';
 import Rete from 'rete';
 import sockets from './sockets';
@@ -24,7 +25,7 @@ export class ScalarComponent extends Rete.Component {
 
     worker(node, inputs, outputs) {
         console.log(`ScalarComponent worker: node id: ${node.id} inputs: ${_.isEmpty(inputs)} outputs: ${_.isEmpty(outputs)} node.inputs: ${_.isEmpty(node.inputs)} node.outputs: ${_.isEmpty(node.outputs)}`);
-        /* console.log(node.data);*/
+        /* console.log(node.data); */
 
         // TODO pull this out somewhere
         function getInput(name) {
@@ -39,7 +40,7 @@ export class ScalarComponent extends Rete.Component {
         if (_.isNil(input)) {
             editorNode.controls.get('numctl').setReadOnly(false);
         } else {
-            node.data.numctl = input
+            node.data.numctl = input;
             editorNode.controls.get('numctl').setValue(input);
             editorNode.controls.get('numctl').setReadOnly(true);
         }
