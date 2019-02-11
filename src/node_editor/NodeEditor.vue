@@ -38,6 +38,7 @@ export default {
             newNodePosition: [50, 50],
             container: null,
             editor: null,
+            engine: null,
             components: {
                 'num':           new allComponents.ScalarComponent(),
                 'add':           new allComponents.AddComponent(),
@@ -88,6 +89,20 @@ export default {
             }
         },
 
+        async loadNodes() {
+            /* const savedEditorJson = null; */
+            const savedEditorJson = JSON.parse(window.localStorage.getItem('node_editor'));
+
+            if (savedEditorJson) {
+                console.log('Loading node editor from local storage');
+                console.log(savedEditorJson);
+                await this.editor.fromJSON(savedEditorJson);
+            } else {
+                console.log('Creating demo nodes');
+                await this.createDemoNodes();
+            }
+        },
+
         async createDemoNodes() {
             const [in1, in2, out, vec, vec2, vecOp, vecOut] = await Promise.all([
                 this.components['num'].createNode({'numctl': 5}),
@@ -120,6 +135,21 @@ export default {
             this.editor.connect(vec2.outputs.get('vec'), vecOp.inputs.get('vec2'));
             this.editor.connect(vecOp.outputs.get('vec'), vecOut.inputs.get('vec'));
         },
+
+        async handleEngineProcess() {
+            console.log('NodeEditor handleEngineProcess');
+            console.log(this.editor.toJSON());
+            await this.engine.abort(); // Stop old job if running
+            console.log('Calling engine.process()');
+            await this.engine.process(this.editor.toJSON());
+
+            // TODO should I save during more events?
+            console.log('Saving editor state to browser-local storage');
+            window.localStorage.setItem('node_editor', JSON.stringify(this.editor.toJSON()));
+
+            this.$emit('process', this.editor.toJSON());
+            this.$root.$emit('node_engine_processed', this.editor.toJSON());
+        },
     },
 
     mounted() {
@@ -133,27 +163,14 @@ export default {
         this.editor.use(ConnectionPlugin);
         this.editor.use(VueRenderPlugin);
 
-        const engine = new Rete.Engine('name@0.1.0');
+        this.engine = new Rete.Engine('name@0.1.0');
 
         Object.keys(this.components).map(key => {
             this.editor.register(this.components[key]);
-            engine.register(this.components[key]);
+            this.engine.register(this.components[key]);
         });
 
-        this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved',
-            async () => {
-                console.log('editor processing');
-                console.log(this.editor.toJSON());
-                await engine.abort(); // Stop old job if running
-                console.log('calling engine.process');
-                await engine.process(this.editor.toJSON());
-
-                // TODO should I save during more events?
-                window.localStorage.setItem('node_editor', JSON.stringify(this.editor.toJSON()));
-
-                this.$emit('process', this.editor.toJSON());
-                this.$root.$emit('node_engine_processed', this.editor.toJSON());
-            });
+        this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved', this.handleEngineProcess);
 
         this.editor.on('nodecreated', node => {
             Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
@@ -165,36 +182,22 @@ export default {
             });
         });
 
-        engine.on('error', ({message, data}) => {
+        this.engine.on('error', ({message, data}) => {
             const msg = `Error in Rete engine: ${message}`;
             alert(msg);
             console.error(msg);
             console.info(data);
         });
 
-        engine.on('warn', (exc) => {
+        this.engine.on('warn', (exc) => {
             console.warn(`Warning from Rete engine`);
             console.warn(exc);
         });
 
-        (async () => {
-            /* const savedEditorJson = null; */
-            const savedEditorJson = JSON.parse(window.localStorage.getItem('node_editor'));
-
-            if (savedEditorJson) {
-                console.log('Loading node editor from local storage');
-                console.log(savedEditorJson);
-                await this.editor.fromJSON(savedEditorJson);
-            } else {
-                console.log('Creating demo nodes');
-                await this.createDemoNodes();
-            }
-        })();
+        (async () => { this.loadNodes(); })();
 
         this.editor.view.resize();
-        console.log('MAIN process');
         this.editor.trigger('process');
-        console.log('MAIN end process');
 
         this.$nextTick(() => {
             // For some reason the initial render has a scroll bar, so need to force resize again to take up whole container
