@@ -1,5 +1,6 @@
 <template>
-  <div class="node-editor">
+  <!-- NOTE: This dblclick listener is only to prevent the default dblclick zoom in Rete -->
+  <div class="node-editor" @dblclick.capture.stop="">
     <div class="rete" id="rete" />
 
     <div class="buttons-add-nodes">
@@ -128,9 +129,6 @@ export default {
         });
         this.container = document.getElementById('rete');
         this.editor = new Rete.NodeEditor('name@0.1.0', this.container);
-
-        // TODO testing this... double click zoom is annoying
-        // this.editor.view.container.removeEventListener('dblclick', this.editor.view.area._zoom.dblclick);
 
         this.editor.use(ConnectionPlugin);
         this.editor.use(VueRenderPlugin);
