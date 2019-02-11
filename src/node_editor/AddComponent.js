@@ -27,7 +27,9 @@ export class AddComponent extends Rete.Component {
 
     worker(node, inputs, outputs) {
         console.log('AddComponent worker');
+        // console.log(node);
         // console.log(inputs);
+        // console.log(outputs);
         // console.log(`${inputs['num1']} (${typeof inputs['num1']}) (${typeof inputs['num1'][0]})`);
         // console.log(`${inputs['num2']} (${typeof inputs['num2']}) (${typeof inputs['num2'][0]})`);
         // TODO when should I use node.data over inputs?
@@ -40,9 +42,9 @@ export class AddComponent extends Rete.Component {
         /* console.log(node.controls); */
         /* console.log(this.editor.nodes.find(n => n.id === node.id).controls); */
         /* console.log(this.node.controls); */
-        const thisNode = this.editor.nodes.find(n => n.id === node.id);
+        const editorNode = this.editor.nodes.find(n => n.id === node.id);
         const sum = inputs['num1'][0] + inputs['num2'][0];
         console.log(`AddComponent setting ctrl to ${sum}`);
-        thisNode.controls.get('numctl').setValue(sum);
+        editorNode.controls.get('numctl').setValue(sum);
     }
 };

@@ -4,6 +4,7 @@
     <div class="rete" id="rete" />
 
     <div class="buttons-add-nodes">
+      <md-button class="md-raised add-scalar" type="button" @click="addNode('scalar')">Add Scalar</md-button>
       <md-button class="md-raised add-vector" type="button" @click="addNode('vector')">Add Vector</md-button>
       <md-button class="md-raised add-operation" type="button" @click="addNode('operation')">Add Operation</md-button>
     </div>
@@ -40,7 +41,7 @@ export default {
             editor: null,
             engine: null,
             components: {
-                'num':           new allComponents.ScalarComponent(),
+                'scalar':        new allComponents.ScalarComponent(),
                 'add':           new allComponents.AddComponent(),
                 'vec':           new allComponents.VectorComponent(),
                 'vec_operation': new allComponents.VectorOperationComponent(),
@@ -54,6 +55,9 @@ export default {
 
             var node = null;
             switch (nodeType) {
+            case 'scalar':
+                node = await this.components['scalar'].createNode({'numctl': 0});
+                break;
             case 'vector':
                 node = await this.components['vec'].createNode({'vecctl': vec3.fromValues(0, 0, 0)});
                 break;
@@ -105,8 +109,8 @@ export default {
 
         async createDemoNodes() {
             const [in1, in2, out, vec, vec2, vecOp, vecOut] = await Promise.all([
-                this.components['num'].createNode({'numctl': 5}),
-                this.components['num'].createNode({'numctl': 4}),
+                this.components['scalar'].createNode({'numctl': 5}),
+                this.components['scalar'].createNode({'numctl': 4}),
                 this.components['add'].createNode(),
                 this.components['vec'].createNode({'vecctl': vec3.fromValues(3, 2, 1)}),
                 this.components['vec'].createNode({'vecctl': vec3.fromValues(2, 2, 2)}),
@@ -129,8 +133,8 @@ export default {
             this.editor.addNode(vecOp);
             this.editor.addNode(vecOut);
 
-            this.editor.connect(in1.outputs.get('num'), out.inputs.get('num1'));
-            this.editor.connect(in2.outputs.get('num'), out.inputs.get('num2'));
+            this.editor.connect(in1.outputs.get('scalar'), out.inputs.get('num1'));
+            this.editor.connect(in2.outputs.get('scalar'), out.inputs.get('num2'));
             this.editor.connect(vec.outputs.get('vec'), vecOp.inputs.get('vec1'));
             this.editor.connect(vec2.outputs.get('vec'), vecOp.inputs.get('vec2'));
             this.editor.connect(vecOp.outputs.get('vec'), vecOut.inputs.get('vec'));
@@ -235,7 +239,7 @@ export default {
       margin-left: -8px
     &.output
       margin-right: -8px
-    &.number-value
+    &.scalar-value
       background: #7777dd
     &.vector-value
       background: #ff4444

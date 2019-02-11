@@ -1,5 +1,5 @@
 <template>
-  <md-field><md-input type="number" v-model.number="value" :readonly="readOnly" @input="update" /></md-field>
+<md-field><md-input type="number" v-model.number="value" :readonly="readOnly" /></md-field>
 </template>
 
 <script>
@@ -9,17 +9,27 @@ export default {
         emitter:  { type: Object,   required: true }, // injected by Rete
         getData:  { type: Function, required: true }, // injected by Rete
         putData:  { type: Function, required: true }, // injected by Rete
-        readOnly: { type: Boolean,  default: false },
     },
 
     data() {
         return {
             value: 0,
+            readOnly: false,
         };
     },
 
+    watch: {
+        // TODO I think this is the more correct way to handle this (rather than using @input) to avoid duplicate callbacks; use this pattern everywhere?
+        value() {
+            console.log(`ScalarControlView value watcher, calling updateData ${this.vkey} ${this.value}`);
+            this.updateData(); // TODO Careful of infinite recursion here...
+        },
+    },
+
     methods: {
-        update() {
+        updateData() {
+            console.log(`ScalarControlView updateData() ${this.vkey} ${this.value}`);
+            console.log(this);
             if (this.vkey) {
                 console.log(`ScalarControlView putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
                 this.putData(this.vkey, this.value);
@@ -33,7 +43,7 @@ export default {
         console.log('ScalarControlView mounted');
         console.log(this);
         this.value = this.getData(this.vkey);
-        console.log(`mounted set value for key ${this.vkey} to ${this.value}`);
+        console.log(`ScalarControlView mounted getData set value for key ${this.vkey} to ${this.value}`);
     },
 };
 </script>
