@@ -41,17 +41,12 @@ export default {
                 console.log(`VectorControlView putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
                 this.putData(this.vkey, this.value);
             }
-            console.log('VectorControlView triggering process');
             this.emitter.trigger('process');
         },
     },
 
     mounted() {
-        console.log(`VectorControlView mounted`);
-        console.log(this);
-
         this.value = this.getData(this.vkey);
-        console.log(`VectorControlView mounted set value for key ${this.vkey} to ${this.value}`);
     },
 };
 </script>

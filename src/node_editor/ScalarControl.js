@@ -11,13 +11,10 @@ export class ScalarControl extends Rete.Control {
     }
 
     setValue(val) {
-        console.log(`ScalarControl setValue to ${val}`);
-        console.log(this);
         this.vueContext.value = val;
     }
 
     setReadOnly(readOnly) {
-        console.log(`ScalarControl setReadOnly ${readOnly}`);
         this.vueContext.readOnly = readOnly;
     }
 };

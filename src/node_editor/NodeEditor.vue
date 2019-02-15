@@ -83,7 +83,6 @@ export default {
         },
 
         deleteNode() {
-            console.log('deleteNode');
             this.editor.selected.each(node => {
                 this.editor.removeNode(node);
             });
@@ -152,7 +151,6 @@ export default {
             console.log('NodeEditor handleEngineProcess');
             console.log(this.editor.toJSON());
             await this.engine.abort(); // Stop old job if running
-            console.log('Calling engine.process()');
             await this.engine.process(this.editor.toJSON());
 
             // TODO should I save during more events?
@@ -165,7 +163,6 @@ export default {
     },
 
     mounted() {
-        console.log('NodeEditor.vue mounted()');
         EventBus.$on('split-resized', () => {
             this.editor.view.resize();
         });

@@ -43,17 +43,12 @@ export default {
 
     mounted() {
         this.color = this.getData(this.vkey) || '#FFFF00';
-        console.log(`ColorControlView mounted, set color to ${this.color} (vkey: ${this.vkey})`);
     },
 
     methods: {
-        log(msg) {
-            console.log(msg);
-        },
         colorUpdated(color) {
             this.color = color.hex;
             if (this.vkey) {
-                // console.log(`Set color to ${this.color} (vkey: ${this.vkey})`);
                 this.putData(this.vkey, this.color);
             }
             this.emitter.trigger('process');

@@ -102,7 +102,6 @@ export default {
     mounted() {
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
         /* this.$refs.scene.inst.background = new THREE.Color(0xffffff); */
-        console.log('QuadViewport mounted');
 
         this.$refs.grid_free.inst.layers.set(1);
         this.$refs.grid_top.inst.layers.set(2);
@@ -116,13 +115,9 @@ export default {
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
                 if (node.name === 'Vector') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
-                    /* console.log(node); */
                     this.vectors.push(new VectorView(node.data.vecctl, node.data.color)); // TODO need to figure out best practices for handling data in engine
                 }
-                /* console.log(node.name); */
-                /* console.log(typeof(node)); */
             }
-            /* this.vectors = */
         });
     },
     methods: {

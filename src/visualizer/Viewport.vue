@@ -115,7 +115,6 @@ export default {
             }
         },
         render() {
-            console.log('Viewport render');
             this.$refs.renderer.inst.render(this.$parent.$parent.$refs.scene.inst, this.$refs.camera.inst);
         },
 

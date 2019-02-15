@@ -29,21 +29,15 @@ export default {
     methods: {
         updateData() {
             console.log(`ScalarControlView updateData() ${this.vkey} ${this.value}`);
-            console.log(this);
             if (this.vkey) {
-                console.log(`ScalarControlView putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
                 this.putData(this.vkey, this.value);
             }
-            console.log('ScalarControlView triggering process');
             this.emitter.trigger('process');
         },
     },
 
     mounted() {
-        console.log('ScalarControlView mounted');
-        console.log(this);
         this.value = this.getData(this.vkey);
-        console.log(`ScalarControlView mounted getData set value for key ${this.vkey} to ${this.value}`);
     },
 };
 </script>
