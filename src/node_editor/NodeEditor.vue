@@ -10,6 +10,7 @@
     </div>
 
     <div class="buttons-delete-nodes">
+      <md-button class="md-raised recenter-camera" type="button" @click="recenterView">Recenter</md-button>
       <md-button class="md-raised clear-nodes" type="button" @click="clearAllNodes">Clear</md-button>
     </div>
 
@@ -84,6 +85,11 @@ export default {
             this.editor.selected.each(node => {
                 this.editor.removeNode(node);
             });
+        },
+
+        recenterView() {
+            this.editor.view.area.transform = { k: 1, x: 0, y: 0 }; // TODO dynamic view sizing based on bounds of current nodes
+            this.editor.view.area.update();
         },
 
         clearAllNodes() {
