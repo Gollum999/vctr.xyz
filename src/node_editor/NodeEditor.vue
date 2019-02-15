@@ -202,10 +202,10 @@ export default {
             console.info(data);
         });
 
-        this.engine.on('warn', (exc) => {
-            console.warn(`Warning from Rete engine`);
-            console.warn(exc);
-        });
+        // this.engine.on('warn', (exc) => {
+        //     console.warn(`Warning from Rete engine`);
+        //     console.warn(exc);
+        // });
 
         (async () => { this.loadNodes(); })();
 

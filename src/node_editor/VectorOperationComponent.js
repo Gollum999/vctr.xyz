@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import NodeRenderer from './NodeRenderer.vue';
 import Rete from 'rete';
 import sockets from './sockets';
@@ -11,14 +12,10 @@ export class VectorOperationComponent extends Rete.Component {
     }
 
     builder(node) {
-        let in1 = new Rete.Input('vec1', 'Left', sockets.vector);
-        let in2 = new Rete.Input('vec2', 'Right', sockets.vector);
-        let out = new Rete.Output('vec', 'Result', sockets.vector);
-        let control = new VectorOperationControl(this.editor, 'vecctl');
-        node.addInput(in1);
-        node.addInput(in2);
-        node.addOutput(out);
-        node.addControl(control);
+        node.addInput(new Rete.Input('vec1', 'Left', sockets.vector));
+        node.addInput(new Rete.Input('vec2', 'Right', sockets.vector));
+        node.addOutput(new Rete.Output('vec', 'Result', sockets.vector));
+        node.addControl(new VectorOperationControl(this.editor, 'vecctl'));
         return node;
     }
 
@@ -45,6 +42,9 @@ export class VectorOperationComponent extends Rete.Component {
 
         const vec1 = getInput('vec1');
         const vec2 = getInput('vec2');
+        if (_.isNil(vec1) || _.isNil(vec2)) {
+            return;
+        }
         const out = vec3.create();
         opFn(out, vec1, vec2); // TODO assign?
 
