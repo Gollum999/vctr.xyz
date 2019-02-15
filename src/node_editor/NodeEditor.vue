@@ -41,6 +41,8 @@ export default {
             container: null,
             editor: null,
             engine: null,
+            minZoom: 0.1,
+            maxZoom: 3,
             components: {
                 'scalar':        new allComponents.ScalarComponent(),
                 'add':           new allComponents.AddComponent(),
@@ -190,6 +192,10 @@ export default {
                     this.$refs.ctxMenu.open(event, {node: node, nodeView: nodeView});
                 });
             });
+        });
+
+        this.editor.on('zoom', ({transform, zoom, source}) => {
+            return (this.minZoom <= zoom && zoom <= this.maxZoom);
         });
 
         this.engine.on('error', ({message, data}) => {
