@@ -24,7 +24,6 @@
     "rete-connection-plugin": "^0.3.2",
     "rete-vue-render-plugin": "^0.2.5",
     "three": "^0.99.0",
-    "three-orbit-controls": "^82.1.0",
     "vue": "^2.5.2",
     "vue-color": "^2.7.0",
     "vue-context-menu": "^2.0.6",
