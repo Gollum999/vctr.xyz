@@ -2,7 +2,7 @@
 <div class="color-control-container">
   <div class="color-label input-title" :style="{'grid-row': rowIdx}">Color</div>
 
-  <md-menu class="color-picker" :style="{'grid-row': rowIdx}" md-size="auto" md-direction="bottom-start" md-menu-trigger>
+  <md-menu class="color-picker" :style="{'grid-row': rowIdx}" md-size="auto" md-direction="bottom-start" md-align-trigger>
     <div class="color-picker-button" :style="{'background-color': color}" md-menu-trigger>
       <md-menu-content class="color-picker-popup">
         <color-picker :value="color" @input="colorUpdated" disableAlpha />
