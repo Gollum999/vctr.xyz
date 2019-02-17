@@ -1,0 +1,48 @@
+* Operations to support
+** Scalars
+ - s + s
+ - s - s
+ - s * s
+ - s / s
+ - s ^ s
+ - s % s
+ - |s|
+** Vectors
+ - v * s
+ - v / s
+ - v + v
+ - v - v
+ - v . v
+ - v x v
+ - ||v||
+ - norm(v) -> v
+ - v.proj(v) -> v
+ - lerp(v, v, s) -> v
+** Matrices
+ - m + m
+ - m - m
+ - m * m
+ - inverse(m) -> m
+ - determinant(m) -> s
+ - eigenvalue(m) -> s
+ - eigenvector(m) -> v
+ - v * m -> v
+ - translate/rotate/scale/skew helpers -> m
+   - Should this produce a value, or should it act like an operation?  or both somehow?
+   - Maybe inverse these functions too?
+ - transpose(m) -> m
+** Mux/demux
+ - v -> (s, s, s)
+ - (s, s, s) -> v
+ - m -> (v, v, v, v)
+ - (v, v, v, v) -> m
+** Trig
+ - sin/cos/tan... etc(s) -> s
+ - angle_between(v, v) -> s
+** Misc
+*** Quaternions?
+*** Other geometry?
+ - Sphere
+ - Plane
+*** Branching or other control flow?
+* 2D mode?
