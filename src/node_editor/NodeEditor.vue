@@ -4,14 +4,27 @@
     <div class="rete" id="rete" />
 
     <div class="buttons-add-nodes">
-      <md-button class="md-raised add-scalar" type="button" @click="addNode('scalar')">Add Scalar</md-button>
-      <md-button class="md-raised add-vector" type="button" @click="addNode('vector')">Add Vector</md-button>
-      <md-button class="md-raised add-operation" type="button" @click="addNode('operation')">Add Operation</md-button>
+      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add scalar" @click="addNode('scalar')">
+        <md-icon class="custom-icon" md-src="/static/scalar.svg"></md-icon>
+      </md-button>
+      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector" @click="addNode('vector')">
+        <md-icon class="custom-icon" md-src="/static/vector.svg"></md-icon>
+      </md-button>
+      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add matrix" @click="addNode('matrix')" disabled>
+        <md-icon class="custom-icon" md-src="/static/matrix.svg"></md-icon>
+      </md-button>
+      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector operation" @click="addNode('operation')">
+        <md-icon class="custom-icon" md-src="/static/operation.svg"></md-icon>
+      </md-button>
     </div>
 
     <div class="buttons-delete-nodes">
-      <md-button class="md-raised recenter-camera" type="button" @click="recenterView">Recenter</md-button>
-      <md-button class="md-raised clear-nodes" type="button" @click="clearAllNodes">Clear</md-button>
+      <md-button class="md-icon-button md-dense md-raised" type="button" title="Recenter view" @click="recenterView">
+        <md-icon>center_focus_weak</md-icon>
+      </md-button>
+      <md-button class="md-icon-button md-dense md-raised" type="button" title="Clear all nodes" @click="clearAllNodes">
+        <md-icon>delete</md-icon>
+      </md-button>
     </div>
 
     <context-menu id="context-menu" ref="ctxMenu">
@@ -252,6 +265,11 @@ export default {
       background: #7777dd
     &.vector-value
       background: #ff4444
+  .custom-icon
+    svg
+      position: absolute // TODO: necessary to get icon positioned properly in button
+      top: 0px
+      left: 0px
 </style>
 
 <style lang="sass" scoped>
@@ -265,11 +283,11 @@ export default {
   .buttons-add-nodes
     position: absolute
     left: 5px
-    top: 5px
+    top: 12px
   .buttons-delete-nodes
     position: absolute
     right: 5px
-    top: 5px
+    top: 12px
 .rete
   display: block
   height: 100%

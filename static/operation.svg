@@ -1,0 +1,26 @@
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<!-- 362 == 256 * sqrt(2) -->
+<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="100%" width="100%" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="0 0 24 24">
+ <defs></defs>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <g style="letter-spacing:0px;word-spacing:0px;" font-family="sans-serif" font-size="40px" line-height="125%" font-style="normal" font-weight="normal">
+  <path d="m5.0093,10.77,0-3.6804-3.5199,0,0-2.0795,3.5199,0,0-3.6804,2.16,0,0,3.6804,3.5199,0,0,2.0795-3.5199,0,0,3.6804z"/>
+ </g>
+ <g style="letter-spacing:0px;word-spacing:0px;" font-family="sans-serif" font-size="40px" line-height="125%" font-style="normal" font-weight="normal">
+  <path d="m17.896,15.817c-0.46631,0.000008-0.85287-0.14332-1.1597-0.42999-0.30681-0.28665-0.46021-0.65663-0.4602-1.1099-0.000005-0.45328,0.1534-0.82325,0.4602-1.1099s0.69335-0.42998,1.1597-0.42999c0.46671,0.000012,0.85347,0.14334,1.1603,0.42999,0.3068,0.28667,0.4602,0.65665,0.4602,1.1099-0.000007,0.4533-0.15341,0.82327-0.4602,1.1099-0.30681,0.28667-0.69357,0.43-1.1603,0.42999zm0,7.2003c-0.46631,0.000002-0.85287-0.14333-1.1597-0.42999-0.30681-0.28666-0.46021-0.65663-0.4602-1.1099-0.000005-0.45328,0.1534-0.82326,0.4602-1.1099,0.3068-0.28666,0.69335-0.42999,1.1597-0.42999,0.46671,0.000005,0.85347,0.14334,1.1603,0.42999,0.3068,0.28666,0.4602,0.65664,0.4602,1.1099-0.000007,0.45329-0.15341,0.82326-0.4602,1.1099-0.30681,0.28666-0.69357,0.42999-1.1603,0.42999zm-4.6-4.1v-2.0795h9.1998v2.0795z"/>
+ </g>
+ <g style="letter-spacing:0px;word-spacing:0px;" font-family="sans-serif" font-size="40px" line-height="125%" font-style="normal" font-weight="normal">
+  <path d="m13.296,7.0896,0-2.0795,9.1998,0,0,2.0795z"/>
+ </g>
+ <g style="letter-spacing:0px;word-spacing:0px;" font-weight="normal" font-size="20px" font-style="normal" font-stretch="normal" line-height="125%" font-variant="normal" font-family="Source Code Pro">
+  <path d="M3.2295,22.227,1.7696,20.747,4.6095,17.887,1.7696,15.007,3.2295,13.527,6.089,16.407,8.9491,13.527,10.409,15.007,7.5691,17.887,10.409,20.747,8.9491,22.227,6.089,19.347z"/>
+ </g>
+</svg>
