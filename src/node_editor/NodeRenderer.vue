@@ -98,6 +98,7 @@ $node-width: 100px
   user-select: none
   // box-shadow:
   .node-body
+    width: 100%
     display: inline-grid
     grid-template-columns: [inputs] auto [controls] auto [outputs] auto [end]
     grid-template-rows: auto
