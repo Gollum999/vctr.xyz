@@ -34,6 +34,6 @@ module.exports = {
     'semi': ['error', 'always'], // require semicolons
     'indent': ['error', 4], // 4 space indentation
     'key-spacing': ['error', {'mode': 'minimum'}], // Allow extra spaces in object to align values
-    'no-multi-spaces': ['error', { exceptions: { 'Property': true, 'ObjectExpression': true, } }],
+    'no-multi-spaces': ['error', { exceptions: { 'Property': true, 'ObjectExpression': true, 'SwitchCase': true, } }],
   }
 }
