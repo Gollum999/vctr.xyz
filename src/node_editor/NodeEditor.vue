@@ -5,17 +5,31 @@
 
     <div class="buttons-add-nodes">
       <md-button class="md-icon-button md-dense md-raised" type="button" title="Add scalar" @click="addNode('scalar')">
-        <md-icon class="custom-icon" md-src="/static/scalar.svg"></md-icon>
+        <md-icon class="custom-icon" md-src="/static/scalar.svg" />
       </md-button>
       <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector" @click="addNode('vector')">
-        <md-icon class="custom-icon" md-src="/static/vector.svg"></md-icon>
+        <md-icon class="custom-icon" md-src="/static/vector.svg" />
       </md-button>
       <md-button class="md-icon-button md-dense md-raised" type="button" title="Add matrix" @click="addNode('matrix')" disabled>
-        <md-icon class="custom-icon" md-src="/static/matrix.svg"></md-icon>
+        <md-icon class="custom-icon" md-src="/static/matrix.svg" />
       </md-button>
-      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector operation" @click="addNode('operation')">
-        <md-icon class="custom-icon" md-src="/static/operation.svg"></md-icon>
-      </md-button>
+      <!-- TODO not sure why "auto" size seems truncated on the right (possibly doesn't take scroll bar width into account) -->
+      <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
+      <md-menu md-size="medium" md-align-trigger>
+        <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
+        <md-button class="md-icon-button md-dense md-raised" type="button" title="Add basic operation" md-menu-trigger>
+          <md-icon class="custom-icon" md-src="/static/operation.svg" />
+        </md-button>
+
+        <md-menu-content>
+          <md-menu-item @click="addNode('operation-add')">Add</md-menu-item>
+          <md-menu-item @click="addNode('operation-subtract')">Subtract</md-menu-item>
+          <md-menu-item disabled @click="addNode('operation-multiply')">Multiply</md-menu-item>
+          <md-menu-item disabled @click="addNode('operation-divide')">Divide</md-menu-item>
+          <md-menu-item @click="addNode('operation-dot')">Dot Product</md-menu-item>
+          <md-menu-item @click="addNode('operation-cross')">Cross Product</md-menu-item>
+        </md-menu-content>
+      </md-menu>
     </div>
 
     <div class="buttons-delete-nodes">
@@ -58,10 +72,16 @@ export default {
             minZoom: 0.1,
             maxZoom: 3,
             components: {
-                'scalar':          new allComponents.ScalarComponent(),
-                'vector':          new allComponents.VectorComponent(),
-                'basic_operation': new allComponents.VectorOperationComponent(),
-                'add_old':         new allComponents.AddComponent(),
+                'scalar':             new allComponents.ScalarComponent(),
+                'vector':             new allComponents.VectorComponent(),
+
+                'operation-add':      new allComponents.VectorOperationComponent('ADD'),
+                'operation-subtract': new allComponents.VectorOperationComponent('SUBTRACT'),
+                'operation-multiply': new allComponents.VectorOperationComponent('MULTIPLY'),
+                'operation-divide':   new allComponents.VectorOperationComponent('DIVIDE'),
+                'operation-dot':      new allComponents.VectorOperationComponent('DOT'),
+                'operation-cross':    new allComponents.VectorOperationComponent('CROSS'),
+                'add_old':            new allComponents.AddComponent(),
             },
         };
     },
@@ -78,8 +98,13 @@ export default {
             case 'vector':
                 node = await this.components['vector'].createNode({'value': vec3.fromValues(0, 0, 0)});
                 break;
-            case 'operation':
-                node = await this.components['basic_operation'].createNode();
+            case 'operation-add':
+            case 'operation-subtract':
+            case 'operation-multiply':
+            case 'operation-divide':
+            case 'operation-dot':
+            case 'operation-cross':
+                node = await this.components[nodeType].createNode();
                 break;
             default:
                 throw new Error(`Cannot add node of type ${nodeType}`);
@@ -139,7 +164,7 @@ export default {
                 this.components['add_old'].createNode(),
                 this.components['vector'].createNode({'value': vec3.fromValues(3, 2, 1), 'color': '#00FFFF'}),
                 this.components['vector'].createNode({'value': vec3.fromValues(2, 2, 2), 'color': '#00FFFF'}),
-                this.components['basic_operation'].createNode(),
+                this.components['operation-add'].createNode(),
                 this.components['vector'].createNode({'value': vec3.fromValues(2, 2, 2)}),
             ]);
             in1.position = [20, 40];
@@ -148,7 +173,7 @@ export default {
             vec.position = [320, 40];
             vec2.position = [320, 200];
             vecOp.position = [590, 120];
-            vecOut.position = [820, 100];
+            vecOut.position = [720, 100];
 
             this.editor.addNode(in1);
             this.editor.addNode(in2);
@@ -160,9 +185,9 @@ export default {
 
             this.editor.connect(in1.outputs.get('scalar'), out.inputs.get('scalar1'));
             this.editor.connect(in2.outputs.get('scalar'), out.inputs.get('scalar2'));
-            this.editor.connect(vec.outputs.get('vector'), vecOp.inputs.get('vector1'));
-            this.editor.connect(vec2.outputs.get('vector'), vecOp.inputs.get('vector2'));
-            this.editor.connect(vecOp.outputs.get('vector'), vecOut.inputs.get('vector'));
+            this.editor.connect(vec.outputs.get('vector'), vecOp.inputs.get('lhs'));
+            this.editor.connect(vec2.outputs.get('vector'), vecOp.inputs.get('rhs'));
+            this.editor.connect(vecOp.outputs.get('result'), vecOut.inputs.get('vector'));
         },
 
         async handleEngineProcess() {
@@ -270,6 +295,10 @@ export default {
       background: #7777dd
     &.vector-value
       background: #ff4444
+    &.matrix-value
+      background: #44ffff
+    &.anything
+      background: #aaaaaa
   .custom-icon
     svg
       position: absolute // TODO: necessary to get icon positioned properly in button

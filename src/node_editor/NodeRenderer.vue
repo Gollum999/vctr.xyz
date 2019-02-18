@@ -1,4 +1,5 @@
 <template lang="pug">
+// TODO may need to have manual control over class name
 md-card.node(md-with-hover :class="[selected(), node.name] | kebab")
   // TODO editable titles
   .title {{node.name}}
