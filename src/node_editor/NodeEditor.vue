@@ -50,6 +50,7 @@ export default {
     },
     data() {
         return {
+            version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
             newNodePosition: [50, 50],
             container: null,
             editor: null,
@@ -114,13 +115,17 @@ export default {
         },
 
         async loadNodes() {
-            /* const savedEditorJson = null; */
+            // const savedEditorJson = null;
             const savedEditorJson = JSON.parse(window.localStorage.getItem('node_editor'));
 
             if (savedEditorJson) {
                 console.log('Loading node editor from local storage');
                 console.log(savedEditorJson);
-                await this.editor.fromJSON(savedEditorJson);
+                const success = await this.editor.fromJSON(savedEditorJson);
+                if (!success) {
+                    console.log('Could not load from local storage, creating demo nodes instead');
+                    await this.createDemoNodes();
+                }
             } else {
                 console.log('Creating demo nodes');
                 await this.createDemoNodes();
@@ -180,12 +185,12 @@ export default {
             this.editor.view.resize();
         });
         this.container = document.getElementById('rete');
-        this.editor = new Rete.NodeEditor('name@0.1.0', this.container);
+        this.editor = new Rete.NodeEditor(this.version, this.container);
 
         this.editor.use(ConnectionPlugin);
         this.editor.use(VueRenderPlugin);
 
-        this.engine = new Rete.Engine('name@0.1.0');
+        this.engine = new Rete.Engine(this.version);
 
         Object.keys(this.components).map(key => {
             this.editor.register(this.components[key]);
