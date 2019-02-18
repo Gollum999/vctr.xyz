@@ -12,17 +12,17 @@ export class VectorOperationComponent extends Rete.Component {
     }
 
     builder(node) {
-        node.addInput(new Rete.Input('vec1', 'Left', sockets.vector));
-        node.addInput(new Rete.Input('vec2', 'Right', sockets.vector));
-        node.addOutput(new Rete.Output('vec', 'Result', sockets.vector));
-        node.addControl(new VectorOperationControl(this.editor, 'vecctl'));
+        node.addInput(new Rete.Input('vector1', 'Left', sockets.vector));
+        node.addInput(new Rete.Input('vector2', 'Right', sockets.vector));
+        node.addOutput(new Rete.Output('vector', 'Result', sockets.vector));
+        node.addControl(new VectorOperationControl(this.editor, 'value'));
         return node;
     }
 
     worker(node, inputs, outputs) {
         const thisNode = this.editor.nodes.find(n => n.id === node.id);
         const opFn = (() => {
-            switch (thisNode.controls.get('vecctl').getValue()) {
+            switch (thisNode.controls.get('value').getValue()) {
             case 'Add':
                 return vec3.add;
             case 'Subtract':
@@ -32,7 +32,7 @@ export class VectorOperationComponent extends Rete.Component {
             case 'Cross':
                 return vec3.cross;
             default:
-                throw new Error(`Invalid operation "${thisNode.controls.get('vecctl').getValue()}" selected in VectorOperationComponent node (id ${node.id})`);
+                throw new Error(`Invalid operation "${thisNode.controls.get('value').getValue()}" selected in VectorOperationComponent node (id ${node.id})`);
             }
         })();
 
@@ -40,14 +40,14 @@ export class VectorOperationComponent extends Rete.Component {
             return inputs[name].length ? inputs[name][0] : node.data[name];
         }
 
-        const vec1 = getInput('vec1');
-        const vec2 = getInput('vec2');
+        const vec1 = getInput('vector1');
+        const vec2 = getInput('vector2');
         if (_.isNil(vec1) || _.isNil(vec2)) {
             return;
         }
         const out = vec3.create();
         opFn(out, vec1, vec2); // TODO assign?
 
-        outputs['vec'] = out;
+        outputs['vector'] = out;
     }
 };

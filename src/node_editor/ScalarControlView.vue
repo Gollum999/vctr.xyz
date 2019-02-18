@@ -48,7 +48,7 @@ export default {
     width: 3em;
     min-width: 100%;
 }
-.add .md-input {
+.add---old .md-input {
     width: 3em;
     min-width: 100%;
 }

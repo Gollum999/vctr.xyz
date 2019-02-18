@@ -11,11 +11,11 @@ export class ScalarComponent extends Rete.Component {
     }
 
     builder(node) {
-        node.addInput(new Rete.Input('num', 'Value', sockets.scalar));
+        node.addInput(new Rete.Input('scalar', 'Value', sockets.scalar));
 
-        node.addControl(new ScalarControl(this.editor, 'numctl'));
+        node.addControl(new ScalarControl(this.editor, 'value'));
 
-        node.addOutput(new Rete.Output('num', 'Value', sockets.scalar));
+        node.addOutput(new Rete.Output('scalar', 'Value', sockets.scalar));
 
         return node;
     }
@@ -29,17 +29,17 @@ export class ScalarComponent extends Rete.Component {
 
         const editorNode = this.editor.nodes.find(n => n.id === node.id);
 
-        const input = getInput('num');
+        const input = getInput('scalar');
         if (_.isNil(input)) {
-            editorNode.controls.get('numctl').setReadOnly(false);
+            editorNode.controls.get('value').setReadOnly(false);
         } else {
-            node.data.numctl = input;
-            editorNode.controls.get('numctl').setValue(input);
-            editorNode.controls.get('numctl').setReadOnly(true);
+            node.data.value = input;
+            editorNode.controls.get('value').setValue(input);
+            editorNode.controls.get('value').setReadOnly(true);
         }
 
-        if (!_.isNil(node.data.numctl)) {
-            outputs['num'] = node.data.numctl;
+        if (!_.isNil(node.data.value)) {
+            outputs['scalar'] = node.data.value;
         }
     }
 }

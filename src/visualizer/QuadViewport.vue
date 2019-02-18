@@ -115,7 +115,7 @@ export default {
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
                 if (node.name === 'Vector') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
-                    this.vectors.push(new VectorView(node.data.vecctl, node.data.color)); // TODO need to figure out best practices for handling data in engine
+                    this.vectors.push(new VectorView(node.data.value, node.data.color)); // TODO need to figure out best practices for handling data in engine
                 }
             }
         });

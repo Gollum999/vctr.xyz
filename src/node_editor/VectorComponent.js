@@ -16,13 +16,13 @@ export class VectorComponent extends Rete.Component {
     }
 
     builder(node) {
-        node.addInput(new Rete.Input('vec', 'Value', sockets.vector));
+        node.addInput(new Rete.Input('vector', 'Value', sockets.vector));
 
         node.addControl(new VectorLabelControl(this.editor, 'label', -999));
-        node.addControl(new VectorControl(this.editor, 'vecctl', 1));
+        node.addControl(new VectorControl(this.editor, 'value', 1));
         node.addControl(new ColorControl(this.editor, 'color', 2));
 
-        node.addOutput(new Rete.Output('vec', 'Value', sockets.vector));
+        node.addOutput(new Rete.Output('vector', 'Value', sockets.vector));
 
         return node;
     }
@@ -44,17 +44,17 @@ export class VectorComponent extends Rete.Component {
 
         const editorNode = this.editor.nodes.find(n => n.id === node.id);
 
-        const input = getInput('vec');
+        const input = getInput('vector');
         if (_.isNil(input)) {
-            editorNode.controls.get('vecctl').setReadOnly(false);
+            editorNode.controls.get('value').setReadOnly(false);
         } else {
-            node.data.vecctl = vec3.clone(input); // Make a copy to avoid sharing the same object between nodes
-            editorNode.controls.get('vecctl').setValue(input);
-            editorNode.controls.get('vecctl').setReadOnly(true);
+            node.data.value = vec3.clone(input); // Make a copy to avoid sharing the same object between nodes
+            editorNode.controls.get('value').setValue(input);
+            editorNode.controls.get('value').setReadOnly(true);
         }
 
-        if (!_.isNil(node.data.vecctl)) {
-            outputs['vec'] = vec3.clone(node.data.vecctl); // Make a copy to avoid sharing the same object between nodes
+        if (!_.isNil(node.data.value)) {
+            outputs['vector'] = vec3.clone(node.data.value); // Make a copy to avoid sharing the same object between nodes
         }
     }
 };

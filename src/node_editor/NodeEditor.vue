@@ -58,10 +58,10 @@ export default {
             minZoom: 0.1,
             maxZoom: 3,
             components: {
-                'scalar':        new allComponents.ScalarComponent(),
-                'add':           new allComponents.AddComponent(),
-                'vec':           new allComponents.VectorComponent(),
-                'vec_operation': new allComponents.VectorOperationComponent(),
+                'scalar':          new allComponents.ScalarComponent(),
+                'vector':          new allComponents.VectorComponent(),
+                'basic_operation': new allComponents.VectorOperationComponent(),
+                'add_old':         new allComponents.AddComponent(),
             },
         };
     },
@@ -73,13 +73,13 @@ export default {
             var node = null;
             switch (nodeType) {
             case 'scalar':
-                node = await this.components['scalar'].createNode({'numctl': 0});
+                node = await this.components['scalar'].createNode({'value': 0});
                 break;
             case 'vector':
-                node = await this.components['vec'].createNode({'vecctl': vec3.fromValues(0, 0, 0)});
+                node = await this.components['vector'].createNode({'value': vec3.fromValues(0, 0, 0)});
                 break;
             case 'operation':
-                node = await this.components['vec_operation'].createNode();
+                node = await this.components['basic_operation'].createNode();
                 break;
             default:
                 throw new Error(`Cannot add node of type ${nodeType}`);
@@ -134,21 +134,21 @@ export default {
 
         async createDemoNodes() {
             const [in1, in2, out, vec, vec2, vecOp, vecOut] = await Promise.all([
-                this.components['scalar'].createNode({'numctl': 5}),
-                this.components['scalar'].createNode({'numctl': 4}),
-                this.components['add'].createNode(),
-                this.components['vec'].createNode({'vecctl': vec3.fromValues(3, 2, 1)}),
-                this.components['vec'].createNode({'vecctl': vec3.fromValues(2, 2, 2)}),
-                this.components['vec_operation'].createNode(),
-                this.components['vec'].createNode({'vecctl': vec3.fromValues(2, 2, 2)}),
+                this.components['scalar'].createNode({'value': 5}),
+                this.components['scalar'].createNode({'value': 4}),
+                this.components['add_old'].createNode(),
+                this.components['vector'].createNode({'value': vec3.fromValues(3, 2, 1), 'color': '#00FFFF'}),
+                this.components['vector'].createNode({'value': vec3.fromValues(2, 2, 2), 'color': '#00FFFF'}),
+                this.components['basic_operation'].createNode(),
+                this.components['vector'].createNode({'value': vec3.fromValues(2, 2, 2)}),
             ]);
-            in1.position = [20, 20];
-            in2.position = [20, 170];
+            in1.position = [20, 40];
+            in2.position = [20, 150];
             out.position = [180, 75];
-            vec.position = [320, 75];
-            vec2.position = [320, 230];
-            vecOp.position = [560, 75];
-            vecOut.position = [740, 75];
+            vec.position = [320, 40];
+            vec2.position = [320, 200];
+            vecOp.position = [590, 120];
+            vecOut.position = [820, 100];
 
             this.editor.addNode(in1);
             this.editor.addNode(in2);
@@ -158,11 +158,11 @@ export default {
             this.editor.addNode(vecOp);
             this.editor.addNode(vecOut);
 
-            this.editor.connect(in1.outputs.get('scalar'), out.inputs.get('num1'));
-            this.editor.connect(in2.outputs.get('scalar'), out.inputs.get('num2'));
-            this.editor.connect(vec.outputs.get('vec'), vecOp.inputs.get('vec1'));
-            this.editor.connect(vec2.outputs.get('vec'), vecOp.inputs.get('vec2'));
-            this.editor.connect(vecOp.outputs.get('vec'), vecOut.inputs.get('vec'));
+            this.editor.connect(in1.outputs.get('scalar'), out.inputs.get('scalar1'));
+            this.editor.connect(in2.outputs.get('scalar'), out.inputs.get('scalar2'));
+            this.editor.connect(vec.outputs.get('vector'), vecOp.inputs.get('vector1'));
+            this.editor.connect(vec2.outputs.get('vector'), vecOp.inputs.get('vector2'));
+            this.editor.connect(vecOp.outputs.get('vector'), vecOut.inputs.get('vector'));
         },
 
         async handleEngineProcess() {
