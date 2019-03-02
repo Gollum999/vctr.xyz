@@ -24,8 +24,8 @@
         <md-menu-content>
           <md-menu-item @click="addNode('operation-add')">Add</md-menu-item>
           <md-menu-item @click="addNode('operation-subtract')">Subtract</md-menu-item>
-          <md-menu-item disabled @click="addNode('operation-multiply')">Multiply</md-menu-item>
-          <md-menu-item disabled @click="addNode('operation-divide')">Divide</md-menu-item>
+          <md-menu-item @click="addNode('operation-multiply')">Multiply</md-menu-item>
+          <md-menu-item @click="addNode('operation-divide')">Divide</md-menu-item>
           <md-menu-item @click="addNode('operation-dot')">Dot Product</md-menu-item>
           <md-menu-item @click="addNode('operation-cross')">Cross Product</md-menu-item>
         </md-menu-content>

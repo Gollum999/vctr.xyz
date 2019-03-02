@@ -1,5 +1,7 @@
 * Operations to support
 ** Scalars
+ - -s?
+   - Could just use * -1
  - s + s
  - s - s
  - s * s
@@ -45,4 +47,48 @@
  - Sphere
  - Plane
 *** Branching or other control flow?
+* Operation types
+| Operation | Supported input types                                            | s in           | v in            | m in            |
+|-----------+------------------------------------------------------------------+----------------+-----------------+-----------------|
+| +         | (s, s) -> s, (v, v) -> v, (m, m) -> m                            | s -> s         | v -> v          | m -> m          |
+| -         | s -> s?, v -> v?, m -> m?, (s, s) -> s, (v, v) -> v, (m, m) -> m | s?, s -> s     | v?, v -> v      | m?, m -> m      |
+| *         | (s, s) -> s, (v, s) -> v, (s, v) -> v, (m, m) -> m, (v, m) -> v? | s -> s, v -> v | s -> v, m -> v* | m -> m, v -> v* |
+| /         | (s, s) -> s, (v, s) -> v, (s, v) -> v?                           | s -> s, v -> v | s -> v          |                 |
+| ^         | (s, s) -> s                                                      | s -> s         |                 |                 |
+| %         | (s, s) -> s                                                      | s -> s         |                 |                 |
+| .         | (v, v) -> s                                                      |                | v -> s          |                 |
+| x         | (v, v) -> v                                                      |                | v -> v          |                 |
+** +
+  IN                              OUT
+| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
+|-----------+---+---+---+---+---+-----------+---+---+---+---|
+| S         |   | - | - | s |   | S         | s | - | - |   |
+| V         | - |   | - | v |   | V         | - | v | - |   |
+| M         | - | - |   | m |   | M         | - | - | m |   |
+| A         | s | v | m |   |   | A         |   |   |   | a |
+** -
+  IN                              OUT
+| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
+|-----------+---+---+---+---+---+-----------+---+---+---+---|
+| S         |   | - | - | s |   | S         | s | - | - |   |
+| V         | - |   | - | v |   | V         | - | v | - |   |
+| M         | - | - |   | m |   | M         | - | - | m |   |
+| A         | s | v | m |   |   | A         |   |   |   | a |
+** *
+  IN                               OUT
+| LHS \ RHS | S | V | M | A  |   | LHS \ RHS | S | V | M  | A |
+|-----------+---+---+---+----+---+-----------+---+---+----+---|
+| S         |   |   |   | a  |   | S         | s | v | m  |   |
+| V         |   | - |   | sm |   | V         | v | - | v  | v |
+| M         |   | - |   | sm |   | M         | m | - | m  | m |
+| A         | a | s | a |    |   | A         |   | v | vm | a |
+** /
+  IN                              OUT
+| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
+|-----------+---+---+---+---+---+-----------+---+---+---+---|
+| S         |   |   |   | a |   | S         | s | v | m | a |
+| V         |   | - | - | s |   | V         | v | - | - | v |
+| M         |   | - | - | s |   | M         | m | - | - | m |
+| A         | a | s | s |   |   | A         | a | v | m | a |
 * 2D mode?
+* Undo/redo support
