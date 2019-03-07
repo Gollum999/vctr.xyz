@@ -297,8 +297,18 @@ export default {
       background: #ff4444
     &.matrix-value
       background: #44ffff
+    &.scalar-or-vector
+      background: #bb5d90 // TODO is there a more graceful way to have a "fallback" style?  media query?
+      background: linear-gradient(0deg, #7777dd 50%, #ff4444 50%)
+    &.scalar-or-matrix
+      background: #5dbbee
+      background: linear-gradient(0deg, #7777dd 50%, #44ffff 50%)
+    &.vector-or-matrix
+      background: #a1a1a1
+      background: linear-gradient(0deg, #ff4444 50%, #44ffff 50%)
     &.anything
       background: #aaaaaa
+      background: conic-gradient(#7777dd 120deg, #ff4444 120deg 240deg, #44ffff 240deg 360deg)
   .custom-icon
     svg
       position: absolute // TODO: necessary to get icon positioned properly in button

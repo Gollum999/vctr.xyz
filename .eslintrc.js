@@ -35,5 +35,6 @@ module.exports = {
     'indent': ['error', 4], // 4 space indentation
     'key-spacing': ['error', {'mode': 'minimum'}], // Allow extra spaces in object to align values
     'no-multi-spaces': ['error', { exceptions: { 'Property': true, 'ObjectExpression': true, 'SwitchCase': true, } }],
+    'standard/object-curly-even-spacing': 'off', // Allow inconsistent spacing in object literals for alignment
   }
 }

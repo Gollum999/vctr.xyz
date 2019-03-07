@@ -86,9 +86,33 @@
   IN                              OUT
 | LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
 |-----------+---+---+---+---+---+-----------+---+---+---+---|
-| S         |   |   |   | a |   | S         | s | v | m | a |
-| V         |   | - | - | s |   | V         | v | - | - | v |
-| M         |   | - | - | s |   | M         | m | - | - | m |
-| A         | a | s | s |   |   | A         | a | v | m | a |
+| S         |   | - | - | s |   | S         | s | - | - |   |
+| V         |   | - | - | s |   | V         | v | - | - |   |
+| M         |   | - | - | s |   | M         | m | - | - |   |
+| A         | a | - | - | s |   | A         | a | - | - |   |
 * 2D mode?
-* Undo/redo support
+* Misc node editor
+ - More operation types
+** Undo/redo support
+** Camera
+ - Recenter view on page load
+ - Recenter view try to fit all nodes
+ - Right click pan to match viewport?
+ - Left click box select?
+ - When adding nodes, add to center of view and only reposition if node too close to center
+
+** Nodes
+ - More render settings
+ - Togglable rendering
+ - Custom node titles
+   - Render node name in viewport?
+ - Random output colors
+ - Custom paste handler
+ - Slightly wider vector input (enough for 3 digits + decimal)
+ - Truncate input display values?
+ - Condense padding a bit more if possible
+** Node types
+ - Render scalar values somehow
+ - Render matrices?  grid w/ transform?
+*** Matrix support
+ - New matrix icon?
