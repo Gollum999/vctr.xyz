@@ -148,7 +148,6 @@ export default {
             const savedEditorJson = JSON.parse(window.localStorage.getItem('node_editor'));
 
             if (savedEditorJson) {
-                console.log('Loading node editor from local storage');
                 console.log(savedEditorJson);
                 const success = await this.editor.fromJSON(savedEditorJson);
                 if (!success) {
@@ -194,6 +193,23 @@ export default {
             this.editor.connect(vecOp.outputs.get('result'), vecOut.inputs.get('vector'));
         },
 
+        saveState() {
+            console.log('Saving editor state to browser-local storage');
+            window.localStorage.setItem('node_editor',                JSON.stringify(this.editor.toJSON()));
+            window.localStorage.setItem('node_editor_view_transform', JSON.stringify(this.editor.view.area.transform));
+        },
+
+        async loadState() {
+            console.log('Loading node editor from local storage');
+            this.loadNodes();
+
+            const viewTransform = JSON.parse(window.localStorage.getItem('node_editor_view_transform'));
+            if (viewTransform) {
+                this.editor.view.area.transform = viewTransform;
+                this.editor.view.area.update();
+            }
+        },
+
         async handleEngineProcess() {
             console.log('NodeEditor handleEngineProcess');
             console.log(this.editor.toJSON());
@@ -201,8 +217,7 @@ export default {
             await this.engine.process(this.editor.toJSON());
 
             // TODO should I save during more events?
-            console.log('Saving editor state to browser-local storage');
-            window.localStorage.setItem('node_editor', JSON.stringify(this.editor.toJSON()));
+            this.saveState();
 
             this.$emit('process', this.editor.toJSON());
             this.$root.$emit('node_engine_processed', this.editor.toJSON());
@@ -254,7 +269,7 @@ export default {
         //     console.warn(exc);
         // });
 
-        (async () => { this.loadNodes(); })();
+        (async () => { this.loadState(); })();
 
         this.editor.view.resize();
         this.editor.trigger('process');
