@@ -10,7 +10,7 @@
       <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector" @click="addNode('vector')">
         <md-icon class="custom-icon" md-src="/static/vector.svg" />
       </md-button>
-      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add matrix" @click="addNode('matrix')" disabled>
+      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add matrix" @click="addNode('matrix')">
         <md-icon class="custom-icon" md-src="/static/matrix.svg" />
       </md-button>
       <!-- TODO not sure why "auto" size seems truncated on the right (possibly doesn't take scroll bar width into account) -->
@@ -53,7 +53,7 @@ import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
-import { vec3 } from 'gl-matrix';
+import { vec3, mat4 } from 'gl-matrix';
 import contextMenu from 'vue-context-menu';
 import { EventBus } from '../EventBus';
 
@@ -74,6 +74,7 @@ export default {
             components: {
                 'scalar':             new allComponents.ScalarComponent(),
                 'vector':             new allComponents.VectorComponent(),
+                'matrix':             new allComponents.MatrixComponent(),
 
                 'operation-add':      new allComponents.BasicOperationComponent('ADD'),
                 'operation-subtract': new allComponents.BasicOperationComponent('SUBTRACT'),
@@ -97,6 +98,9 @@ export default {
                 break;
             case 'vector':
                 node = await this.components['vector'].createNode({'value': vec3.fromValues(0, 0, 0)});
+                break;
+            case 'matrix':
+                node = await this.components['matrix'].createNode({'value': mat4.create()});
                 break;
             case 'operation-add':
             case 'operation-subtract':
