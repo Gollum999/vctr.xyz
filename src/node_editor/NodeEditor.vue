@@ -57,6 +57,48 @@ import { vec3, mat4 } from 'gl-matrix';
 import contextMenu from 'vue-context-menu';
 import { EventBus } from '../EventBus';
 
+// TODO is there a library for this?
+class Rect {
+    constructor({top, left, right, bottom}) {
+        this.top = top;
+        this.left = left;
+        this.right = right;
+        this.bottom = bottom;
+    }
+
+    width() {
+        return this.right - this.left;
+    }
+
+    height() {
+        return this.bottom - this.top;
+    }
+
+    midpoint() {
+        return [this.left + (this.width() / 2), this.top + (this.height() / 2)];
+    }
+
+    grow(padding) {
+        this.top -= padding;
+        this.bottom += padding;
+        this.left -= padding;
+        this.right += padding;
+    }
+
+    union(other) {
+        return new Rect({
+            top: Math.min(this.top, other.top),
+            left: Math.min(this.left, other.left),
+            right: Math.max(this.right, other.right),
+            bottom: Math.max(this.bottom, other.bottom),
+        });
+    }
+}
+
+function clamp(num, min, max) {
+    return Math.min(Math.max(num, min), max);
+}
+
 export default {
     name: 'NodeEditor',
     components: {
@@ -132,7 +174,41 @@ export default {
         },
 
         recenterView() {
-            this.editor.view.area.transform = { k: 1, x: 0, y: 0 }; // TODO dynamic view sizing based on bounds of current nodes
+            let viewRect = null;
+            for (const [node, nodeView] of this.editor.view.nodes) {
+                // These values are in editor space, not screen space
+                const nodeRect = new Rect({
+                    top: node.position[1],
+                    left: node.position[0],
+                    right: node.position[0] + nodeView.el.offsetWidth,
+                    bottom: node.position[1] + nodeView.el.offsetHeight,
+                });
+                if (viewRect) {
+                    viewRect = viewRect.union(nodeRect);
+                } else {
+                    viewRect = nodeRect;
+                }
+            }
+            if (viewRect === null) {
+                return;
+            }
+            const padding = 30;
+            viewRect.grow(padding);
+
+            const [editorMidpointX, editorMidpointY] = viewRect.midpoint(); // In editor space, not screen space
+            const nodeEditorWidth = this.editor.view.container.parentElement.parentElement.clientWidth;
+            const nodeEditorHeight = this.editor.view.container.parentElement.parentElement.clientHeight;
+            const widthRatio = nodeEditorWidth / viewRect.width();
+            const heightRatio = nodeEditorHeight / viewRect.height();
+            const scale = clamp(Math.min(widthRatio, heightRatio), this.minZoom, this.maxZoom); // Determine how far we should zoom in/out to fit everything
+
+            // x/y here is in screen space
+            this.editor.view.area.transform = {
+                k: scale,
+                x: (nodeEditorWidth / 2) - (editorMidpointX * scale),
+                y: (nodeEditorHeight / 2) - (editorMidpointY * scale),
+            };
+            console.log('recenterView set view transform to:', this.editor.view.area.transform);
             this.editor.view.area.update();
         },
 
@@ -195,7 +271,7 @@ export default {
 
         saveState() {
             console.log('Saving editor state to browser-local storage');
-            window.localStorage.setItem('node_editor',                JSON.stringify(this.editor.toJSON()));
+            window.localStorage.setItem('node_editor', JSON.stringify(this.editor.toJSON()));
             window.localStorage.setItem('node_editor_view_transform', JSON.stringify(this.editor.view.area.transform));
         },
 
