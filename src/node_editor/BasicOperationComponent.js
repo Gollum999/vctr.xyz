@@ -437,7 +437,7 @@ const Operation = Object.freeze({
     CROSS:    CrossOperation,
 });
 
-export class VectorOperationComponent extends Rete.Component {
+export class BasicOperationComponent extends Rete.Component {
     constructor(opName) {
         // Note that the Rete engine does some node lookups by name, so each node type must have a unique name.
         // This is especially important in here where I give the component some state; if the name is shared anywhere it will look up
@@ -457,7 +457,7 @@ export class VectorOperationComponent extends Rete.Component {
     worker(engineNode, inputs, outputs) {
         const editorNode = this.editor.nodes.find(n => n.id === engineNode.id);
 
-        // console.log(`TEST VectorOperationComponent worker (${editorNode.name})`);
+        // console.log(`TEST BasicOperationComponent worker (${editorNode.name})`);
         // console.log(this.editor);
         // console.log(engineNode);
         // console.log(inputs);

@@ -1,11 +1,11 @@
 import { ScalarComponent } from './ScalarComponent';
 import { AddComponent } from './AddComponent';
 import { VectorComponent } from './VectorComponent';
-import { VectorOperationComponent } from './VectorOperationComponent';
+import { BasicOperationComponent } from './BasicOperationComponent';
 
 export default {
     ScalarComponent,
     AddComponent,
     VectorComponent,
-    VectorOperationComponent,
+    BasicOperationComponent,
 };

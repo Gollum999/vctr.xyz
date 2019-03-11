@@ -75,12 +75,12 @@ export default {
                 'scalar':             new allComponents.ScalarComponent(),
                 'vector':             new allComponents.VectorComponent(),
 
-                'operation-add':      new allComponents.VectorOperationComponent('ADD'),
-                'operation-subtract': new allComponents.VectorOperationComponent('SUBTRACT'),
-                'operation-multiply': new allComponents.VectorOperationComponent('MULTIPLY'),
-                'operation-divide':   new allComponents.VectorOperationComponent('DIVIDE'),
-                'operation-dot':      new allComponents.VectorOperationComponent('DOT'),
-                'operation-cross':    new allComponents.VectorOperationComponent('CROSS'),
+                'operation-add':      new allComponents.BasicOperationComponent('ADD'),
+                'operation-subtract': new allComponents.BasicOperationComponent('SUBTRACT'),
+                'operation-multiply': new allComponents.BasicOperationComponent('MULTIPLY'),
+                'operation-divide':   new allComponents.BasicOperationComponent('DIVIDE'),
+                'operation-dot':      new allComponents.BasicOperationComponent('DOT'),
+                'operation-cross':    new allComponents.BasicOperationComponent('CROSS'),
                 'add_old':            new allComponents.AddComponent(),
             },
         };
