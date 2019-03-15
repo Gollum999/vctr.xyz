@@ -107,7 +107,8 @@ export default {
     data() {
         return {
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
-            newNodePosition: [50, 50],
+            lastNodePosition: null,
+            newNodesShouldBeCentered: true,
             container: null,
             editor: null,
             engine: null,
@@ -156,15 +157,50 @@ export default {
                 throw new Error(`Cannot add node of type ${nodeType}`);
             }
 
-            node.position = this.newNodePosition.slice();
+            this.editor.addNode(node);
+
+            const nodeView = this.editor.view.nodes.get(node);
+
+            const editorX = this.editor.view.area.transform.x;
+            const editorY = this.editor.view.area.transform.y;
             const nodeEditorWidth = this.editor.view.container.parentElement.parentElement.clientWidth;
             const nodeEditorHeight = this.editor.view.container.parentElement.parentElement.clientHeight;
-            const nodeOffset = 20;
-            const wrapMargin = 50;
-            this.newNodePosition[0] = (this.newNodePosition[0] + nodeOffset) % (nodeEditorWidth - wrapMargin);
-            this.newNodePosition[1] = (this.newNodePosition[1] + nodeOffset) % (nodeEditorHeight - wrapMargin);
+            const editorScale = this.editor.view.area.transform.k;
+            const nodeWidth = nodeView.el.offsetWidth;
+            const nodeHeight = nodeView.el.offsetHeight;
+            if (this.newNodesShouldBeCentered) {
+                const nodeEditorCenterX = nodeEditorWidth / 2;
+                const nodeEditorCenterY = nodeEditorHeight / 2;
+                const desiredPosX = ((nodeEditorCenterX - editorX) / editorScale) - nodeWidth / 2;
+                const desiredPosY = ((nodeEditorCenterY - editorY) / editorScale) - nodeHeight / 2;
+                node.position = [desiredPosX, desiredPosY];
+            } else {
+                const nodeOffset = 30;
+                const wrapMargin = 30;
+                const editorViewRect = new Rect({
+                    top: -editorY / editorScale,
+                    left: -editorX / editorScale,
+                    right: (nodeEditorWidth - editorX) / editorScale,
+                    bottom: (nodeEditorHeight - editorY) / editorScale,
+                });
+                editorViewRect.grow(-wrapMargin);
+                editorViewRect.right -= nodeWidth;
+                editorViewRect.bottom -= nodeHeight;
+                const xRelativeToView = this.lastNodePosition[0] + nodeOffset - editorViewRect.left;
+                const yRelativeToView = this.lastNodePosition[1] + nodeOffset - editorViewRect.top;
+                const desiredPosX = editorViewRect.left + xRelativeToView % editorViewRect.width();
+                const desiredPosY = editorViewRect.top + yRelativeToView % editorViewRect.height();
+                node.position = [desiredPosX, desiredPosY];
+            }
+            console.log('Added node at position', node.position);
 
-            this.editor.addNode(node);
+            // Normally addNode triggers this update, but since I updated the position *after* adding the node, I need to do it manually
+            // TODO: If this causes any performance issues, I can cache node sizes per type so we only need to manually update the first time
+            //       a certain type is created
+            nodeView.update();
+
+            this.newNodesShouldBeCentered = false;
+            this.lastNodePosition = node.position.slice();
         },
 
         deleteNode() {
@@ -331,6 +367,10 @@ export default {
 
         this.editor.on('zoom', ({transform, zoom, source}) => {
             return (this.minZoom <= zoom && zoom <= this.maxZoom);
+        });
+
+        this.editor.on('translated zoomed', () => {
+            this.newNodesShouldBeCentered = true;
         });
 
         this.engine.on('error', ({message, data}) => {
