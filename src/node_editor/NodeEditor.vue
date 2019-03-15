@@ -158,9 +158,21 @@ export default {
             }
 
             this.editor.addNode(node);
-
             const nodeView = this.editor.view.nodes.get(node);
 
+            node.position = this.getNewNodePos(node, nodeView);
+            console.log('Added node at position', node.position);
+
+            // Normally addNode triggers this update, but since I updated the position *after* adding the node, I need to do it manually
+            // TODO: If this causes any performance issues, I can cache node sizes per type so we only need to manually update the first time
+            //       a certain type is created
+            nodeView.update();
+
+            this.newNodesShouldBeCentered = false;
+            this.lastNodePosition = node.position.slice();
+        },
+
+        getNewNodePos(node, nodeView) {
             const editorX = this.editor.view.area.transform.x;
             const editorY = this.editor.view.area.transform.y;
             const nodeEditorWidth = this.editor.view.container.parentElement.parentElement.clientWidth;
@@ -173,7 +185,7 @@ export default {
                 const nodeEditorCenterY = nodeEditorHeight / 2;
                 const desiredPosX = ((nodeEditorCenterX - editorX) / editorScale) - nodeWidth / 2;
                 const desiredPosY = ((nodeEditorCenterY - editorY) / editorScale) - nodeHeight / 2;
-                node.position = [desiredPosX, desiredPosY];
+                return [desiredPosX, desiredPosY];
             } else {
                 const nodeOffset = 30;
                 const wrapMargin = 30;
@@ -190,17 +202,8 @@ export default {
                 const yRelativeToView = this.lastNodePosition[1] + nodeOffset - editorViewRect.top;
                 const desiredPosX = editorViewRect.left + xRelativeToView % editorViewRect.width();
                 const desiredPosY = editorViewRect.top + yRelativeToView % editorViewRect.height();
-                node.position = [desiredPosX, desiredPosY];
+                return [desiredPosX, desiredPosY];
             }
-            console.log('Added node at position', node.position);
-
-            // Normally addNode triggers this update, but since I updated the position *after* adding the node, I need to do it manually
-            // TODO: If this causes any performance issues, I can cache node sizes per type so we only need to manually update the first time
-            //       a certain type is created
-            nodeView.update();
-
-            this.newNodesShouldBeCentered = false;
-            this.lastNodePosition = node.position.slice();
         },
 
         deleteNode() {
