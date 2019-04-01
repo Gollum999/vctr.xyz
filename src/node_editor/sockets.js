@@ -37,7 +37,6 @@ sockets.matrix.combineWith(sockets.vectorOrMatrix);
 sockets.vectorOrMatrix.combineWith(sockets.vector);
 sockets.vectorOrMatrix.combineWith(sockets.matrix);
 
-// TODO might make sense to make this unidirectional, so I don't have to remove connections from dynamic outputs if the types become incompatible
 sockets.scalar.combineWith(sockets.anything);
 sockets.vector.combineWith(sockets.anything);
 sockets.matrix.combineWith(sockets.anything);

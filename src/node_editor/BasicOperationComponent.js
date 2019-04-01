@@ -6,6 +6,7 @@ import { vec3 } from 'gl-matrix';
 
 const invalid = 'INVALID'; // Sentinel indicating that the specified combination should never happen (raise an error if it does)
 const ignore = 'IGNORE'; // Sentinel indicating that no changes need to be made
+// TODO just make all of these sets for consistency
 const s = Object.freeze({
     scalar:         ['scalar'],
     vector:         ['vector'],
@@ -13,21 +14,25 @@ const s = Object.freeze({
     scalarOrVector: ['scalar', 'vector'],
     scalarOrMatrix: ['scalar', 'matrix'],
     vectorOrMatrix: ['vector', 'matrix'],
-    anything:       ['anything'],
+    anything:       ['scalar', 'vector', 'matrix'],
     invalid:        [invalid],
     ignore:         [ignore],
 });
 
-// function isSubset(maybeSubset, maybeSuperset) {
-//     const superset = new Set(maybeSuperset);
-//     return Array.from(maybeSubset).every(val => superset.has(val));
-// }
+// Is x a subset of y?
+function isSubset(x, y) {
+    return x.every(val => {
+        return y.has(val);
+    });
+}
 
+// Do x and y intersect?
 function intersects(x, y) {
     const ySet = new Set(y);
     return Array.from(x).some(val => ySet.has(val));
 }
 
+// What are the common elements between x and y?
 function intersection(x, y) {
     return new Set([...x].filter(val => y.has(val)));
 }
@@ -35,9 +40,7 @@ function intersection(x, y) {
 function socketTypeListToSocketName(typeList) {
     // Ew.
     typeList = new Set(typeList); // In case input is an array
-    if (typeList.has('anything')) {
-        return 'anything';
-    } else if (typeList.size === 3) {
+    if (typeList.size === 3) {
         console.assert(typeList.has('scalar') &&
                        typeList.has('vector') &&
                        typeList.has('matrix'));
@@ -58,7 +61,7 @@ function socketTypeListToSocketName(typeList) {
     throw new Error(`Could not determine socket name from list "${JSON.stringify(typeList)}"`);
 }
 
-// TODO I'm sure there is a way to avoid this
+// TODO There should be a way to avoid this...
 function getSocketTypes(socket) {
     switch (socket.name) {
     case 'Scalar value':     return s.scalar;
@@ -92,7 +95,6 @@ function updateIoType(io, socketTypeNameOrList) {
     // console.log('TEST new io:');
     // console.log(io);
 
-    // TODO how much am I breaking by changing socket type like this?  need to reestablish connections or anything?
     io.node.update(); // TODO may want to pull this out to worker() to only do once for performance
     // console.log('TEST updateIoType END');
 }
@@ -100,113 +102,138 @@ function updateIoType(io, socketTypeNameOrList) {
 class BaseOperation {
     static title = null;
     static symbol = null;
-    static defaultLhsSocket = 'anything';
-    static defaultRhsSocket = 'anything';
-    static defaultOutputSocket = 'anything';
+    // TODO these should be "allowed" instead of "default"; when updating types, intersect with this, and remove connection if result is empty
+    static defaultLhsSockets = s.anything;
+    static defaultRhsSockets = s.anything;
+    static defaultOutputSockets = s.anything;
 
     static getOutputName() {
         return `A ${this.symbol} B`;
     }
 
     static setupSockets(node) {
-        node.addInput(new Rete.Input('lhs', 'A', sockets[this.defaultLhsSocket]));
-        node.addInput(new Rete.Input('rhs', 'B', sockets[this.defaultRhsSocket]));
-        node.addOutput(new Rete.Output('result', this.getOutputName(), sockets[this.defaultOutputSocket]));
+        node.addInput(new Rete.Input('lhs', 'A', sockets[socketTypeListToSocketName(this.defaultLhsSockets)]));
+        node.addInput(new Rete.Input('rhs', 'B', sockets[socketTypeListToSocketName(this.defaultRhsSockets)]));
+        node.addOutput(new Rete.Output('result', this.getOutputName(), sockets[socketTypeListToSocketName(this.defaultOutputSockets)]));
     }
 
-    static updateSocketTypesFromInputs(editorNode, lhsInputTypes, rhsInputTypes) {
-        // console.log(`TEST updateSocketTypesFromInputs ${editorNode.name} LHS "${lhsInputTypes}" RHS "${rhsInputTypes}"`);
-        this._updateSocketTypeFromInput(editorNode.inputs.get('lhs'), lhsInputTypes);
-        this._updateSocketTypeFromInput(editorNode.inputs.get('rhs'), rhsInputTypes);
-    }
-
-    // TODO once again, the 'anything' type is causing problems...
-    static expandAnything(socketTypes) {
-        if (_.isEqual(socketTypes, ['anything'])) {
-            return new Set(['scalar', 'vector', 'matrix']);
+    static getInputTypes(editorNode, name) {
+        console.log(`TEST getInputTypes ${name}`);
+        const input = editorNode.inputs.get(name);
+        // console.log(input);
+        console.assert(input.connections.length <= 1);
+        if (_.isEmpty(input.connections)) {
+            return null; // TODO probably better to return empty list?
         } else {
-            return new Set(socketTypes);
+            return getSocketTypes(input.connections[0].output.socket);
         }
     }
 
+    static updateSocketTypesFromInputs(editor, editorNode) {
+        console.log(`TEST updateSocketTypesFromInputs ${editorNode.name}"`);
+        const lhs = editorNode.inputs.get('lhs');
+        const rhs = editorNode.inputs.get('rhs');
+
+        const lhsInputTypes = this.getInputTypes(editorNode, 'lhs');
+        this._updateSocketTypeFromInput(lhs, lhsInputTypes);
+        this._updateSocketTypeForOperationCompatibility(rhs, lhs, this.lhsToRhsTypeMap);
+
+        // Remove the RHS connection if LHS type updates have made RHS incompatible
+        // (LHS should never be incompatible since it is the first to update from input)
+        this.removeInputConnectionsIfIncompatible(editor, rhs);
+
+        const rhsInputTypes = this.getInputTypes(editorNode, 'rhs');
+        this._updateSocketTypeFromInput(rhs, rhsInputTypes); // TODO need to evaluate this NOW in case connection was removed
+        this._updateSocketTypeForOperationCompatibility(lhs, rhs, this.rhsToLhsTypeMap);
+        /* this.removeInputConnectionsIfIncompatible(editor, lhs); // TODO should this go above _updateSocketTypeFromInput(lhs)? */
+    }
+
     static _updateSocketTypeFromInput(input, inputTypes) {
-        const defaultSocketType = {
-            'lhs': this.defaultLhsSocket,
-            'rhs': this.defaultRhsSocket,
+        console.log(`TEST _updateSocketTypeFromInput ${input.node.name} "${inputTypes}"`);
+        const defaultSocketsTypes = {
+            'lhs': this.defaultLhsSockets,
+            'rhs': this.defaultRhsSockets,
         }[input.key]; // TODO this is pretty gross, clean up
         if (_.isNil(inputTypes)) { // TODO allowing this to be null is a bit annoying
-            // console.log(`TEST inputTypes is null, setting ${input.node.name} socket type to "anything"`);
-            updateIoType(input, defaultSocketType);
-            // inputTypes = sockets.anything; // TODO why did I do this originally?
+            updateIoType(input, defaultSocketsTypes);
         } else if (!_.isEqual(inputTypes, getSocketTypes(input.socket))) {
-            // console.log(`TEST updating ${input.node.name} socket type from "${getSocketTypes(input.socket)}" to "${inputTypes}"`);
-            const newTypes = intersection(this.expandAnything(inputTypes), this.expandAnything([defaultSocketType]));
-            // console.log(`TEST newTypes:`);
+            console.log(`TEST updating ${input.node.name} socket type from "${getSocketTypes(input.socket)}" to "${inputTypes}"`);
+            console.log('TEST defaultSocketsTypes:', defaultSocketsTypes);
+            const newTypes = intersection(new Set(inputTypes), new Set(defaultSocketsTypes));
+            console.log('TEST newTypes:', newTypes);
             // TODO I am so inconsistent with which values are strings and which are arrays/sets...
-            // console.log(this.expandAnything(inputTypes), this.expandAnything([defaultSocketType]), newTypes);
             if (!_.isEmpty(newTypes)) {
                 updateIoType(input, newTypes);
             }
         }
     }
 
-    // TODO better to pass in just the node/sockets?
-    static updateSocketTypesForOperationCompatibility(editorNode, lhsTypes, rhsTypes) {
-        // console.log(`TEST updateSocketTypesForOperationCompatibility ${editorNode.name} LHS "${lhsTypes}" RHS "${rhsTypes}"`);
-        if (!this.lhsToRhsTypeMap || !this.rhsToLhsTypeMap) {
-            // console.log(`TEST an input type map is null, returning early (${editorNode.name} ${lhsTypes} ${rhsTypes})`);
-            // console.log(this.lhsToRhsTypeMap);
-            // console.log(this.rhsToLhsTypeMap);
+    static _updateSocketTypeForOperationCompatibility(input, oppositeInput, oppositeTypeToThisTypeMap) {
+        if (!oppositeTypeToThisTypeMap) {
+            // console.log('oppositeTypeToThisTypeMap was null', this.oppositeTypeToThisTypeMap);
             return;
         }
+        // console.log(`TEST _updateSocketTypeForOperationCompatibility ${input.node.name} ${input.name} (opposite ${oppositeInput.name})"`);
 
-        const expectedLhsTypes = new Set();
-        const expectedRhsTypes = new Set();
-        for (const rhsType of rhsTypes) {
+        let socketTypes = getSocketTypes(input.socket);
+        let oppositeSocketTypes = getSocketTypes(oppositeInput.socket);
+        const compatibleTypes = new Set();
+        for (const socketType of oppositeSocketTypes) {
             // TODO this doesn't feel quite right... like it might choose socket types that are "too loose"
             // TODO maybe I need to explicitly list type mappings for hybrid types instead of auto-aggregating here
-            if (this.rhsToLhsTypeMap[rhsType]) {
-                for (const lhsType of this.rhsToLhsTypeMap[rhsType]) {
-                    expectedLhsTypes.add(lhsType);
+            if (oppositeTypeToThisTypeMap[socketType]) {
+                // TODO variable names are hard
+                for (const otherSideCompatibleType of oppositeTypeToThisTypeMap[socketType]) {
+                    compatibleTypes.add(otherSideCompatibleType);
                 }
             }
         }
-        for (const lhsType of lhsTypes) {
-            if (this.lhsToRhsTypeMap[lhsType]) {
-                for (const rhsType of this.lhsToRhsTypeMap[lhsType]) {
-                    expectedRhsTypes.add(rhsType);
-                }
-            }
-        }
-        this._updateSocketTypeForOperationCompatibility(editorNode.inputs.get('lhs'), lhsTypes, expectedLhsTypes);
-        this._updateSocketTypeForOperationCompatibility(editorNode.inputs.get('rhs'), rhsTypes, expectedRhsTypes);
-    }
 
-    static _updateSocketTypeForOperationCompatibility(socket, socketTypes, expectedSocketTypes) {
-        // console.log(`TEST _updateSocketTypeForOperationCompatibility ${socket.node.name} ${socket.name}, "${socketTypes}" expecting "${JSON.stringify(expectedSocketTypes)}"`);
-
-        // TODO this assumes that only one input can change per update, otherwise I will need to do something smarter based on which conn was last added
-        // TODO   maybe on connection created, check if still compatible, and if not, remove old one
+        // TODO this assumes that only one input can change per update, which is not always true when there are cascading type updates
+        // TODO I might need to do something smarter based on which conn was last added, or maybe remove bad connections while processing inputs?
         // TODO what if I have one type connected, and then switch to a new type that is incompatible with sibling type?
+        //        this is fine as long as the action of switching is actually disconnect -> connect
         // TODO what about "hybrid" socket types?  probably need to do something similar to updateOutputSocketTypes
-        if (!_.isEmpty(expectedSocketTypes)) {
+        if (!_.isEmpty(compatibleTypes)) {
             // TODO this should check whether or not an input is connected, don't assume 'anything' means no connections
-            // console.log(socketTypes);
-            // console.log(expectedSocketTypes);
+            console.log(`_updateSocketTypeForOperationCompatibility ${input.node.name} ${input.name}`, socketTypes, compatibleTypes);
             // console.log(new Set(['anything']));
-            // console.log(`${JSON.stringify(socketTypes)} ${JSON.stringify(expectedSocketTypes)} ${JSON.stringify(new Set(['anything']))}`);
+            // console.log(`${JSON.stringify(socketTypes)} ${JSON.stringify(compatibleTypes)} ${JSON.stringify(new Set(['anything']))}`);
             if (!_.isEqual(new Set(socketTypes), new Set(s.anything))) {
                 // Sanity check that previous socket type updates kept everything compatible
-                // console.log('TEST socketTypes !== anything, verifying types are still compatible');
-                console.assert(socketTypes.every((socketType) => {
-                    return expectedSocketTypes.has(socketType) || expectedSocketTypes.has('anything') || socketType === 'anything';
-                }), socketTypes, expectedSocketTypes);
-            } else if (!_.isEqual(socketTypes, expectedSocketTypes)) {
-                // console.log(`TEST _updateSocketTypeForOperationCompatibility updating "${socket.node.name}" ${socket.name} from "${socketTypes}" to "${JSON.stringify(expectedSocketTypes)}"`);
-                updateIoType(socket, expectedSocketTypes);
+                console.log('TEST socketTypes !== anything, verifying types are still compatible');
+                console.assert(isSubset(socketTypes, compatibleTypes), socketTypes, compatibleTypes);
+            } else if (!_.isEqual(socketTypes, compatibleTypes)) {
+                console.log(`TEST _updateSocketTypeForOperationCompatibility updating "${input.node.name}" ${input.name} from "${socketTypes}" to "${JSON.stringify(compatibleTypes)}"`);
+                updateIoType(input, compatibleTypes);
             }
         } else {
-            console.log('expectedSocketTypes was empty'); // TODO will this happen often?
+            console.log('compatibleTypes was empty'); // TODO will this happen often?
+        }
+    }
+
+    static removeInputConnectionsIfIncompatible(editor, input) {
+        this._removeIoConnectionsIfIncompatible(editor, input, true);
+    }
+
+    static removeOutputConnectionsIfIncompatible(editor, output) {
+        this._removeIoConnectionsIfIncompatible(editor, output, false);
+    }
+
+    static _removeIoConnectionsIfIncompatible(editor, io, isInput) {
+        console.log('TEST _removeIoConnectionsIfIncompatible io:', io);
+        const socketTypes = getSocketTypes(io.socket);
+        if (!_.isEmpty(io.connections)) {
+            for (const connection of io.connections) {
+                const typesFromInput = getSocketTypes(isInput ? connection.output.socket : connection.input.socket);
+                console.log('connection:', connection);
+                console.log('typesFromInput:', typesFromInput, 'socketTypes:', socketTypes);
+                if (!intersects(socketTypes, typesFromInput)) {
+                    console.log(`TEST ${isInput ? 'input' : 'output'} connection incompatible, removing`);
+                    console.log(socketTypes, typesFromInput, connection);
+                    editor.removeConnection(connection); // TODO dangerous to call this while iterating over connections?
+                }
+            }
         }
     }
 
@@ -216,31 +243,21 @@ class BaseOperation {
             return;
         }
 
-        // console.log(`TEST updateOutputSocketTypes ${editorNode.name}`);
+        console.log(`TEST updateOutputSocketTypes ${editorNode.name}`);
         const expectedOutputTypes = this.getExpectedOutputTypes(lhsTypes, rhsTypes);
-        // console.log(`TEST updateOutputSocketTypes expectedOutputTypes = ${JSON.stringify(expectedOutputTypes)}`);
+        console.log(`TEST updateOutputSocketTypes expectedOutputTypes = ${JSON.stringify(expectedOutputTypes)}`);
         if (expectedOutputTypes.has(invalid)) {
             throw new Error(`Cannot update output socket for "${editorNode.name}", input combination ("${lhsTypes}" and "${rhsTypes}") is invalid`);
         } else if (_.isEqual(expectedOutputTypes, new Set(s.ignore))) {
             console.log(`TEST updateOutputSocketTypes expected output for "${editorNode.name}" is 'ignore', skipping (from "${lhsTypes}" "${rhsTypes}")`);
             return;
         }
-        // console.log(`TEST updateOutputSocketTypes updating output for "${editorNode.name}" to "${JSON.stringify(expectedOutputTypes)}" (from "${lhsTypes}" "${rhsTypes}")`);
-        updateIoType(editorNode.outputs.get('result'), expectedOutputTypes); // TODO can check if update required
+        console.log(`TEST updateOutputSocketTypes updating output for "${editorNode.name}" to "${JSON.stringify(expectedOutputTypes)}" (from "${lhsTypes}" "${rhsTypes}")`);
+        const output = editorNode.outputs.get('result');
+        updateIoType(output, expectedOutputTypes); // TODO can check if update required
 
         // If this output changed to a type that is no longer compatible with some of its connections, remove those connections
-        const output = editorNode.outputs.get('result');
-        // console.log(output);
-        if (!_.isEmpty(output.connections)) {
-            for (const connection of editorNode.outputs.get('result').connections) {
-                const outputTypes = getSocketTypes(connection.input.socket);
-                if (!intersects(expectedOutputTypes, outputTypes) && !expectedOutputTypes.has('anything') && !outputTypes.includes('anything')) { // TODO still not perfect, but should be fine for now
-                    // console.log(`TEST output connection incompatible, removing`);
-                    // console.log(expectedOutputTypes, outputTypes, connection);
-                    editor.removeConnection(connection); // TODO dangerous to call this while iterating over connections?
-                }
-            }
-        }
+        this.removeOutputConnectionsIfIncompatible(editor, output);
     }
 
     static getExpectedOutputTypes(lhsTypeList, rhsTypeList) {
@@ -249,9 +266,7 @@ class BaseOperation {
         for (const lhs of lhsTypeList) {
             for (const rhs of rhsTypeList) {
                 // console.log(`TEST getExpectedOutputTypes lhs "${lhs}" rhs "${rhs}"`);
-                const temp = this.inputToOutputTypeMap[lhs];
-                // console.log(temp);
-                const expectedOutputTypeList = temp[rhs];
+                const expectedOutputTypeList = this.inputToOutputTypeMap[lhs][rhs];
                 // console.log(`TEST getExpectedOutputTypes expected output type ${expectedOutputTypeList} from "${lhs}" "${rhs}"`);
                 for (const t of expectedOutputTypeList) {
                     // console.log(`TEST getExpectedOutputTypes Adding output type ${t} from "${lhs}" "${rhs}"`);
@@ -261,8 +276,10 @@ class BaseOperation {
         }
 
         // console.log(allExpectedTypes);
-        if (invalid in allExpectedTypes) {
-            throw new Error(`Invalid type combination ${allExpectedTypes}`);
+        if (_.isEqual(allExpectedTypes, new Set(s.invalid))) {
+            throw new Error(`Invalid type combination ${JSON.stringify(allExpectedTypes)} (from "${lhsTypeList}" "${rhsTypeList}")`);
+        } else {
+            allExpectedTypes.delete(invalid);
         }
         if (_.isEqual(allExpectedTypes, new Set(s.ignore))) {
             return new Set(s.ignore);
@@ -280,14 +297,13 @@ class AddOperation extends BaseOperation {
     static symbol = '+';
 
     // Output socket types must always be in sync
-    static lhsToRhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix, 'anything': s.anything };
-    static rhsToLhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix, 'anything': s.anything };
+    static lhsToRhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix };
+    static rhsToLhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix };
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,  'vector': s.invalid, 'matrix': s.invalid, 'anything': s.ignore   },
-        'vector':   { 'scalar': s.invalid, 'vector': s.vector,  'matrix': s.invalid, 'anything': s.ignore   },
-        'matrix':   { 'scalar': s.invalid, 'vector': s.invalid, 'matrix': s.matrix,  'anything': s.ignore   },
-        'anything': { 'scalar': s.ignore,  'vector': s.ignore,  'matrix': s.ignore,  'anything': s.anything },
+        'scalar':   { 'scalar': s.scalar,  'vector': s.invalid, 'matrix': s.invalid },
+        'vector':   { 'scalar': s.invalid, 'vector': s.vector,  'matrix': s.invalid },
+        'matrix':   { 'scalar': s.invalid, 'vector': s.invalid, 'matrix': s.matrix  },
     };
 
     static calculate(lhs, rhs) {
@@ -309,14 +325,13 @@ class SubtractOperation extends BaseOperation {
     static symbol = '-';
 
     // Input socket types must always be in sync
-    static lhsToRhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix, 'anything': s.anything };
-    static rhsToLhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix, 'anything': s.anything };
+    static lhsToRhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix };
+    static rhsToLhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix };
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,  'vector': s.invalid, 'matrix': s.invalid, 'anything': s.ignore   },
-        'vector':   { 'scalar': s.invalid, 'vector': s.vector,  'matrix': s.invalid, 'anything': s.ignore   },
-        'matrix':   { 'scalar': s.invalid, 'vector': s.invalid, 'matrix': s.matrix,  'anything': s.ignore   },
-        'anything': { 'scalar': s.ignore,  'vector': s.ignore,  'matrix': s.ignore,  'anything': s.anything },
+        'scalar':   { 'scalar': s.scalar,  'vector': s.invalid, 'matrix': s.invalid },
+        'vector':   { 'scalar': s.invalid, 'vector': s.vector,  'matrix': s.invalid },
+        'matrix':   { 'scalar': s.invalid, 'vector': s.invalid, 'matrix': s.matrix  },
     };
 
     static calculate(lhs, rhs) {
@@ -338,17 +353,13 @@ class MultiplyOperation extends BaseOperation {
     static title = 'Multiply';
     static symbol = '*';
 
-    // TODO I think 'anything' needs to become ['scalar', 'vector', 'matrix']... but then I can't use it as key below...
-    // TODO   Though I think I can derive the values for 'anything' from the basic types
-    // TODO just make all of these sets for consistency
     static lhsToRhsTypeMap = { 'scalar': s.anything, 'vector': s.scalarOrMatrix, 'matrix': s.scalarOrMatrix };
     static rhsToLhsTypeMap = { 'scalar': s.anything, 'vector': s.scalar,         'matrix': s.anything       };
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,   'vector': s.vector,  'matrix': s.matrix,         'anything': s.ignore   },
-        'vector':   { 'scalar': s.vector,   'vector': s.invalid, 'matrix': s.vector,         'anything': s.vector   },
-        'matrix':   { 'scalar': s.matrix,   'vector': s.invalid, 'matrix': s.matrix,         'anything': s.matrix   },
-        'anything': { 'scalar': s.anything, 'vector': s.vector,  'matrix': s.vectorOrMatrix, 'anything': s.anything },
+        'scalar':   { 'scalar': s.scalar,   'vector': s.vector,  'matrix': s.matrix },
+        'vector':   { 'scalar': s.vector,   'vector': s.invalid, 'matrix': s.vector },
+        'matrix':   { 'scalar': s.matrix,   'vector': s.invalid, 'matrix': s.matrix },
     };
 
     static calculate(lhs, rhs) {
@@ -367,19 +378,18 @@ class MultiplyOperation extends BaseOperation {
 class DivideOperation extends BaseOperation {
     static title = 'Divide';
     static symbol = '/';
-    static defaultLhsSocket = 'anything';
-    static defaultRhsSocket = 'scalar';
-    static defaultOutputSocket = 'anything';
+    static defaultLhsSockets = s.anything;
+    static defaultRhsSockets = s.scalar;
+    static defaultOutputSockets = s.anything;
 
     // RHS is static
     static lhsToRhsTypeMap = null;
     static rhsToLhsTypeMap = null;
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,   'vector': s.invalid, 'matrix': s.invalid, 'anything': s.ignore },
-        'vector':   { 'scalar': s.vector,   'vector': s.invalid, 'matrix': s.invalid, 'anything': s.ignore },
-        'matrix':   { 'scalar': s.matrix,   'vector': s.invalid, 'matrix': s.invalid, 'anything': s.ignore },
-        'anything': { 'scalar': s.anything, 'vector': s.invalid, 'matrix': s.invalid, 'anything': s.ignore },
+        'scalar':   { 'scalar': s.scalar,   'vector': s.invalid, 'matrix': s.invalid },
+        'vector':   { 'scalar': s.vector,   'vector': s.invalid, 'matrix': s.invalid },
+        'matrix':   { 'scalar': s.matrix,   'vector': s.invalid, 'matrix': s.invalid },
     };
 
     static calculate(lhs, rhs) {
@@ -396,9 +406,9 @@ class DivideOperation extends BaseOperation {
 class DotOperation extends BaseOperation {
     static title = 'Dot Product';
     static symbol = '·';
-    static defaultLhsSocket = 'vector';
-    static defaultRhsSocket = 'vector';
-    static defaultOutputSocket = 'scalar';
+    static defaultLhsSockets = s.vector;
+    static defaultRhsSockets = s.vector;
+    static defaultOutputSockets = s.scalar;
 
     // Socket types are static
     static lhsToRhsTypeMap = null;
@@ -413,9 +423,9 @@ class DotOperation extends BaseOperation {
 class CrossOperation extends BaseOperation {
     static title = 'Cross Product';
     static symbol = '×';
-    static defaultLhsSocket = 'vector';
-    static defaultRhsSocket = 'vector';
-    static defaultOutputSocket = 'vector';
+    static defaultLhsSockets = s.vector;
+    static defaultRhsSockets = s.vector;
+    static defaultOutputSockets = s.vector;
 
     // Socket types are static
     static lhsToRhsTypeMap = null;
@@ -466,18 +476,6 @@ export class BasicOperationComponent extends Rete.Component {
         // console.log(editorNode.inputs);
         // console.log(editorNode.outputs);
 
-        function getInputTypes(name) {
-            // console.log(`TEST getInputTypes ${name}`);
-            const input = editorNode.inputs.get(name);
-            // console.log(input);
-            console.assert(input.connections.length <= 1);
-            if (_.isEmpty(input.connections)) {
-                return null; // TODO probably better to return empty list?
-            } else {
-                return getSocketTypes(input.connections[0].output.socket);
-            }
-        }
-
         const operation = Operation[this.opName];
         const inputArray = Array.from(editorNode.inputs);
         // console.log(inputArray);
@@ -508,20 +506,18 @@ export class BasicOperationComponent extends Rete.Component {
         const needsUpdateFromInputs = anyConnectionEmpty || anySocketTypeMismatch;
         if (needsUpdateFromInputs) {
             // First, update each input socket based on the type connected to it
-            const lhsInputTypes = getInputTypes('lhs');
-            const rhsInputTypes = getInputTypes('rhs');
-            // console.log(`TEST worker updating socket types ${editorNode.name}, ${lhsInputTypes} ${rhsInputTypes}`);
-            operation.updateSocketTypesFromInputs(editorNode, lhsInputTypes, rhsInputTypes);
+            operation.updateSocketTypesFromInputs(this.editor, editorNode);
         }
 
         // Then update "sibling" socket types depending on types accepted for the current operation
         // TODO do a check here like with "needsUpdateFromInputs"?
-        let lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket);
-        let rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
+        /* let lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket); */
+        /* let rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket); */
         // console.log(`TEST type BEFORE updateSocketTypesForOperationCompatibility: LHS ${lhsTypes} RHS ${rhsTypes}`);
-        operation.updateSocketTypesForOperationCompatibility(editorNode, lhsTypes, rhsTypes);
-        lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket); // TODO maybe return [lhs, rhs] from updateSocketTypesForOperationCompatibility
-        rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
+        /* operation.updateSocketTypesForOperationCompatibility(editorNode); */
+
+        const lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket); // TODO maybe return [lhs, rhs] from updateSocketTypesForOperationCompatibility
+        const rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
         // console.log(`TEST type AFTER updateSocketTypesForOperationCompatibility: LHS ${lhsTypes} RHS ${rhsTypes}`);
 
         // Finally, update output socket type based on input socket types
@@ -539,6 +535,7 @@ export class BasicOperationComponent extends Rete.Component {
             return;
         }
 
+        console.log(lhsValue, rhsValue);
         console.assert(lhsTypes.length === 1, lhsTypes);
         console.assert(rhsTypes.length === 1, rhsTypes);
         const result = operation.calculate({type: lhsTypes[0], value: lhsValue}, {type: rhsTypes[0], value: rhsValue});
