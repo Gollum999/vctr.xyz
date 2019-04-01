@@ -1,45 +1,27 @@
-import _ from 'lodash';
-import NodeRenderer from './NodeRenderer.vue';
-import Rete from 'rete';
-import sockets from './sockets';
 import { vec3 } from 'gl-matrix';
+import _ from 'lodash';
+import Rete from 'rete';
+
+import NodeRenderer from './NodeRenderer.vue';
+import sockets from './sockets';
+import util from './util';
 
 const invalid = 'INVALID'; // Sentinel indicating that the specified combination should never happen (raise an error if it does)
 const ignore = 'IGNORE'; // Sentinel indicating that no changes need to be made
-// TODO just make all of these sets for consistency
 const s = Object.freeze({
-    scalar:         ['scalar'],
-    vector:         ['vector'],
-    matrix:         ['matrix'],
-    scalarOrVector: ['scalar', 'vector'],
-    scalarOrMatrix: ['scalar', 'matrix'],
-    vectorOrMatrix: ['vector', 'matrix'],
-    anything:       ['scalar', 'vector', 'matrix'],
-    invalid:        [invalid],
-    ignore:         [ignore],
+    scalar:         new Set(['scalar']),
+    vector:         new Set(['vector']),
+    matrix:         new Set(['matrix']),
+    scalarOrVector: new Set(['scalar', 'vector']),
+    scalarOrMatrix: new Set(['scalar', 'matrix']),
+    vectorOrMatrix: new Set(['vector', 'matrix']),
+    anything:       new Set(['scalar', 'vector', 'matrix']),
+    invalid:        new Set([invalid]),
+    ignore:         new Set([ignore]),
 });
-
-// Is x a subset of y?
-function isSubset(x, y) {
-    return x.every(val => {
-        return y.has(val);
-    });
-}
-
-// Do x and y intersect?
-function intersects(x, y) {
-    const ySet = new Set(y);
-    return Array.from(x).some(val => ySet.has(val));
-}
-
-// What are the common elements between x and y?
-function intersection(x, y) {
-    return new Set([...x].filter(val => y.has(val)));
-}
 
 function socketTypeListToSocketName(typeList) {
     // Ew.
-    typeList = new Set(typeList); // In case input is an array
     if (typeList.size === 3) {
         console.assert(typeList.has('scalar') &&
                        typeList.has('vector') &&
@@ -53,12 +35,12 @@ function socketTypeListToSocketName(typeList) {
         } else if (typeList.has('vector') && typeList.has('matrix')) {
             return 'vectorOrMatrix';
         } else {
-            throw new Error(`Could not determine socket name from list "${JSON.stringify(typeList)}"`);
+            throw new Error('Could not determine socket name from list', typeList);
         }
     } else if (typeList.size === 1) {
         return typeList.values().next().value;
     }
-    throw new Error(`Could not determine socket name from list "${JSON.stringify(typeList)}"`);
+    throw new Error('Could not determine socket name from list', typeList);
 }
 
 // TODO There should be a way to avoid this...
@@ -118,7 +100,7 @@ class BaseOperation {
     }
 
     static getInputTypes(editorNode, name) {
-        console.log(`TEST getInputTypes ${name}`);
+        // console.log(`TEST getInputTypes ${name}`);
         const input = editorNode.inputs.get(name);
         // console.log(input);
         console.assert(input.connections.length <= 1);
@@ -130,38 +112,38 @@ class BaseOperation {
     }
 
     static updateSocketTypesFromInputs(editor, editorNode) {
-        console.log(`TEST updateSocketTypesFromInputs ${editorNode.name}"`);
+        // console.log(`TEST updateSocketTypesFromInputs ${editorNode.name}"`);
         const lhs = editorNode.inputs.get('lhs');
         const rhs = editorNode.inputs.get('rhs');
 
+        // TODO this still isn't great.  _updateSocketTypeFromInput should always filter down, then the removeInputConnectionsIfIncompatible
+        //      should remove if empty.  also probably should keep track of types and only update at the end
+        // First, update LHS socket based on the type connected to it
         const lhsInputTypes = this.getInputTypes(editorNode, 'lhs');
-        this._updateSocketTypeFromInput(lhs, lhsInputTypes);
+        this._updateSocketTypeFromInput(lhs, lhsInputTypes, this.defaultLhsSockets);
+        // Then update RHS socket depending on types allowed for the current operation
         this._updateSocketTypeForOperationCompatibility(rhs, lhs, this.lhsToRhsTypeMap);
 
         // Remove the RHS connection if LHS type updates have made RHS incompatible
         // (LHS should never be incompatible since it is the first to update from input)
         this.removeInputConnectionsIfIncompatible(editor, rhs);
 
+        // Update RHS socket based on the type connected to it
         const rhsInputTypes = this.getInputTypes(editorNode, 'rhs');
-        this._updateSocketTypeFromInput(rhs, rhsInputTypes); // TODO need to evaluate this NOW in case connection was removed
+        this._updateSocketTypeFromInput(rhs, rhsInputTypes, this.defaultRhsSockets);
+        // Finally update LHS socket depending on types allowed for the current operation
         this._updateSocketTypeForOperationCompatibility(lhs, rhs, this.rhsToLhsTypeMap);
-        /* this.removeInputConnectionsIfIncompatible(editor, lhs); // TODO should this go above _updateSocketTypeFromInput(lhs)? */
     }
 
-    static _updateSocketTypeFromInput(input, inputTypes) {
-        console.log(`TEST _updateSocketTypeFromInput ${input.node.name} "${inputTypes}"`);
-        const defaultSocketsTypes = {
-            'lhs': this.defaultLhsSockets,
-            'rhs': this.defaultRhsSockets,
-        }[input.key]; // TODO this is pretty gross, clean up
+    static _updateSocketTypeFromInput(input, inputTypes, defaultTypes) {
+        // console.log(`TEST _updateSocketTypeFromInput ${input.node.name} "${inputTypes}" "${defaultTypes}"`);
         if (_.isNil(inputTypes)) { // TODO allowing this to be null is a bit annoying
-            updateIoType(input, defaultSocketsTypes);
+            updateIoType(input, defaultTypes);
         } else if (!_.isEqual(inputTypes, getSocketTypes(input.socket))) {
-            console.log(`TEST updating ${input.node.name} socket type from "${getSocketTypes(input.socket)}" to "${inputTypes}"`);
-            console.log('TEST defaultSocketsTypes:', defaultSocketsTypes);
-            const newTypes = intersection(new Set(inputTypes), new Set(defaultSocketsTypes));
-            console.log('TEST newTypes:', newTypes);
-            // TODO I am so inconsistent with which values are strings and which are arrays/sets...
+            // console.log(`TEST updating ${input.node.name} socket type from "${getSocketTypes(input.socket)}" to "${inputTypes}"`);
+            // console.log('TEST defaultTypes:', defaultTypes);
+            const newTypes = util.intersection(inputTypes, defaultTypes);
+            // console.log('TEST newTypes:', newTypes);
             if (!_.isEmpty(newTypes)) {
                 updateIoType(input, newTypes);
             }
@@ -189,26 +171,19 @@ class BaseOperation {
             }
         }
 
-        // TODO this assumes that only one input can change per update, which is not always true when there are cascading type updates
-        // TODO I might need to do something smarter based on which conn was last added, or maybe remove bad connections while processing inputs?
-        // TODO what if I have one type connected, and then switch to a new type that is incompatible with sibling type?
-        //        this is fine as long as the action of switching is actually disconnect -> connect
-        // TODO what about "hybrid" socket types?  probably need to do something similar to updateOutputSocketTypes
         if (!_.isEmpty(compatibleTypes)) {
             // TODO this should check whether or not an input is connected, don't assume 'anything' means no connections
-            console.log(`_updateSocketTypeForOperationCompatibility ${input.node.name} ${input.name}`, socketTypes, compatibleTypes);
-            // console.log(new Set(['anything']));
-            // console.log(`${JSON.stringify(socketTypes)} ${JSON.stringify(compatibleTypes)} ${JSON.stringify(new Set(['anything']))}`);
-            if (!_.isEqual(new Set(socketTypes), new Set(s.anything))) {
+            // console.log(`_updateSocketTypeForOperationCompatibility ${input.node.name} ${input.name}`, socketTypes, compatibleTypes);
+            if (!_.isEqual(socketTypes, s.anything)) {
                 // Sanity check that previous socket type updates kept everything compatible
-                console.log('TEST socketTypes !== anything, verifying types are still compatible');
-                console.assert(isSubset(socketTypes, compatibleTypes), socketTypes, compatibleTypes);
+                // console.log('TEST socketTypes !== anything, verifying types are still compatible');
+                console.assert(util.isSubset(socketTypes, compatibleTypes), socketTypes, compatibleTypes);
             } else if (!_.isEqual(socketTypes, compatibleTypes)) {
-                console.log(`TEST _updateSocketTypeForOperationCompatibility updating "${input.node.name}" ${input.name} from "${socketTypes}" to "${JSON.stringify(compatibleTypes)}"`);
+                // console.log(`TEST _updateSocketTypeForOperationCompatibility updating "${input.node.name}" ${input.name} from "${socketTypes}" to "${JSON.stringify(compatibleTypes)}"`);
                 updateIoType(input, compatibleTypes);
             }
         } else {
-            console.log('compatibleTypes was empty'); // TODO will this happen often?
+            // console.log('compatibleTypes was empty'); // TODO will this happen often?
         }
     }
 
@@ -221,40 +196,43 @@ class BaseOperation {
     }
 
     static _removeIoConnectionsIfIncompatible(editor, io, isInput) {
-        console.log('TEST _removeIoConnectionsIfIncompatible io:', io);
+        // console.log('TEST _removeIoConnectionsIfIncompatible io:', io);
         const socketTypes = getSocketTypes(io.socket);
         if (!_.isEmpty(io.connections)) {
             for (const connection of io.connections) {
                 const typesFromInput = getSocketTypes(isInput ? connection.output.socket : connection.input.socket);
-                console.log('connection:', connection);
-                console.log('typesFromInput:', typesFromInput, 'socketTypes:', socketTypes);
-                if (!intersects(socketTypes, typesFromInput)) {
-                    console.log(`TEST ${isInput ? 'input' : 'output'} connection incompatible, removing`);
-                    console.log(socketTypes, typesFromInput, connection);
+                // console.log('connection:', connection);
+                // console.log('typesFromInput:', typesFromInput, 'socketTypes:', socketTypes);
+                if (!util.intersects(socketTypes, typesFromInput)) {
+                    // console.log(`TEST ${isInput ? 'input' : 'output'} connection incompatible, removing`);
+                    // console.log(socketTypes, typesFromInput, connection);
                     editor.removeConnection(connection); // TODO dangerous to call this while iterating over connections?
                 }
             }
         }
     }
 
-    static updateOutputSocketTypes(editor, editorNode, lhsTypes, rhsTypes) {
+    static updateOutputSocketTypes(editor, editorNode) {
         if (!this.inputToOutputTypeMap) {
             // console.log(`TEST updateOutputSocketTypes input to output type map is null, returning early (${editorNode.name} ${lhsTypes} ${rhsTypes})`);
             return;
         }
 
-        console.log(`TEST updateOutputSocketTypes ${editorNode.name}`);
+        const lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket);
+        const rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
+
+        // console.log(`TEST updateOutputSocketTypes ${editorNode.name}`);
         const expectedOutputTypes = this.getExpectedOutputTypes(lhsTypes, rhsTypes);
-        console.log(`TEST updateOutputSocketTypes expectedOutputTypes = ${JSON.stringify(expectedOutputTypes)}`);
+        // console.log('TEST updateOutputSocketTypes expectedOutputTypes =', expectedOutputTypes);
         if (expectedOutputTypes.has(invalid)) {
             throw new Error(`Cannot update output socket for "${editorNode.name}", input combination ("${lhsTypes}" and "${rhsTypes}") is invalid`);
-        } else if (_.isEqual(expectedOutputTypes, new Set(s.ignore))) {
-            console.log(`TEST updateOutputSocketTypes expected output for "${editorNode.name}" is 'ignore', skipping (from "${lhsTypes}" "${rhsTypes}")`);
+        } else if (_.isEqual(expectedOutputTypes, s.ignore)) {
+            // console.log(`TEST updateOutputSocketTypes expected output for "${editorNode.name}" is 'ignore', skipping (from "${lhsTypes}" "${rhsTypes}")`);
             return;
         }
-        console.log(`TEST updateOutputSocketTypes updating output for "${editorNode.name}" to "${JSON.stringify(expectedOutputTypes)}" (from "${lhsTypes}" "${rhsTypes}")`);
+        // console.log(`TEST updateOutputSocketTypes updating output for "${editorNode.name}" to`, expectedOutputTypes, `" (from "${lhsTypes}" "${rhsTypes}")`);
         const output = editorNode.outputs.get('result');
-        updateIoType(output, expectedOutputTypes); // TODO can check if update required
+        updateIoType(output, expectedOutputTypes); // TODO can check if update required for efficiency
 
         // If this output changed to a type that is no longer compatible with some of its connections, remove those connections
         this.removeOutputConnectionsIfIncompatible(editor, output);
@@ -276,13 +254,13 @@ class BaseOperation {
         }
 
         // console.log(allExpectedTypes);
-        if (_.isEqual(allExpectedTypes, new Set(s.invalid))) {
-            throw new Error(`Invalid type combination ${JSON.stringify(allExpectedTypes)} (from "${lhsTypeList}" "${rhsTypeList}")`);
+        if (_.isEqual(allExpectedTypes, s.invalid)) {
+            throw new Error('Invalid type combination', allExpectedTypes, `(from "${lhsTypeList}" "${rhsTypeList}")`);
         } else {
             allExpectedTypes.delete(invalid);
         }
-        if (_.isEqual(allExpectedTypes, new Set(s.ignore))) {
-            return new Set(s.ignore);
+        if (_.isEqual(allExpectedTypes, s.ignore)) {
+            return s.ignore;
         } else {
             allExpectedTypes.delete(ignore);
         }
@@ -459,13 +437,12 @@ export class BasicOperationComponent extends Rete.Component {
     }
 
     builder(node) {
-        // TODO Maybe change socket types to be defined in terms of "addable", "dottable", etc.
         Operation[this.opName].setupSockets(node);
         return node;
     }
 
     worker(engineNode, inputs, outputs) {
-        const editorNode = this.editor.nodes.find(n => n.id === engineNode.id);
+        const editorNode = util.getEditorNode(this.editor, engineNode);
 
         // console.log(`TEST BasicOperationComponent worker (${editorNode.name})`);
         // console.log(this.editor);
@@ -505,39 +482,26 @@ export class BasicOperationComponent extends Rete.Component {
         // const needsUpdate = hasDynamicInputSockets && (anyConnectionEmpty || anySocketTypeMismatch); // TODO dynamic also could just mean that the socket can go from 'anything' to input type
         const needsUpdateFromInputs = anyConnectionEmpty || anySocketTypeMismatch;
         if (needsUpdateFromInputs) {
-            // First, update each input socket based on the type connected to it
+            // First, update each input socket based on its connection and based on what types the current operation allows
             operation.updateSocketTypesFromInputs(this.editor, editorNode);
         }
 
-        // Then update "sibling" socket types depending on types accepted for the current operation
-        // TODO do a check here like with "needsUpdateFromInputs"?
-        /* let lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket); */
-        /* let rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket); */
-        // console.log(`TEST type BEFORE updateSocketTypesForOperationCompatibility: LHS ${lhsTypes} RHS ${rhsTypes}`);
-        /* operation.updateSocketTypesForOperationCompatibility(editorNode); */
+        // Then update output socket type based on input socket types
+        operation.updateOutputSocketTypes(this.editor, editorNode);
 
-        const lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket); // TODO maybe return [lhs, rhs] from updateSocketTypesForOperationCompatibility
-        const rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
-        // console.log(`TEST type AFTER updateSocketTypesForOperationCompatibility: LHS ${lhsTypes} RHS ${rhsTypes}`);
-
-        // Finally, update output socket type based on input socket types
-        operation.updateOutputSocketTypes(this.editor, editorNode, lhsTypes, rhsTypes);
-
-        function getInputValue(name) { // TODO pull out somewhere common
-            // console.log(`getInputValue ${name} inputs:`);
-            // console.log(inputs);
-            return inputs[name].length ? inputs[name][0] : engineNode.data[name];
-        }
-
-        const lhsValue = getInputValue('lhs');
-        const rhsValue = getInputValue('rhs');
+        const lhsValue = util.getInputValue('lhs', inputs, engineNode.data);
+        const rhsValue = util.getInputValue('rhs', inputs, engineNode.data);
         if (_.isNil(lhsValue) || _.isNil(rhsValue)) {
             return;
         }
 
-        console.log(lhsValue, rhsValue);
-        console.assert(lhsTypes.length === 1, lhsTypes);
-        console.assert(rhsTypes.length === 1, rhsTypes);
+        const lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket);
+        const rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
+        // console.log(`TEST type AFTER updateSocketTypesForOperationCompatibility: LHS ${lhsTypes} RHS ${rhsTypes}`);
+        console.assert(lhsTypes.size === 1, lhsTypes);
+        console.assert(rhsTypes.size === 1, rhsTypes);
+
+        // console.log(lhsValue, rhsValue);
         const result = operation.calculate({type: lhsTypes[0], value: lhsValue}, {type: rhsTypes[0], value: rhsValue});
         outputs['result'] = result;
     }
