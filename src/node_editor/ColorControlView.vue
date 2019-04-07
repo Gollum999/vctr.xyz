@@ -70,7 +70,7 @@ export default {
     width: 1.4em;
     height: 1.4em;
     /* background-color: yellow; */
-    border: 1px solid lightgray;
+    border: 1px solid rgba(128, 128, 128, 0.4);
     margin: 0.5em;
 }
 /* color-picker { */

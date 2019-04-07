@@ -49,7 +49,7 @@ export default {
       width: auto // Prevents control from overflowing grid cell... not sure why this is necessary or if there is a better way
       box-sizing: border-box
       padding-left: 4px
-      background-color: #eeeeee
+      background-color: rgba(128, 128, 128, 0.2)
       padding-top: 0px
       margin: 0px 2px
       min-height: 12px
@@ -76,7 +76,7 @@ export default {
 // @import "../../node_modules/rete-vue-render-plugin/src/vars"
 // $node-color: #aaaaaa
 $node-color: #ffffff
-// $node-color-selected: #cccccc
+$node-color-selected: #ffe2e2
 // I don't use the node group plugin...
 $group-color: rgba(15, 80, 255, 0.2)
 $group-handler-size: 40px
@@ -108,7 +108,7 @@ $node-width: 100px
   &:hover
     background: lighten($node-color,4%)
   &.selected
-    // background: $node-color-selected
+    background-color: $node-color-selected
     // border: 1px solid black // TODO temp, figure out a better indicator
   .title
     // background-color: #888888
@@ -117,7 +117,7 @@ $node-width: 100px
     font-size: 14px
     padding: 4px
     margin: 0px 16px 4px
-    border-bottom: 1px solid lightgray
+    border-bottom: 1px solid rgba(128, 128, 128, 0.4)
     // border-radius: 10px 10px 0 0
   .input
     grid-column: inputs
