@@ -1,8 +1,15 @@
 <template>
 <div class="vector-control-container" :style="{'grid-row': rowIdx}">
-  <md-field><md-input type="number" v-model.number="value[0]" :readonly="readOnly" @input="updateData" /></md-field>
-  <md-field><md-input type="number" v-model.number="value[1]" :readonly="readOnly" @input="updateData" /></md-field>
-  <md-field><md-input type="number" v-model.number="value[2]" :readonly="readOnly" @input="updateData" /></md-field>
+  <md-field v-for="(axis, idx) in values" :key="idx">
+    <md-input
+      type="number"
+      v-model.number="axis.val"
+      :readonly="readOnly"
+      @input="onInput"
+      @copy.prevent.stop="onCopy"
+      @paste.prevent.stop="onPaste(idx, $event)"
+      />
+  </md-field>
 </div>
 
 <!-- <template v-if="readOnly"> -->
@@ -16,7 +23,17 @@
 </template>
 
 <script>
-import { vec3 } from 'gl-matrix';
+import _ from 'lodash';
+
+const DEFAULT_VECTOR_WRAPPER = Object.freeze([{val: 0}, {val: 0}, {val: 0}]);
+
+function vectorWrapperToArray(vec) {
+    return vec.map(axis => axis.val);
+}
+
+function arrayToVectorWrapper(array) {
+    return array.map(i => { return {val: i}; });
+}
 
 export default {
     props: {
@@ -29,24 +46,42 @@ export default {
 
     data() {
         return {
-            value: vec3.create(),
+            // To make everything properly reactive, must use proxy array instead of raw vec3, and must wrap array elements in objects
+            values: DEFAULT_VECTOR_WRAPPER.slice(),
             readOnly: false,
         };
     },
 
     methods: {
-        updateData() {
-            console.log('VectorControlView updateData');
-            if (this.vkey) {
-                console.log(`VectorControlView putData key: ${this.vkey} value: ${this.value} type: ${typeof this.value}`);
-                this.putData(this.vkey, this.value);
+        setValue(value) {
+            // console.log('VectorControlView setValue', value);
+            // TODO repeat this check for other types
+            if (_.isNil(value) || value.length !== 3) {
+                this.values = DEFAULT_VECTOR_WRAPPER.slice();
+                // console.log('VectorControlView setValue DEFAULT to', this.values);
+            } else {
+                this.values = arrayToVectorWrapper(value);
+                // console.log('VectorControlView setValue from array to', this.values);
             }
+        },
+
+        onInput(event) {
+            // console.log('VectorControlView updateData');
+            if (this.vkey) {
+                console.log('VectorControlView putData key:', this.vkey, 'values:', this.values, vectorWrapperToArray(this.values));
+                console.log(this);
+                this.putData(this.vkey, vectorWrapperToArray(this.values));
+            }
+            console.log('VectorControlView triggering engine process from input');
             this.emitter.trigger('process');
         },
     },
 
     mounted() {
-        this.value = this.getData(this.vkey);
+        const data = this.getData(this.vkey);
+        // console.log('VectorControlView mounted, data = ', data);
+        this.setValue(data);
+        // console.log('VectorControlView mounted, set this.values to ', this.values);
     },
 };
 </script>

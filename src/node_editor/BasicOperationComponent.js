@@ -501,7 +501,7 @@ export class BasicOperationComponent extends Rete.Component {
 
         const lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket);
         const rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
-        console.log('TEST type AFTER updateSocketTypesForOperationCompatibility: LHS', lhsTypes, 'RHS', rhsTypes);
+        // console.log('TEST type AFTER updateSocketTypesForOperationCompatibility: LHS', lhsTypes, 'RHS', rhsTypes);
         console.assert(lhsTypes.size === 1, lhsTypes);
         console.assert(rhsTypes.size === 1, rhsTypes);
 

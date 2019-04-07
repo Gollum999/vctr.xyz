@@ -5,7 +5,6 @@ import sockets from './sockets';
 import { VectorControl } from './VectorControl';
 import { VectorLabelControl } from './VectorLabelControl';
 import { ColorControl } from './ColorControl';
-import { vec3 } from 'gl-matrix';
 
 export class VectorComponent extends Rete.Component {
     constructor() {
@@ -35,8 +34,8 @@ export class VectorComponent extends Rete.Component {
         //   To check things like input state and component configuration, I either need to go through node.data or need to manually find the node
         //     through the editor by ID
         //   Also note that anything in data will be saved between sessions
-        console.log(`VectorComponent worker "${node.name}"`);
-        console.log(node.data);
+        // console.log(`VectorComponent worker "${node.name}"`);
+        /* console.log(node.data); */
 
         // TODO pull this out somewhere
         function getInput(name) {
@@ -48,15 +47,18 @@ export class VectorComponent extends Rete.Component {
 
         const input = getInput('vector');
         if (_.isNil(input)) {
+            // console.log('VectorComponent worker, input empty, setting readonly = false');
             editorNode.controls.get('value').setReadOnly(false);
         } else {
-            node.data.value = vec3.clone(input); // Make a copy to avoid sharing the same object between nodes
+            // console.log('VectorComponent worker setting value from input to ', input, typeof input);
+            node.data.value = input.slice(); // Make a copy to avoid sharing the same object between nodes
             editorNode.controls.get('value').setValue(input);
             editorNode.controls.get('value').setReadOnly(true);
         }
 
         if (!_.isNil(node.data.value)) {
-            outputs['vector'] = vec3.clone(node.data.value); // Make a copy to avoid sharing the same object between nodes
+            // console.log('VectorComponent worker setting output to ', node.data.value, typeof node.data.value);
+            outputs['vector'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
         }
     }
 };

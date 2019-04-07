@@ -53,7 +53,7 @@ import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
-import { vec3, mat4 } from 'gl-matrix';
+import { mat4 } from 'gl-matrix';
 import contextMenu from 'vue-context-menu';
 import { EventBus } from '../EventBus';
 
@@ -140,7 +140,7 @@ export default {
                 node = await this.components['scalar'].createNode({'value': 0});
                 break;
             case 'vector':
-                node = await this.components['vector'].createNode({'value': vec3.fromValues(0, 0, 0)});
+                node = await this.components['vector'].createNode({'value': [0, 0, 0]});
                 break;
             case 'matrix':
                 node = await this.components['matrix'].createNode({'value': mat4.create()});
@@ -280,10 +280,10 @@ export default {
                 this.components['scalar'].createNode({'value': 5}),
                 this.components['scalar'].createNode({'value': 4}),
                 this.components['add_old'].createNode(),
-                this.components['vector'].createNode({'value': vec3.fromValues(3, 2, 1), 'color': '#00FFFF'}),
-                this.components['vector'].createNode({'value': vec3.fromValues(2, 2, 2), 'color': '#00FFFF'}),
+                this.components['vector'].createNode({'value': [3, 2, 1], 'color': '#00FFFF'}),
+                this.components['vector'].createNode({'value': [2, 2, 2], 'color': '#00FFFF'}),
                 this.components['operation-add'].createNode(),
-                this.components['vector'].createNode({'value': vec3.fromValues(2, 2, 2)}),
+                this.components['vector'].createNode({'value': [2, 2, 2]}),
             ]);
             in1.position = [20, 40];
             in2.position = [20, 150];
