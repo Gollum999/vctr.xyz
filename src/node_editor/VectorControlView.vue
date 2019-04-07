@@ -75,6 +75,28 @@ export default {
             console.log('VectorControlView triggering engine process from input');
             this.emitter.trigger('process');
         },
+
+        onCopy(event) {
+            const valueArray = vectorWrapperToArray(this.values);
+            const text = valueArray.join(', ');
+            console.log('VectorControlView onCopy', event, valueArray, 'setting clipboard to "', text, '"');
+            event.clipboardData.setData('text', text);
+        },
+
+        onPaste(idx, event) {
+            if (this.readOnly) {
+                return;
+            }
+            console.log(`VectorControlView onPaste ${idx}`, event);
+            const text = event.clipboardData.getData('text');
+            const split = text.split(/[ ,;]+/);
+            // TODO consider falling back to default paste handler if split is wrong length (so pasting single numbers appends instead of overwrites selected cell)
+            const result = vectorWrapperToArray(this.values);
+            for (let offset = 0; idx + offset < 3 && offset < split.length; ++offset) {
+                result[idx + offset] = parseFloat(split[offset]);
+            }
+            this.setValue(result);
+        },
     },
 
     mounted() {
