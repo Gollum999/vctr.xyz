@@ -58,9 +58,7 @@ function getSocketTypes(socket) {
 }
 
 function updateIoType(io, socketTypeNameOrList) {
-    // console.log(`TEST updateIoType "${io.node.name}" "${io.name}" "${socketTypeNameOrList}" ${typeof socketTypeNameOrList}`);
-    // console.log(socketTypeNameOrList);
-    // console.log(io);
+    // console.log('TEST updateIoType ', io.node.name, io.name, 'to', socketTypeNameOrList, typeof socketTypeNameOrList);
     const socketTypeName = (() => {
         if (typeof socketTypeNameOrList === 'string') {
             return socketTypeNameOrList;
@@ -118,9 +116,12 @@ class BaseOperation {
 
         // TODO this still isn't great.  _updateSocketTypeFromInput should always filter down, then the removeInputConnectionsIfIncompatible
         //      should remove if empty.  also probably should keep track of types and only update at the end
-        // First, update LHS socket based on the type connected to it
+        // First, update both sockets based on the types connected to them
         const lhsInputTypes = this.getInputTypes(editorNode, 'lhs');
+        const rhsInputTypes = this.getInputTypes(editorNode, 'rhs');
         this._updateSocketTypeFromInput(lhs, lhsInputTypes, this.defaultLhsSockets);
+        this._updateSocketTypeFromInput(rhs, rhsInputTypes, this.defaultRhsSockets);
+
         // Then update RHS socket depending on types allowed for the current operation
         this._updateSocketTypeForOperationCompatibility(rhs, lhs, this.lhsToRhsTypeMap);
 
@@ -128,9 +129,6 @@ class BaseOperation {
         // (LHS should never be incompatible since it is the first to update from input)
         this.removeInputConnectionsIfIncompatible(editor, rhs);
 
-        // Update RHS socket based on the type connected to it
-        const rhsInputTypes = this.getInputTypes(editorNode, 'rhs');
-        this._updateSocketTypeFromInput(rhs, rhsInputTypes, this.defaultRhsSockets);
         // Finally update LHS socket depending on types allowed for the current operation
         this._updateSocketTypeForOperationCompatibility(lhs, rhs, this.rhsToLhsTypeMap);
     }
@@ -138,6 +136,8 @@ class BaseOperation {
     static _updateSocketTypeFromInput(input, inputTypes, defaultTypes) {
         // console.log(`TEST _updateSocketTypeFromInput ${input.node.name} "${inputTypes}" "${defaultTypes}"`);
         if (_.isNil(inputTypes)) { // TODO allowing this to be null is a bit annoying
+            // const newTypes = util.intersection(getSocketTypes(input.socket), defaultTypes);
+            // updateIoType(input, newTypes);
             updateIoType(input, defaultTypes);
         } else if (!_.isEqual(inputTypes, getSocketTypes(input.socket))) {
             // console.log(`TEST updating ${input.node.name} socket type from "${getSocketTypes(input.socket)}" to "${inputTypes}"`);
@@ -173,13 +173,13 @@ class BaseOperation {
 
         if (!_.isEmpty(compatibleTypes)) {
             // TODO this should check whether or not an input is connected, don't assume 'anything' means no connections
-            // console.log(`_updateSocketTypeForOperationCompatibility ${input.node.name} ${input.name}`, socketTypes, compatibleTypes);
+            // console.log(`_updateSocketTypeForOperationCompatibility ${input.node.name} ${input.name}, current types:`, socketTypes, 'compat:', compatibleTypes);
             if (!_.isEqual(socketTypes, s.anything)) {
                 // Sanity check that previous socket type updates kept everything compatible
                 // console.log('TEST socketTypes !== anything, verifying types are still compatible');
                 console.assert(util.isSubset(socketTypes, compatibleTypes), socketTypes, compatibleTypes);
             } else if (!_.isEqual(socketTypes, compatibleTypes)) {
-                // console.log(`TEST _updateSocketTypeForOperationCompatibility updating "${input.node.name}" ${input.name} from "${socketTypes}" to "${JSON.stringify(compatibleTypes)}"`);
+                // console.log('TEST _updateSocketTypeForOperationCompatibility updating', input.node.name, input.name, 'from', socketTypes, 'to', compatibleTypes);
                 updateIoType(input, compatibleTypes);
             }
         } else {
@@ -292,9 +292,8 @@ class AddOperation extends BaseOperation {
             return vec3.add(out, lhs.value, rhs.value);
         } else if (lhs.type === 'matrix' && rhs.type === 'matrix') {
             throw new Error('Not implemented'); // TODO
-        } else {
-            throw new Error(`AddOperation unsupported input types ${lhs.type.name} ${rhs.type.name}`);
         }
+        throw new Error('AddOperation unsupported input types', lhs.type, rhs.type);
     }
 }
 
@@ -321,9 +320,8 @@ class SubtractOperation extends BaseOperation {
             return vec3.subtract(out, lhs.value, rhs.value);
         } else if (lhs.type === 'matrix' && rhs.type === 'matrix') {
             throw new Error('Not implemented'); // TODO
-        } else {
-            throw new Error(`SubtractOperation unsupported input types ${lhs.type} ${rhs.type}`);
         }
+        throw new Error('SubtractOperation unsupported input types', lhs.type, rhs.type);
     }
 }
 
@@ -341,15 +339,19 @@ class MultiplyOperation extends BaseOperation {
     };
 
     static calculate(lhs, rhs) {
+        // TODO how to clean this up and/or assert that all paths are covered?
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
             return lhs.value * rhs.value;
-        } else if (lhs.type === 'vector') {
+        } else if (lhs.type === 'vector' && rhs.type === 'scalar') {
             const out = vec3.create();
             return vec3.scale(out, lhs.value, rhs.value);
-        } else if (rhs.type === 'vector') {
+        } else if (lhs.type === 'scalar' && rhs.type === 'vector') {
             const out = vec3.create();
             return vec3.scale(out, rhs.value, lhs.value);
+        } else if (lhs.type === 'matrix' || rhs.type === 'matrix') {
+            throw new Error('Not implemented'); // TODO
         }
+        throw new Error('MultiplyOperation unsupported input types', lhs.type, rhs.type);
     }
 }
 
@@ -372,12 +374,17 @@ class DivideOperation extends BaseOperation {
 
     static calculate(lhs, rhs) {
         // TODO handle division by 0 here
-        if (lhs.type === 'scalar' && rhs.type === 'scalar') {
-            return lhs.value / rhs.value;
-        } else if (lhs.type === 'vector') {
-            const out = vec3.create();
-            return vec3.scale(out, lhs.value, 1.0 / rhs.value);
+        if (rhs.type === 'scalar') {
+            if (lhs.type === 'scalar') {
+                return lhs.value / rhs.value;
+            } else if (lhs.type === 'vector') {
+                const out = vec3.create();
+                return vec3.scale(out, lhs.value, 1.0 / rhs.value);
+            } else if (lhs.type === 'matrix') {
+                throw new Error('Not implemented'); // TODO
+            }
         }
+        throw new Error('DivideOperation unsupported input types', lhs.type, rhs.type);
     }
 }
 
@@ -472,11 +479,8 @@ export class BasicOperationComponent extends Rete.Component {
                 return false;
             }
             const connection = input.connections[0];
-            if (connection.input.socket.name !== connection.output.socket.name) {
-                // TODO doesn't account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
-                // console.log(`TEST socket name mismatch (${connection.input.socket.name} ${connection.output.socket.name}), flagging for update`);
-                return true;
-            }
+            // TODO doesn't account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
+            return connection.input.socket.name !== connection.output.socket.name;
         }));
 
         // const needsUpdate = hasDynamicInputSockets && (anyConnectionEmpty || anySocketTypeMismatch); // TODO dynamic also could just mean that the socket can go from 'anything' to input type
@@ -497,12 +501,17 @@ export class BasicOperationComponent extends Rete.Component {
 
         const lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket);
         const rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
-        // console.log(`TEST type AFTER updateSocketTypesForOperationCompatibility: LHS ${lhsTypes} RHS ${rhsTypes}`);
+        console.log('TEST type AFTER updateSocketTypesForOperationCompatibility: LHS', lhsTypes, 'RHS', rhsTypes);
         console.assert(lhsTypes.size === 1, lhsTypes);
         console.assert(rhsTypes.size === 1, rhsTypes);
 
         // console.log(lhsValue, rhsValue);
-        const result = operation.calculate({type: lhsTypes[0], value: lhsValue}, {type: rhsTypes[0], value: rhsValue});
+        let result = operation.calculate({type: Array.from(lhsTypes)[0], value: lhsValue}, {type: Array.from(rhsTypes)[0], value: rhsValue});
+        if (result instanceof Float32Array) {
+            // Float32Array serializes as an object instead of a regular array; force types to be consistent
+            // TODO how will this look for matrices?  should this be the receiving node's responsibility?
+            result = Array.from(result);
+        }
         outputs['result'] = result;
     }
 };
