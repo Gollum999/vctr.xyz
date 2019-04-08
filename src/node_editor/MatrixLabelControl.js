@@ -6,6 +6,6 @@ export class MatrixLabelControl extends Rete.Control {
         super(key);
         this.render = 'vue';
         this.component = MatrixLabelControlView;
-        this.props = { emitter, vkey: key, rowIdx };
+        this.props = { emitter, dataKey: key, rowIdx };
     }
 };

@@ -10,10 +10,10 @@
 <script>
 export default {
     props: {
-        vkey:     { type: String,   required: true }, // injected by Rete
-        emitter:  { type: Object,   required: true }, // injected by Rete
         getData:  { type: Function, required: true }, // injected by Rete
         putData:  { type: Function, required: true }, // injected by Rete
+        emitter:  { type: Object,   required: true },
+        dataKey:  { type: String,   required: true },
         rowIdx:   { type: Number,   required: true }, // used to position control within parent grid
     },
 };

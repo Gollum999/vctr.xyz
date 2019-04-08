@@ -24,10 +24,10 @@ import { Chrome } from 'vue-color';
 
 export default {
     props: {
-        vkey:    { type: String,   required: true }, // injected by Rete
-        emitter: { type: Object,   required: true }, // injected by Rete
         getData: { type: Function, required: true }, // injected by Rete
         putData: { type: Function, required: true }, // injected by Rete
+        emitter: { type: Object,   required: true },
+        dataKey: { type: String,   required: true },
         rowIdx:  { type: Number,   required: true }, // used to position control within parent grid
     },
 
@@ -42,14 +42,14 @@ export default {
     },
 
     mounted() {
-        this.color = this.getData(this.vkey) || '#FFFF00';
+        this.color = this.getData(this.dataKey) || '#FFFF00';
     },
 
     methods: {
         colorUpdated(color) {
             this.color = color.hex;
-            if (this.vkey) {
-                this.putData(this.vkey, this.color);
+            if (this.dataKey) {
+                this.putData(this.dataKey, this.color);
             }
             this.emitter.trigger('process');
         },

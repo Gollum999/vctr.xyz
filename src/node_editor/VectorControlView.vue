@@ -37,10 +37,10 @@ function arrayToVectorWrapper(array) {
 
 export default {
     props: {
-        vkey:     { type: String,   required: true }, // injected by Rete
+        getData:  { type: Function, required: true },
+        putData:  { type: Function, required: true },
         emitter:  { type: Object,   required: true }, // injected by Rete
-        getData:  { type: Function, required: true }, // injected by Rete
-        putData:  { type: Function, required: true }, // injected by Rete
+        dataKey:  { type: String,   required: true }, // injected by Rete
         rowIdx:   { type: Number,   required: true }, // used to position control within parent grid
     },
 
@@ -67,10 +67,10 @@ export default {
 
         onInput(event) {
             // console.log('VectorControlView updateData');
-            if (this.vkey) {
-                console.log('VectorControlView putData key:', this.vkey, 'values:', this.values, vectorWrapperToArray(this.values));
+            if (this.dataKey) {
+                console.log('VectorControlView putData key:', this.dataKey, 'values:', this.values, vectorWrapperToArray(this.values));
                 console.log(this);
-                this.putData(this.vkey, vectorWrapperToArray(this.values));
+                this.putData(this.dataKey, vectorWrapperToArray(this.values));
             }
             console.log('VectorControlView triggering engine process from input');
             this.emitter.trigger('process');
@@ -100,7 +100,7 @@ export default {
     },
 
     mounted() {
-        const data = this.getData(this.vkey);
+        const data = this.getData(this.dataKey);
         // console.log('VectorControlView mounted, data = ', data);
         this.setValue(data);
         // console.log('VectorControlView mounted, set this.values to ', this.values);

@@ -42,10 +42,10 @@ function arrayToMatrixWrapper(array) {
 
 export default {
     props: {
-        vkey:     { type: String,   required: true }, // injected by Rete
-        emitter:  { type: Object,   required: true }, // injected by Rete
         getData:  { type: Function, required: true }, // injected by Rete
         putData:  { type: Function, required: true }, // injected by Rete
+        emitter:  { type: Object,   required: true },
+        dataKey:  { type: String,   required: true },
         rowIdx:   { type: Number,   required: true }, // used to position control within parent grid
     },
 
@@ -72,10 +72,10 @@ export default {
 
         onInput(event) {
             // console.log('MatrixControlView updateData');
-            if (this.vkey) {
-                console.log('MatrixControlView putData key:', this.vkey, 'values:', this.values, matrixWrapperToArray(this.values));
+            if (this.dataKey) {
+                console.log('MatrixControlView putData key:', this.dataKey, 'values:', this.values, matrixWrapperToArray(this.values));
                 console.log(this);
-                this.putData(this.vkey, matrixWrapperToArray(this.values));
+                this.putData(this.dataKey, matrixWrapperToArray(this.values));
             }
             console.log('MatrixControlView triggering engine process from input');
             this.emitter.trigger('process');
@@ -107,7 +107,7 @@ export default {
     },
 
     mounted() {
-        this.setValue(this.getData(this.vkey));
+        this.setValue(this.getData(this.dataKey));
     },
 };
 </script>

@@ -6,6 +6,6 @@ export class VectorLabelControl extends Rete.Control {
         super(key);
         this.render = 'vue';
         this.component = VectorLabelControlView;
-        this.props = { emitter, vkey: key, rowIdx };
+        this.props = { emitter, dataKey: key, rowIdx };
     }
 };

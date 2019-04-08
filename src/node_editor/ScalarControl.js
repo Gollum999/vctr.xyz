@@ -7,7 +7,7 @@ export class ScalarControl extends Rete.Control {
         super(key);
         this.render = 'vue';
         this.component = ScalarControlView;
-        this.props = { emitter, vkey: key, readOnly };
+        this.props = { emitter, dataKey: key, readOnly };
     }
 
     setValue(val) {
