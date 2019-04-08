@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, mat4 } from 'gl-matrix';
 import _ from 'lodash';
 import Rete from 'rete';
 
@@ -285,13 +285,15 @@ class AddOperation extends BaseOperation {
     };
 
     static calculate(lhs, rhs) {
+        // console.log('AddOperation', lhs, rhs);
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
             return lhs.value + rhs.value;
         } else if (lhs.type === 'vector' && rhs.type === 'vector') {
             const out = vec3.create();
             return vec3.add(out, lhs.value, rhs.value);
         } else if (lhs.type === 'matrix' && rhs.type === 'matrix') {
-            throw new Error('Not implemented'); // TODO
+            const out = mat4.create();
+            return mat4.add(out, lhs.value, rhs.value);
         }
         throw new Error('AddOperation unsupported input types', lhs.type, rhs.type);
     }
@@ -319,7 +321,8 @@ class SubtractOperation extends BaseOperation {
             const out = vec3.create();
             return vec3.subtract(out, lhs.value, rhs.value);
         } else if (lhs.type === 'matrix' && rhs.type === 'matrix') {
-            throw new Error('Not implemented'); // TODO
+            const out = mat4.create();
+            return mat4.subtract(out, lhs.value, rhs.value);
         }
         throw new Error('SubtractOperation unsupported input types', lhs.type, rhs.type);
     }
@@ -348,8 +351,26 @@ class MultiplyOperation extends BaseOperation {
         } else if (lhs.type === 'scalar' && rhs.type === 'vector') {
             const out = vec3.create();
             return vec3.scale(out, rhs.value, lhs.value);
+        } else if (lhs.type === 'scalar' || rhs.type === 'matrix') {
+            const out = mat4.create();
+            return mat4.multiplyScalar(out, rhs.value, lhs.value);
+        } else if (lhs.type === 'vector' || rhs.type === 'matrix') {
+            const out = vec3.create();
+            const rhsT = mat4.create();
+            mat4.transpose(rhsT, rhs.value); // gl-matrix is column-major, but I am row-major; transpose before and after calculating
+            vec3.transformMat4(out, lhs.value, rhsT);
+            return mat4.transpose(out, out); // TODO will this work, or do I need a second temp matrix?
+        } else if (lhs.type === 'matrix' || rhs.type === 'scalar') {
+            const out = mat4.create();
+            return mat4.multiplyScalar(out, lhs.value, rhs.value);
         } else if (lhs.type === 'matrix' || rhs.type === 'matrix') {
-            throw new Error('Not implemented'); // TODO
+            const out = mat4.create();
+            const lhsT = mat4.create();
+            const rhsT = mat4.create();
+            mat4.transpose(lhsT, lhs.value); // gl-matrix is column-major, but I am row-major; transpose before and after calculating
+            mat4.transpose(rhsT, rhs.value);
+            mat4.multiply(out, lhsT, rhsT);
+            return mat4.transpose(out, out); // TODO will this work, or do I need a second temp matrix?
         }
         throw new Error('MultiplyOperation unsupported input types', lhs.type, rhs.type);
     }
@@ -381,7 +402,8 @@ class DivideOperation extends BaseOperation {
                 const out = vec3.create();
                 return vec3.scale(out, lhs.value, 1.0 / rhs.value);
             } else if (lhs.type === 'matrix') {
-                throw new Error('Not implemented'); // TODO
+                const out = mat4.create();
+                return mat4.multiplyScalar(out, lhs.value, 1.0 / rhs.value);
             }
         }
         throw new Error('DivideOperation unsupported input types', lhs.type, rhs.type);

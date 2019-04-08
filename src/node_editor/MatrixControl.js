@@ -3,7 +3,7 @@ import MatrixControlView from './MatrixControlView.vue';
 
 export class MatrixControl extends Rete.Control {
     constructor(emitter, key, rowIdx) {
-        console.log('MatrixControl constrtuctor');
+        // console.log('MatrixControl constructor');
         super(key);
         this.render = 'vue';
         this.component = MatrixControlView;
@@ -11,7 +11,7 @@ export class MatrixControl extends Rete.Control {
     }
 
     setValue(val) {
-        console.log(`MatrixControl setValue to ${val} (from ${this.vueContext.values})`);
+        // console.log('MatrixControl setValue to', val, '(from ', this.vueContext.values, ')');
         this.vueContext.setValue(val);
     }
 
