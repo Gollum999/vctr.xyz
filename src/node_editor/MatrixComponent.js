@@ -5,7 +5,6 @@ import sockets from './sockets';
 import { MatrixControl } from './MatrixControl';
 import { MatrixLabelControl } from './MatrixLabelControl';
 import { ColorControl } from './ColorControl';
-import { vec3 } from 'gl-matrix';
 
 export class MatrixComponent extends Rete.Component {
     constructor() {
@@ -35,8 +34,8 @@ export class MatrixComponent extends Rete.Component {
         //   To check things like input state and component configuration, I either need to go through node.data or need to manually find the node
         //     through the editor by ID
         //   Also note that anything in data will be saved between sessions
-        console.log(`MatrixComponent worker "${node.name}"`);
-        console.log(node.data);
+        // console.log(`MatrixComponent worker "${node.name}"`);
+        // console.log(node.data);
 
         // TODO pull this out somewhere
         function getInput(name) {
@@ -50,13 +49,13 @@ export class MatrixComponent extends Rete.Component {
         if (_.isNil(input)) {
             editorNode.controls.get('value').setReadOnly(false);
         } else {
-            node.data.value = vec3.clone(input); // Make a copy to avoid sharing the same object between nodes
+            node.data.value = input.slice(); // Make a copy to avoid sharing the same object between nodes
             editorNode.controls.get('value').setValue(input);
             editorNode.controls.get('value').setReadOnly(true);
         }
 
         if (!_.isNil(node.data.value)) {
-            outputs['matrix'] = vec3.clone(node.data.value); // Make a copy to avoid sharing the same object between nodes
+            outputs['matrix'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
         }
     }
 };

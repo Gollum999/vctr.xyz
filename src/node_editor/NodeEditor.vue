@@ -53,7 +53,6 @@ import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
-import { mat4 } from 'gl-matrix';
 import contextMenu from 'vue-context-menu';
 import { EventBus } from '../EventBus';
 
@@ -143,7 +142,12 @@ export default {
                 node = await this.components['vector'].createNode({'value': [0, 0, 0]});
                 break;
             case 'matrix':
-                node = await this.components['matrix'].createNode({'value': mat4.create()});
+                node = await this.components['matrix'].createNode({'value': [
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1,
+                ]});
                 break;
             case 'operation-add':
             case 'operation-subtract':
