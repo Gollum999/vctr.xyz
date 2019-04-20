@@ -84,10 +84,10 @@ export default {
             // TODO Get allow left click drag too?  (Will require modification of CameraControls I think...)
             this.controls.minZoom = 2;
             this.controls.maxZoom = 100;
-            this.controls.object.zoom = 10;
+            this.controls._camera.zoom = 10;
             this.controls.dollySpeed = -1; // TODO ortho zoom is inverted for some reason?
-            this.controls.phiSpeed = 0; // No rotation
-            this.controls.thetaSpeed = 0; // No rotation
+            this.controls.azimuthRotateSpeed = 0; // No rotation
+            this.controls.polarRotateSpeed = 0; // No rotation
         }
         this.anim();
 
