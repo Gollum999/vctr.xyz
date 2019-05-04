@@ -11,7 +11,7 @@ export class ColorControl extends Rete.Control {
     }
 
     setValue(val) {
-        console.log(`ColorControl setValue to ${val}`);
+        // console.log(`ColorControl setValue to ${val}`);
         this.vueContext.color = val;
     }
 };

@@ -28,6 +28,7 @@ export class ScalarComponent extends Rete.Component {
         }
 
         const editorNode = this.editor.nodes.find(n => n.id === node.id);
+        // console.log('editorNode.controls', editorNode.controls);
 
         const input = getInput('scalar');
         if (_.isNil(input)) {

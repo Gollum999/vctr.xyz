@@ -16,7 +16,7 @@ export class MatrixControl extends Rete.Control {
     }
 
     setReadOnly(readOnly) {
-        console.log(`MatrixControl setReadOnly ${readOnly}`);
+        // console.log(`MatrixControl setReadOnly ${readOnly}`);
         this.vueContext.readOnly = readOnly;
     }
 };

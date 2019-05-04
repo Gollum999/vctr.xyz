@@ -15,16 +15,16 @@ body, html.md-theme-default {
     background-color: #333333;
 }
 
-// These are outside of the #app div
+/* These are outside of the #app div */
 body .md-select-menu {
     font-family: Ubuntu, Avenir, Helvetica, Arial, sans-serif;
     font-size: 12px;
-    // TODO hack, not sure why the default style is transparent for material select menu
+    /* TODO hack, not sure why the default style is transparent for material select menu */
     background-color: white;
 }
 body .md-select-menu.md-menu-content {
     width: initial;
-    // min-width: 100px;
+    /* min-width: 100px; */
 }
 
 .material-icons.md-dark {

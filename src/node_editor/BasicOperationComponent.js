@@ -21,12 +21,18 @@ const s = Object.freeze({
 });
 
 function socketTypeListToSocketName(typeList) {
+    if (!(typeList instanceof Set)) {
+        throw new Error('socketTypeListToSocketName: Input should be of type Set');
+    }
     // Ew.
     if (typeList.size === 3) {
-        console.assert(typeList.has('scalar') &&
-                       typeList.has('vector') &&
-                       typeList.has('matrix'));
-        return 'anything';
+        if (typeList.has('scalar') &&
+            typeList.has('vector') &&
+            typeList.has('matrix')) {
+            return 'anything';
+        } else {
+            throw new Error(`Could not determine socket name from list "${typeList}"`);
+        }
     } else if (typeList.size === 2) {
         if (typeList.has('scalar') && typeList.has('vector')) {
             return 'scalarOrVector';
@@ -35,12 +41,15 @@ function socketTypeListToSocketName(typeList) {
         } else if (typeList.has('vector') && typeList.has('matrix')) {
             return 'vectorOrMatrix';
         } else {
-            throw new Error('Could not determine socket name from list', typeList);
+            throw new Error(`Could not determine socket name from list "${typeList}"`);
         }
     } else if (typeList.size === 1) {
+        if (!util.intersects(typeList, new Set(['scalar', 'vector', 'matrix']))) {
+            throw new Error(`Could not determine socket name from list "${typeList}"`);
+        }
         return typeList.values().next().value;
     }
-    throw new Error('Could not determine socket name from list', typeList);
+    throw new Error(`Could not determine socket name from list "${typeList}"`);
 }
 
 // TODO There should be a way to avoid this...
@@ -170,20 +179,22 @@ class BaseOperation {
                 }
             }
         }
+        // console.log('oppositeSocketTypes:', oppositeSocketTypes, 'compatibleTypes:', compatibleTypes);
 
         if (!_.isEmpty(compatibleTypes)) {
-            // TODO this should check whether or not an input is connected, don't assume 'anything' means no connections
             // console.log(`_updateSocketTypeForOperationCompatibility ${input.node.name} ${input.name}, current types:`, socketTypes, 'compat:', compatibleTypes);
-            if (!_.isEqual(socketTypes, s.anything)) {
-                // Sanity check that previous socket type updates kept everything compatible
-                // console.log('TEST socketTypes !== anything, verifying types are still compatible');
-                console.assert(util.isSubset(socketTypes, compatibleTypes), socketTypes, compatibleTypes);
-            } else if (!_.isEqual(socketTypes, compatibleTypes)) {
+            // if (!_.isEmpty(input.connections)) {
+            //     // Sanity check that previous socket type updates kept everything compatible
+            //     console.log('TEST input has connection, verifying types are still compatible (types: "', socketTypes, '", compat: "', compatibleTypes, '"');
+            //     // TODO maybe removeInputConnectionsIfIncompatible should happen here?
+            //     // console.assert(util.isSubset(socketTypes, compatibleTypes), socketTypes, compatibleTypes);
+            // } else
+            if (!util.isSubset(socketTypes, compatibleTypes)) {
                 // console.log('TEST _updateSocketTypeForOperationCompatibility updating', input.node.name, input.name, 'from', socketTypes, 'to', compatibleTypes);
                 updateIoType(input, compatibleTypes);
             }
         } else {
-            // console.log('compatibleTypes was empty'); // TODO will this happen often?
+            throw new Error(`Could not determine compatible types for ${input.node.name} ${input.name}`);
         }
     }
 
@@ -196,25 +207,23 @@ class BaseOperation {
     }
 
     static _removeIoConnectionsIfIncompatible(editor, io, isInput) {
-        // console.log('TEST _removeIoConnectionsIfIncompatible io:', io);
+        // console.log('TEST _removeIoConnectionsIfIncompatible io:', io.name, 'isInput:', isInput, 'cxns empty:', _.isEmpty(io.connections));
         const socketTypes = getSocketTypes(io.socket);
-        if (!_.isEmpty(io.connections)) {
-            for (const connection of io.connections) {
-                const typesFromInput = getSocketTypes(isInput ? connection.output.socket : connection.input.socket);
-                // console.log('connection:', connection);
-                // console.log('typesFromInput:', typesFromInput, 'socketTypes:', socketTypes);
-                if (!util.intersects(socketTypes, typesFromInput)) {
-                    // console.log(`TEST ${isInput ? 'input' : 'output'} connection incompatible, removing`);
-                    // console.log(socketTypes, typesFromInput, connection);
-                    editor.removeConnection(connection); // TODO dangerous to call this while iterating over connections?
-                }
+        for (const connection of io.connections) {
+            const typesFromInput = getSocketTypes(isInput ? connection.output.socket : connection.input.socket);
+            // console.log('connection:', connection);
+            // console.log('typesFromInput:', typesFromInput, 'socketTypes:', socketTypes);
+            if (!util.intersects(socketTypes, typesFromInput)) {
+                // console.log(`TEST ${isInput ? 'input' : 'output'} connection incompatible, REMOVING`);
+                // console.log(socketTypes, typesFromInput, connection);
+                editor.removeConnection(connection); // TODO dangerous to call this while iterating over connections?
             }
         }
     }
 
     static updateOutputSocketTypes(editor, editorNode) {
         if (!this.inputToOutputTypeMap) {
-            // console.log(`TEST updateOutputSocketTypes input to output type map is null, returning early (${editorNode.name} ${lhsTypes} ${rhsTypes})`);
+            // console.log(`TEST updateOutputSocketTypes input to output type map is null, returning early (${editorNode.name})`);
             return;
         }
 
@@ -230,7 +239,7 @@ class BaseOperation {
             // console.log(`TEST updateOutputSocketTypes expected output for "${editorNode.name}" is 'ignore', skipping (from "${lhsTypes}" "${rhsTypes}")`);
             return;
         }
-        // console.log(`TEST updateOutputSocketTypes updating output for "${editorNode.name}" to`, expectedOutputTypes, `" (from "${lhsTypes}" "${rhsTypes}")`);
+        // console.log(`TEST updateOutputSocketTypes updating output for "${editorNode.name}" to`, expectedOutputTypes, '" (from "', lhsTypes, '" "', rhsTypes, ')');
         const output = editorNode.outputs.get('result');
         updateIoType(output, expectedOutputTypes); // TODO can check if update required for efficiency
 
@@ -345,25 +354,25 @@ class MultiplyOperation extends BaseOperation {
         // TODO how to clean this up and/or assert that all paths are covered?
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
             return lhs.value * rhs.value;
-        } else if (lhs.type === 'vector' && rhs.type === 'scalar') {
-            const out = vec3.create();
-            return vec3.scale(out, lhs.value, rhs.value);
         } else if (lhs.type === 'scalar' && rhs.type === 'vector') {
             const out = vec3.create();
             return vec3.scale(out, rhs.value, lhs.value);
-        } else if (lhs.type === 'scalar' || rhs.type === 'matrix') {
+        } else if (lhs.type === 'scalar' && rhs.type === 'matrix') {
             const out = mat4.create();
             return mat4.multiplyScalar(out, rhs.value, lhs.value);
-        } else if (lhs.type === 'vector' || rhs.type === 'matrix') {
+        } else if (lhs.type === 'vector' && rhs.type === 'scalar') {
+            const out = vec3.create();
+            return vec3.scale(out, lhs.value, rhs.value);
+        } else if (lhs.type === 'vector' && rhs.type === 'matrix') {
             const out = vec3.create();
             const rhsT = mat4.create();
-            mat4.transpose(rhsT, rhs.value); // gl-matrix is column-major, but I am row-major; transpose before and after calculating
-            vec3.transformMat4(out, lhs.value, rhsT);
-            return mat4.transpose(out, out); // TODO will this work, or do I need a second temp matrix?
-        } else if (lhs.type === 'matrix' || rhs.type === 'scalar') {
+            mat4.transpose(rhsT, rhs.value); // gl-matrix is column-major, but I am row-major; transpose before calculating
+            const result = vec3.transformMat4(out, lhs.value, rhsT);
+            return result;
+        } else if (lhs.type === 'matrix' && rhs.type === 'scalar') {
             const out = mat4.create();
             return mat4.multiplyScalar(out, lhs.value, rhs.value);
-        } else if (lhs.type === 'matrix' || rhs.type === 'matrix') {
+        } else if (lhs.type === 'matrix' && rhs.type === 'matrix') {
             const out = mat4.create();
             const lhsT = mat4.create();
             const rhsT = mat4.create();
@@ -423,6 +432,9 @@ class DotOperation extends BaseOperation {
     static inputToOutputTypeMap = null;
 
     static calculate(lhs, rhs) {
+        if (lhs.type !== 'vector' || rhs.type !== 'vector') {
+            throw new Error('DotOperation unsupported input types', lhs.type, rhs.type);
+        }
         return vec3.dot(lhs.value, rhs.value);
     }
 }
@@ -440,6 +452,9 @@ class CrossOperation extends BaseOperation {
     static inputToOutputTypeMap = null;
 
     static calculate(lhs, rhs) {
+        if (lhs.type !== 'vector' || rhs.type !== 'vector') {
+            throw new Error('CrossOperation unsupported input types', lhs.type, rhs.type);
+        }
         const out = vec3.create();
         return vec3.cross(out, lhs.value, rhs.value);
     }
@@ -496,18 +511,21 @@ export class BasicOperationComponent extends Rete.Component {
         }));
 
         const anySocketTypeMismatch = (inputArray.some(([name, input]) => {
-            console.assert(input.connections.length <= 1);
+            console.assert(input.connections.length <= 1); // Enforced by editor
             if (_.isEmpty(input.connections)) {
                 return false;
             }
             const connection = input.connections[0];
             // TODO doesn't account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
+            // TODO checking by socket name is overlay aggressive; could instead check for type subset
             return connection.input.socket.name !== connection.output.socket.name;
         }));
 
         // const needsUpdate = hasDynamicInputSockets && (anyConnectionEmpty || anySocketTypeMismatch); // TODO dynamic also could just mean that the socket can go from 'anything' to input type
         const needsUpdateFromInputs = anyConnectionEmpty || anySocketTypeMismatch;
+        // console.log('TEST', editorNode.name, 'needs input update?', needsUpdateFromInputs);
         if (needsUpdateFromInputs) {
+        // if (true) {
             // First, update each input socket based on its connection and based on what types the current operation allows
             operation.updateSocketTypesFromInputs(this.editor, editorNode);
         }
