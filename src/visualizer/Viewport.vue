@@ -147,14 +147,15 @@ export default {
 </style>
 
 <style>
-#app .viewport canvas {
-    height: 100%;
-}
+/* #app .viewport canvas { */
+/*     height: 100%; */
+/* } */
 #app .viewport iframe {
     visibility: visible !important; /* This fixes getting 'resize' callbacks on Firefox */
 
     /* These two make the resize behavior a bit more responsive/less jumpy on Firefox */
     /* margin-right: initial; */
-    position: absolute; /* This positions the iframe on top of the canvas to avoid weird flow issues */
+    /* NOTE: This breaks ALL events with newer vue-gl versions. */
+    /* position: absolute; /* This positions the iframe on top of the canvas to avoid weird flow issues */
 }
 </style>

@@ -395,7 +395,7 @@ export default {
         (async () => { this.loadState(); })();
 
         this.editor.view.resize();
-        this.editor.trigger('process');
+        this.editor.trigger('process'); // TODO what is the difference between this and this.engine.process()?
 
         this.$nextTick(() => {
             // For some reason the initial render has a scroll bar, so need to force resize again to take up whole container
