@@ -5,20 +5,20 @@
 
     <div class="buttons-add-nodes">
       <md-button class="md-icon-button md-dense md-raised" type="button" title="Add scalar" @click="addNode('scalar')">
-        <md-icon class="custom-icon" md-src="/static/scalar.svg" />
+        <md-icon class="custom-icon" :md-src="require('@/assets/scalar.svg')" />
       </md-button>
       <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector" @click="addNode('vector')">
-        <md-icon class="custom-icon" md-src="/static/vector.svg" />
+        <md-icon class="custom-icon" :md-src="require('@/assets/vector.svg')" />
       </md-button>
       <md-button class="md-icon-button md-dense md-raised" type="button" title="Add matrix" @click="addNode('matrix')">
-        <md-icon class="custom-icon" md-src="/static/matrix.svg" />
+        <md-icon class="custom-icon" :md-src="require('@/assets/matrix.svg')" />
       </md-button>
       <!-- TODO not sure why "auto" size seems truncated on the right (possibly doesn't take scroll bar width into account) -->
       <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
       <md-menu md-size="medium" md-align-trigger>
         <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
         <md-button class="md-icon-button md-dense md-raised" type="button" title="Add basic operation" md-menu-trigger>
-          <md-icon class="custom-icon" md-src="/static/operation.svg" />
+          <md-icon class="custom-icon" :md-src="require('@/assets/operation.svg')" />
         </md-button>
 
         <md-menu-content>
@@ -395,7 +395,7 @@ export default {
         (async () => { this.loadState(); })();
 
         this.editor.view.resize();
-        this.editor.trigger('process'); // TODO what is the difference between this and this.engine.process()?
+        this.editor.trigger('process');
 
         this.$nextTick(() => {
             // For some reason the initial render has a scroll bar, so need to force resize again to take up whole container
