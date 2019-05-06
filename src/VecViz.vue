@@ -1,15 +1,20 @@
 <template>
-  <div>
-    <Split class="vec-viz" direction="vertical" :gutterSize="8" @onDragStart="onDragStart" @onDrag="onDrag" @onDragEnd="onDragEnd">
-      <SplitArea :size="50" :minSize="150">
-        <QuadViewport />
-      </SplitArea>
-      <SplitArea class="bottom-split" :size="50" :minSize="150">
-        <NodeEditor @process="editorJson = $event"/>
-      </SplitArea>
-    </Split>
-    <p style="color: #333333">{{editorJson}}</p>
-  </div>
+<div class="vec-viz">
+  <md-button class="settings-button md-raised md-dense" to="/vecviz/settings">
+    <md-icon>settings</md-icon>
+    Settings
+  </md-button>
+  <Split direction="vertical" :gutterSize="8" @onDragStart="onDragStart" @onDrag="onDrag" @onDragEnd="onDragEnd">
+    <SplitArea :size="50" :minSize="150">
+      <QuadViewport />
+    </SplitArea>
+    <SplitArea class="bottom-split" :size="50" :minSize="150">
+      <NodeEditor @process="editorJson = $event"/>
+    </SplitArea>
+  </Split>
+  <router-view name="modal" />
+  <p style="color: #333333">{{editorJson}}</p>
+</div>
 </template>
 
 <script>
@@ -47,10 +52,23 @@ export default {
     overflow-y: hidden;
 }
 .vec-viz {
+    position: relative;
     border: 1px solid #dddddd;
     border-bottom: 3px solid #dddddd; /* TODO this is a hack to put a bottom border despite NodeEditor's hidden overflow */
     margin-left: auto;
     margin-right: auto;
+}
+.settings-button {
+    /* TODO probably a better way to position this but I am a CSS noob */
+    position: absolute;
+    right: 0px;
+    transform: translateY(-100%);
+    margin-top: 0px;
+    margin-right: 0px;
+    top: -6px;
+}
+.settings-button:hover {
+    text-decoration: none;
 }
 
 @media screen and (max-height: 920px) {

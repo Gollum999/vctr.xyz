@@ -106,6 +106,10 @@ export default {
     data() {
         return {
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
+            // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
+            settings: {
+                defaultVectorColor: '#FFFF00',
+            },
             lastNodePosition: null,
             newNodesShouldBeCentered: true,
             container: null,
@@ -344,6 +348,12 @@ export default {
     },
 
     mounted() {
+        const loadSettings = () => {
+            this.settings = JSON.parse(window.localStorage.getItem('node_editor_settings')) || this.settings;
+        };
+        loadSettings();
+        EventBus.$on('settings-updated', loadSettings);
+
         EventBus.$on('split-resized', () => {
             this.editor.view.resize();
         });

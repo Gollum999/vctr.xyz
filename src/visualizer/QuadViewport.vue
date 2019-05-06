@@ -7,6 +7,7 @@
         <!-- </template> -->
         <vgl-grid-helper
             ref="grid_free"
+            v-if="settings.showGrid"
             :size="20"
             :divisions="20"
             :color-center-line="'#888888'"
@@ -14,6 +15,7 @@
         />
         <vgl-grid-helper
             ref="grid_top"
+            v-if="settings.showGrid"
             :size="200"
             :divisions="200"
             :color-center-line="'#888888'"
@@ -21,6 +23,7 @@
         />
         <vgl-grid-helper
             ref="grid_front"
+            v-if="settings.showGrid"
             :rotation="`${Math.PI / 2} 0 0`"
             :size="200"
             :divisions="200"
@@ -29,6 +32,7 @@
         />
         <vgl-grid-helper
             ref="grid_side"
+            v-if="settings.showGrid"
             :rotation="`0 0 ${Math.PI / 2}`"
             :size="200"
             :divisions="200"
@@ -46,7 +50,7 @@
         />
         <vgl-ambient-light color="#ffeecc" />
         <vgl-directional-light position="0 1 1" />
-        <vgl-axes-helper size="5" />
+        <vgl-axes-helper v-if="settings.showAxis" size="5" />
       </vgl-scene>
 
       <div v-if="expandedView" class="viewport-container viewport-container-expanded">
@@ -77,8 +81,11 @@
 
 <script>
 /* import * as THREE from 'three'; */
-import Viewport from './Viewport';
+import _ from 'lodash';
 import { vec3 } from 'gl-matrix';
+
+import { EventBus } from '../EventBus';
+import Viewport from './Viewport';
 
 class VectorView {
     constructor(value, color) {
@@ -94,6 +101,11 @@ export default {
     },
     data() {
         return {
+            // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
+            settings: {
+                showAxis: true,
+                showGrid: true,
+            },
             vectors: [],
             vec3: vec3, // For use in render
             expandedView: null,
@@ -107,13 +119,33 @@ export default {
         },
     },
     mounted() {
+        const loadSettings = () => {
+            this.settings = JSON.parse(window.localStorage.getItem('viewport_settings')) || this.settings;
+            console.log('Viewport settings loaded:', this.settings);
+
+            this.$nextTick(() => {
+                // TODO This is kind of a hack; figure out best practices with v-if plus stateful components
+                // TODO maybe I can just hide the grids or set the color to transparent
+                if (!_.isNil(this.$refs.grid_free)) {
+                    this.$refs.grid_free.inst.layers.set(1);
+                }
+                if (!_.isNil(this.$refs.grid_top)) {
+                    this.$refs.grid_top.inst.layers.set(2);
+                }
+                if (!_.isNil(this.$refs.grid_front)) {
+                    this.$refs.grid_front.inst.layers.set(3);
+                }
+                if (!_.isNil(this.$refs.grid_side)) {
+                    this.$refs.grid_side.inst.layers.set(4);
+                }
+                this.$forceUpdate(); // TODO bit of a hack; if showAxis is toggled, the ortho views don't re-render immediately
+            });
+        };
+        loadSettings();
+        EventBus.$on('settings-updated', loadSettings);
+
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
         /* this.$refs.scene.inst.background = new THREE.Color(0xffffff); */
-
-        this.$refs.grid_free.inst.layers.set(1);
-        this.$refs.grid_top.inst.layers.set(2);
-        this.$refs.grid_front.inst.layers.set(3);
-        this.$refs.grid_side.inst.layers.set(4);
 
         this.$root.$on('node_engine_processed', editorJson => {
             console.log('QuadViewport handling process event');
