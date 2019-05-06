@@ -35,7 +35,7 @@
             :color-center-line="'#888888'"
             :color-grid="'#444444'"
         />
-        <vgl-arrow-helper v-for="(v, idx) in vectors" v-if="v && vec3.length(v.value)"
+        <vgl-arrow-helper v-for="(v, idx) in renderVectors"
             :key="idx"
             :position="'0 0 0'"
             :dir="`${v.value[0]} ${v.value[1]} ${v.value[2]}`"
@@ -98,6 +98,13 @@ export default {
             vec3: vec3, // For use in render
             expandedView: null,
         };
+    },
+    computed: {
+        renderVectors() {
+            return this.vectors.filter(v => {
+                return v && vec3.length(v.value);
+            });
+        },
     },
     mounted() {
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
