@@ -1,6 +1,6 @@
 <template>
   <!-- NOTE: This dblclick listener is only to prevent the default dblclick zoom in Rete -->
-  <div class="node-editor" @dblclick.capture.stop="">
+  <div class="node-editor" @dblclick.capture.stop>
     <div class="rete" id="rete" />
 
     <div class="buttons-add-nodes">

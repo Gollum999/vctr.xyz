@@ -11,7 +11,7 @@
   </md-menu>
 
   <!-- <div class="color-picker-button" :style="{'grid-row': rowIdx, 'background-color': color}"> -->
-  <!--   <div @mousedown.stop="" @touchstart.stop=""> -->
+  <!--   <div @mousedown.stop @touchstart.stop> -->
   <!--     <color-picker :value="color" @input="colorUpdated" disableAlpha /> -->
   <!--   </div> -->
   <!-- </div> -->

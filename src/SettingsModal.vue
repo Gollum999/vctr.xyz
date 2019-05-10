@@ -1,6 +1,6 @@
 <template>
 <div class="modal-background" @click.prevent.stop="close">
-  <div class="modal-body" @click.prevent.stop="">
+  <div class="modal-body" @click.prevent.stop>
     <md-button class="close-button md-icon-button" @click.prevent.stop="close">
       <md-icon>close</md-icon>
     </md-button>

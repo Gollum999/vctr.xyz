@@ -95,24 +95,36 @@
  - More operation types
 ** Undo/redo support
 ** Camera
- - Recenter view on page load
- - Recenter view try to fit all nodes
- - Right click pan to match viewport?
- - Left click box select?
- - When adding nodes, add to center of view and only reposition if node too close to center
+ - [ ] Recenter view on page load?
+ - [X] Recenter view try to fit all nodes
+ - [ ] Right click pan to match viewport?
+ - [ ] Left click box select?
+ - [X] When adding nodes, add to center of view and only reposition if node too close to center
 
 ** Nodes
- - More render settings
- - Togglable rendering
- - Custom node titles
-   - Render node name in viewport?
- - Random output colors
- - Custom paste handler
- - Slightly wider vector input (enough for 3 digits + decimal)
- - Truncate input display values?
- - Condense padding a bit more if possible
+ - [ ] More render settings
+ - [ ] Togglable rendering
+ - [ ] Custom node titles
+   - [ ] Render node name in viewport?
+ - [ ] Random output colors
+ - [ ] Custom paste handler
+ - [ ] Slightly wider vector input (enough for 3 digits + decimal)
+ - [ ] Truncate input display values?
+ - [ ] Condense padding a bit more if possible
 ** Node types
- - Render scalar values somehow
- - Render matrices?  grid w/ transform?
+ - [ ] Render scalar values somehow
+ - [ ] Render matrices?  grid w/ transform?
 *** Matrix support
- - New matrix icon?
+ - [ ] New matrix icon?
+** Plugins
+ - [[https://rete.js.org/#/docs/plugins/keyboard][Keyboard plugin]]
+   - Delete hotkey
+   - Could I modify this to get copy-paste?
+ - [[https://rete.js.org/#/docs/plugins/area][Area plugin]]
+   - I think this just gives view recentering like I do manually, but it also gives zoom/translate bounds on the canvas
+ - [[https://rete.js.org/#/docs/plugins/code][Code plugin]]
+   - Generate JS from node editor (can I go the other way too?)
+ - [[https://rete.js.org/#/docs/plugins/minimap][Minimap plugin]]
+ - [[https://rete.js.org/#/docs/plugins/auto-arrange][Auto-arrange plugin]]
+ - [[https://rete.js.org/#/docs/plugins/history][History plugin]]
+   - Undo/redo support!
