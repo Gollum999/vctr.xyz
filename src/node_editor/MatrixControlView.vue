@@ -3,9 +3,9 @@
   <md-field v-for="(item, idx) in values" :key="`matrix-value-${idx}`">
     <md-input
       type="number"
-      v-model.number="item.val"
+      :value="item.val"
       :readonly="readOnly"
-      @input="onInput"
+      @change="onChange($event, idx)"
       @copy.prevent.stop="onCopy"
       @paste.prevent.stop="onPaste(idx, $event)"
     />
@@ -24,6 +24,7 @@
 
 <script>
 import _ from 'lodash';
+import { FieldChangeAction } from './util';
 
 const DEFAULT_MATRIX_WRAPPER = Object.freeze([
     {val: 1}, {val: 0}, {val: 0}, {val: 0},
@@ -57,6 +58,19 @@ export default {
         };
     },
 
+    watch: {
+        values: {
+            handler: function (newVal, oldVal) {
+                /* console.log('MatrixControlView value watcher, calling putData', this.dataKey, this.values, newVal, oldVal); */
+                if (this.dataKey) {
+                    /* console.log('MatrixControlView putData key:', this.dataKey, 'values:', this.values, matrixWrapperToArray(this.values)); */
+                    this.putData(this.dataKey, matrixWrapperToArray(this.values));
+                }
+            },
+            deep: true,
+        },
+    },
+
     methods: {
         setValue(value) {
             // console.log('MatrixControlView setValue', value);
@@ -70,14 +84,16 @@ export default {
             }
         },
 
-        onInput(event) {
-            // console.log('MatrixControlView updateData');
-            if (this.dataKey) {
-                console.log('MatrixControlView putData key:', this.dataKey, 'values:', this.values, matrixWrapperToArray(this.values));
-                console.log(this);
-                this.putData(this.dataKey, matrixWrapperToArray(this.values));
-            }
-            console.log('MatrixControlView triggering engine process from input');
+        onChange(event, idx) {
+            /* console.log('MatrixControlView onChange old values:', this.values); */
+            const newValues = this.values.map(i => ({...i})); // Make sure to deep copy the wrappers
+            newValues[idx].val = parseFloat(event.target.value);
+            /* console.log('MatrixControlView onChange new values:', newValues); */
+            /* console.log('MatrixControlView adding history', event, idx, this.values, newValues); */
+            this.emitter.trigger('addhistory', new FieldChangeAction(this.values, newValues, val => { this.values = val; }));
+            this.values = newValues;
+
+            /* console.log('MatrixControlView triggering engine process from onChange'); */
             this.emitter.trigger('process');
         },
 

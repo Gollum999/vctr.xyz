@@ -1,8 +1,10 @@
 <template>
-<md-field><md-input type="number" v-model.number="value" :readonly="readOnly" /></md-field>
+<md-field><md-input type="number" :value="value" :readonly="readOnly" @change="onChange" /></md-field>
 </template>
 
 <script>
+import { FieldChangeAction } from './util';
+
 export default {
     props: {
         getData:  { type: Function, required: true },
@@ -20,19 +22,23 @@ export default {
 
     watch: {
         // TODO I think this is the more correct way to handle this (rather than using @input) to avoid duplicate callbacks; use this pattern everywhere?
-        value() {
-            console.log(`ScalarControlView value watcher, calling updateData ${this.dataKey} ${this.value}`);
-            this.updateData(); // TODO Careful of infinite recursion here...
-        },
-    },
-
-    methods: {
-        updateData() {
+        value(newVal, oldVal) {
+            console.log('ScalarControlView value watcher, calling updateData', this.dataKey, this.value, newVal, oldVal);
+            // TODO don't want to call this when undoing...
+            /* this.emitter.trigger('addhistory', new FieldChangeAction(oldVal, newVal, val => { this.value = val; })); */
             console.log(`ScalarControlView updateData() ${this.dataKey} ${this.value}`);
             if (this.dataKey) {
                 this.putData(this.dataKey, this.value);
             }
             this.emitter.trigger('process');
+        },
+    },
+
+    methods: {
+        onChange(event) {
+            /* console.log('onChange', this.value, event); */
+            this.emitter.trigger('addhistory', new FieldChangeAction(this.value, event.target.value, val => { this.value = val; }));
+            this.value = event.target.value;
         },
     },
 

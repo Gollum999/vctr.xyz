@@ -94,6 +94,14 @@
 * Misc node editor
  - More operation types
 ** Undo/redo support
+ - [ ] Current history plugin does not give access to undo stack, which prevents
+   me from doing a couple things.  Maybe submit a patch to the plugin, or write
+   my own, or just try to find some workarounds...
+   - [ ] "Collapse" multiple similar actions (node value updates, cascading
+     socket type changes + connection changes, etc.)
+   - [ ] Save undo/redo state between page loads?
+   - [ ] Clear history stack on load to avoid being able to undo loading?
+     (breaks saving between page loads if I go that way)
 ** Camera
  - [ ] Recenter view on page load?
  - [X] Recenter view try to fit all nodes

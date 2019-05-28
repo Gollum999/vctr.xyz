@@ -3,53 +3,69 @@
   <div class="node-editor" @dblclick.capture.stop>
     <div class="rete" id="rete" />
 
-    <div class="buttons-add-nodes">
-      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add scalar" @click="addNode('scalar')">
-        <md-icon class="custom-icon" :md-src="require('@/assets/scalar.svg')" />
-      </md-button>
-      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector" @click="addNode('vector')">
-        <md-icon class="custom-icon" :md-src="require('@/assets/vector.svg')" />
-      </md-button>
-      <md-button class="md-icon-button md-dense md-raised" type="button" title="Add matrix" @click="addNode('matrix')">
-        <md-icon class="custom-icon" :md-src="require('@/assets/matrix.svg')" />
-      </md-button>
-      <!-- TODO not sure why "auto" size seems truncated on the right (possibly doesn't take scroll bar width into account) -->
-      <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
-      <md-menu md-size="medium" md-align-trigger>
-        <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
-        <md-button class="md-icon-button md-dense md-raised" type="button" title="Add basic operation" md-menu-trigger>
-          <md-icon class="custom-icon" :md-src="require('@/assets/operation.svg')" />
+    <div class="buttons-container">
+      <div class="buttons-group buttons-add-nodes">
+        <md-button class="md-icon-button md-dense md-raised" type="button" title="Add scalar" @click="addNode('scalar')">
+          <md-icon class="custom-icon" :md-src="require('@/assets/scalar.svg')" />
         </md-button>
+        <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector" @click="addNode('vector')">
+          <md-icon class="custom-icon" :md-src="require('@/assets/vector.svg')" />
+        </md-button>
+        <md-button class="md-icon-button md-dense md-raised" type="button" title="Add matrix" @click="addNode('matrix')">
+          <md-icon class="custom-icon" :md-src="require('@/assets/matrix.svg')" />
+        </md-button>
+        <!-- TODO not sure why "auto" size seems truncated on the right (possibly doesn't take scroll bar width into account) -->
+        <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
+        <md-menu md-size="medium" md-align-trigger>
+          <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
+          <md-button class="md-icon-button md-dense md-raised" type="button" title="Add basic operation" md-menu-trigger>
+            <md-icon class="custom-icon" :md-src="require('@/assets/operation.svg')" />
+          </md-button>
 
-        <md-menu-content>
-          <md-menu-item @click="addNode('operation-add')">Add</md-menu-item>
-          <md-menu-item @click="addNode('operation-subtract')">Subtract</md-menu-item>
-          <md-menu-item @click="addNode('operation-multiply')">Multiply</md-menu-item>
-          <md-menu-item @click="addNode('operation-divide')">Divide</md-menu-item>
-          <md-menu-item @click="addNode('operation-dot')">Dot Product</md-menu-item>
-          <md-menu-item @click="addNode('operation-cross')">Cross Product</md-menu-item>
-        </md-menu-content>
-      </md-menu>
+          <md-menu-content>
+            <md-menu-item @click="addNode('operation-add')">Add</md-menu-item>
+            <md-menu-item @click="addNode('operation-subtract')">Subtract</md-menu-item>
+            <md-menu-item @click="addNode('operation-multiply')">Multiply</md-menu-item>
+            <md-menu-item @click="addNode('operation-divide')">Divide</md-menu-item>
+            <md-menu-item @click="addNode('operation-dot')">Dot Product</md-menu-item>
+            <md-menu-item @click="addNode('operation-cross')">Cross Product</md-menu-item>
+          </md-menu-content>
+        </md-menu>
+      </div>
+
+      <span class="buttons-group buttons-spacer" />
+
+      <div class="buttons-group buttons-history">
+        <md-button class="md-icon-button md-dense md-raised" type="button" title="Undo" @click="onUndo">
+          <md-icon>undo</md-icon>
+        </md-button>
+        <md-button class="md-icon-button md-dense md-raised" type="button" title="Redo" @click="onRedo">
+          <md-icon>redo</md-icon>
+        </md-button>
+      </div>
+
+      <span class="buttons-group buttons-spacer" />
+
+      <div class="buttons-group buttons-delete-nodes">
+        <md-button class="md-icon-button md-dense md-raised" type="button" title="Recenter view" @click="recenterView">
+          <md-icon>center_focus_weak</md-icon>
+        </md-button>
+        <md-button class="md-icon-button md-dense md-raised" type="button" title="Clear all nodes" @click="clearAllNodes">
+          <md-icon>delete</md-icon>
+        </md-button>
+      </div>
+
+      <context-menu id="context-menu" ref="ctxMenu">
+        <li class="ctx-item" @click="deleteNode">Delete</li>
+      </context-menu>
     </div>
-
-    <div class="buttons-delete-nodes">
-      <md-button class="md-icon-button md-dense md-raised" type="button" title="Recenter view" @click="recenterView">
-        <md-icon>center_focus_weak</md-icon>
-      </md-button>
-      <md-button class="md-icon-button md-dense md-raised" type="button" title="Clear all nodes" @click="clearAllNodes">
-        <md-icon>delete</md-icon>
-      </md-button>
-    </div>
-
-    <context-menu id="context-menu" ref="ctxMenu">
-      <li class="ctx-item" @click="deleteNode">Delete</li>
-    </context-menu>
   </div>
 </template>
 
 <script>
 import Rete from 'rete';
 import ConnectionPlugin from 'rete-connection-plugin';
+import HistoryPlugin from 'rete-history-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
@@ -220,6 +236,22 @@ export default {
             });
         },
 
+        onUndo() {
+            console.log('UNDO');
+            try {
+                /* console.log('before trigger undo', this.editor.plugins); */
+                this.editor.trigger('undo');
+                /* console.log('after trigger undo'); */
+            } catch (error) {
+                console.warn('caught error in undo event', error);
+            }
+        },
+
+        onRedo() {
+            console.log('REDO');
+            this.editor.trigger('redo');
+        },
+
         recenterView() {
             let viewRect = null;
             for (const [node, nodeView] of this.editor.view.nodes) {
@@ -271,8 +303,9 @@ export default {
             const savedEditorJson = JSON.parse(window.localStorage.getItem('node_editor'));
 
             if (savedEditorJson) {
-                console.log(savedEditorJson);
+                console.log('LOADING:', savedEditorJson);
                 const success = await this.editor.fromJSON(savedEditorJson);
+                console.log('LOADED:', this.editor);
                 if (!success) {
                     console.log('Could not load from local storage, creating demo nodes instead');
                     await this.createDemoNodes();
@@ -317,26 +350,26 @@ export default {
         },
 
         saveState() {
-            console.log('Saving editor state to browser-local storage');
+            console.log('Saving editor state to browser-local storage', this.editor.toJSON());
             window.localStorage.setItem('node_editor', JSON.stringify(this.editor.toJSON()));
             window.localStorage.setItem('node_editor_view_transform', JSON.stringify(this.editor.view.area.transform));
         },
 
         async loadState() {
             console.log('Loading node editor from local storage');
-            this.loadNodes();
 
             const viewTransform = JSON.parse(window.localStorage.getItem('node_editor_view_transform'));
             if (viewTransform) {
                 this.editor.view.area.transform = viewTransform;
                 this.editor.view.area.update();
             }
+
+            await this.loadNodes();
         },
 
         async handleEngineProcess() {
-            console.log('NodeEditor handleEngineProcess');
-            console.log(this.editor.toJSON());
-            await this.engine.abort(); // Stop old job if running
+            console.log('NodeEditor handleEngineProcess', this.editor.toJSON());
+            await this.engine.abort(); // Stop old job if running // TODO this is not syncronized with other invocations of handleEngineProcess
             await this.engine.process(this.editor.toJSON());
 
             // TODO should I save during more events?
@@ -362,6 +395,10 @@ export default {
 
         this.editor.use(ConnectionPlugin);
         this.editor.use(VueRenderPlugin);
+        console.log('NodeEditor mounted, plugins list:', this.editor.plugins);
+        console.log('NodeEditor mounted, events:', this.editor.events);
+        // console.log('NodeEditor mounted, connectionremoved:', this.editor.events['connectionremoved']);
+        // console.log('NodeEditor mounted, connectionremoved handlers:', this.editor.events['connectionremoved'].handlers);
 
         this.engine = new Rete.Engine(this.version);
 
@@ -370,7 +407,17 @@ export default {
             this.engine.register(this.components[key]);
         });
 
-        this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved', this.handleEngineProcess);
+        (async () => {
+            await this.loadState();
+
+            // Don't set up undo/redo callbacks until after finished loading to prevent user from undoing load
+            this.editor.use(HistoryPlugin, { keyboard: true });
+
+            // Don't trigger any of these events until after the initial load is done
+            // TODO still not perfect, doesn't prevent multiple changes from user getting queued up; is there something like Java's 'synchronized' keyword?
+            this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved', this.handleEngineProcess);
+            this.editor.trigger('process'); // Process at least once to make sure the viewports are updated // TODO figure out where this really belongs; the order of events here is not very clear
+        })();
 
         this.editor.on('nodecreated', node => {
             Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
@@ -401,8 +448,6 @@ export default {
         //     console.warn(`Warning from Rete engine`);
         //     console.warn(exc);
         // });
-
-        (async () => { this.loadState(); })();
 
         this.editor.view.resize();
         this.editor.trigger('process');
@@ -477,14 +522,14 @@ export default {
   width: 100%
   min-height: 100px
   overflow-y: hidden
-  .buttons-add-nodes
+  .buttons-container
+    display: flex
     position: absolute
     left: 5px
     top: 12px
-  .buttons-delete-nodes
-    position: absolute
     right: 5px
-    top: 12px
+    .buttons-spacer
+      flex-grow: 1
 .rete
   display: block
   height: 100%

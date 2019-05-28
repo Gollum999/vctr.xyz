@@ -3,12 +3,12 @@
   <md-field v-for="(axis, idx) in values" :key="idx">
     <md-input
       type="number"
-      v-model.number="axis.val"
+      :value="axis.val"
       :readonly="readOnly"
-      @input="onInput"
+      @change="onChange($event, idx)"
       @copy.prevent.stop="onCopy"
       @paste.prevent.stop="onPaste(idx, $event)"
-      />
+    />
   </md-field>
 </div>
 
@@ -24,6 +24,7 @@
 
 <script>
 import _ from 'lodash';
+import { FieldChangeAction } from './util';
 
 const DEFAULT_VECTOR_WRAPPER = Object.freeze([{val: 0}, {val: 0}, {val: 0}]);
 
@@ -52,6 +53,20 @@ export default {
         };
     },
 
+    watch: {
+        values: {
+            handler: function (newVal, oldVal) {
+                console.log('VectorControlView value watcher, calling putData', this.dataKey, this.values, newVal, oldVal);
+                if (this.dataKey) {
+                    /* console.log('VectorControlView putData key:', this.dataKey, 'values:', this.values, vectorWrapperToArray(this.values)); */
+                    this.putData(this.dataKey, vectorWrapperToArray(this.values));
+                    console.log(this);
+                }
+            },
+            deep: true,
+        },
+    },
+
     methods: {
         setValue(value) {
             // console.log('VectorControlView setValue', value);
@@ -65,14 +80,16 @@ export default {
             }
         },
 
-        onInput(event) {
-            // console.log('VectorControlView updateData');
-            if (this.dataKey) {
-                console.log('VectorControlView putData key:', this.dataKey, 'values:', this.values, vectorWrapperToArray(this.values));
-                console.log(this);
-                this.putData(this.dataKey, vectorWrapperToArray(this.values));
-            }
-            console.log('VectorControlView triggering engine process from input');
+        onChange(event, idx) {
+            /* console.log('VectorControlView onChange old values:', this.values, this.values[0].val, this.values[1].val, this.values[2].val); */
+            const newValues = this.values.map(i => ({...i})); // Make sure to deep copy the wrappers
+            newValues[idx].val = parseFloat(event.target.value);
+            /* console.log('VectorControlView onChange new values:', newValues, newValues[0].val, newValues[1].val, newValues[2].val); */
+            console.log('VectorControlView onChange', event, idx, this.values, newValues);
+            this.emitter.trigger('addhistory', new FieldChangeAction(this.values, newValues, val => { this.values = val; }));
+            this.values = newValues;
+
+            console.log('VectorControlView triggering engine process from onChange');
             this.emitter.trigger('process');
         },
 

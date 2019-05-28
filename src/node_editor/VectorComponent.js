@@ -34,8 +34,7 @@ export class VectorComponent extends Rete.Component {
         //   To check things like input state and component configuration, I either need to go through node.data or need to manually find the node
         //     through the editor by ID
         //   Also note that anything in data will be saved between sessions
-        // console.log(`VectorComponent worker "${node.name}"`);
-        /* console.log(node.data); */
+        // console.log('VectorComponent worker', node.name, node.data);
 
         // TODO pull this out somewhere
         function getInput(name) {

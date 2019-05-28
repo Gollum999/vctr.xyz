@@ -2,7 +2,15 @@
 <div class="color-control-container">
   <div class="color-label input-title" :style="{'grid-row': rowIdx}">Color</div>
 
-  <md-menu class="color-picker" :style="{'grid-row': rowIdx}" md-size="auto" md-direction="bottom-start" md-align-trigger>
+  <md-menu
+      class="color-picker"
+      :style="{'grid-row': rowIdx}"
+      md-size="auto"
+      md-direction="bottom-start"
+      md-align-trigger
+      @md-opened="colorPickerOpened"
+      @md-closed="colorPickerClosed"
+  >
     <div class="color-picker-button" :style="{'background-color': color}" md-menu-trigger>
       <md-menu-content class="color-picker-popup">
         <color-picker :value="color" @input="colorUpdated" disableAlpha />
@@ -21,6 +29,7 @@
 
 <script>
 import { Chrome } from 'vue-color';
+import { FieldChangeAction } from './util';
 
 export default {
     props: {
@@ -45,13 +54,28 @@ export default {
         this.color = this.getData(this.dataKey) || '#FFFF00';
     },
 
+    // watch: {
+    //     color(newVal, oldVal) {
+    //         console.log('color watcher', oldVal, newVal);
+    //     },
+    // },
+
     methods: {
+        colorPickerOpened(event) {
+            /* console.log('colorPickerOpened', event); */
+            this.prevColor = this.color;
+        },
+        colorPickerClosed(event) { // TODO I don't think vue-color supports the typical "change" action, so need to fudge it
+            /* console.log('colorPickerClosed', event); */
+            this.emitter.trigger('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
+        },
         colorUpdated(color) {
+            /* console.log('colorUpdated:', color); */
             this.color = color.hex;
             if (this.dataKey) {
                 this.putData(this.dataKey, this.color);
             }
-            this.emitter.trigger('process');
+            this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
         },
     },
 };
