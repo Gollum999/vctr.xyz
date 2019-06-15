@@ -40,13 +40,27 @@
             :color-grid="'#444444'"
         />
         <vgl-arrow-helper v-for="(v, idx) in renderVectors"
-            :key="idx"
+            :key="`vector-${idx}`"
             :position="'0 0 0'"
             :dir="`${v.value[0]} ${v.value[1]} ${v.value[2]}`"
             :color="v.color"
             :length="`${vec3.length(v.value)}`"
             :head-length="0.5"
             :head-width="0.5"
+        />
+        <!-- <div v-for="(s, idx) in scalars"
+             :key="`scalar-${idx}`">
+             {{idx}} {{s}} ({{s.color}} {{s.value}})
+             </div> -->
+        <!-- TODO use node id here?  or hash? -->
+        <Scalar v-for="(s, idx) in scalars"
+            :key="`scalar-${idx}`"
+            :idx="idx"
+            display-type="circle"
+            :value="s.value"
+            :color="s.color"
+            :canvas-size="canvasSize()"
+            :line-thickness="0.1"
         />
         <vgl-ambient-light color="#ffeecc" />
         <vgl-directional-light position="0 1 1" />
@@ -62,7 +76,7 @@
           <div class="viewport-container" :style="getStyle('top')">
             <Viewport view="top" scene="main_scene" @expand-viewport="expandViewport" />
           </div>
-          <div class="viewport-container" :style="getStyle('free')">
+          <div ref="viewportFree" class="viewport-container" :style="getStyle('free')">
             <Viewport view="free" scene="main_scene" @expand-viewport="expandViewport" />
           </div>
         </div>
@@ -85,7 +99,15 @@ import _ from 'lodash';
 import { vec3 } from 'gl-matrix';
 
 import { EventBus } from '../EventBus';
+import Scalar from './Scalar';
 import Viewport from './Viewport';
+
+class ScalarView {
+    constructor(value, color) {
+        this.value = value;
+        this.color = color;
+    }
+};
 
 class VectorView {
     constructor(value, color) {
@@ -97,6 +119,7 @@ class VectorView {
 export default {
     name: 'QuadViewport',
     components: {
+        Scalar,
         Viewport,
     },
     data() {
@@ -106,6 +129,7 @@ export default {
                 showAxis: true,
                 showGrid: true,
             },
+            scalars: [],
             vectors: [],
             vec3: vec3, // For use in render
             expandedView: null,
@@ -126,6 +150,7 @@ export default {
             this.$nextTick(() => {
                 // TODO This is kind of a hack; figure out best practices with v-if plus stateful components
                 // TODO maybe I can just hide the grids or set the color to transparent
+                // TODO It may make more sense to just duplicate the scene and everything in it for each viewport
                 if (!_.isNil(this.$refs.grid_free)) {
                     this.$refs.grid_free.inst.layers.set(1);
                 }
@@ -149,17 +174,28 @@ export default {
 
         this.$root.$on('node_engine_processed', editorJson => {
             console.log('QuadViewport handling process event');
+            this.scalars = [];
             this.vectors = [];
             // TODO may be a more ideomatic way to write this (filter?)
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
-                if (node.name === 'Vector') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
-                    this.vectors.push(new VectorView(node.data.value, node.data.color)); // TODO need to figure out best practices for handling data in engine
+                if (node.name === 'Scalar') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
+                    this.scalars.push(new ScalarView(node.data.value, node.data.color.rgba));
+                    /* console.log('pushed scalar', this.scalars, node.data); */
+                } else if (node.name === 'Vector') {
+                    this.vectors.push(new VectorView(node.data.value, node.data.color.hex)); // TODO need to figure out best practices for handling data in engine
                 }
             }
         });
     },
     methods: {
+        canvasSize() {
+            // TODO HACK: need to move the scene and all related things into Viewport; right now the data flow is spaghetti
+            return {
+                x: this.$refs.viewportFree.getBoundingClientRect().width - 4,
+                y: this.$refs.viewportFree.getBoundingClientRect().height - 4,
+            };
+        },
         expandViewport(view) {
             if (this.expandedView) {
                 console.log(`un-expanding ${view}`);

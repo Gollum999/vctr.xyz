@@ -23,11 +23,11 @@
     "rete-connection-plugin": "^0.7.0",
     "rete-history-plugin": "^0.2.1",
     "rete-vue-render-plugin": "^0.3.5",
-    "three": "^0.103.0",
+    "three": "^0.105.2",
     "vue": "^2.6.6",
     "vue-color": "^2.7.0",
     "vue-context-menu": "^2.0.6",
-    "vue-gl": "^0.12.1",
+    "vue-gl": "^0.13.0",
     "vue-material": "^1.0.0-beta-10.2",
     "vue-router": "^3.0.1",
     "vue-split-panel": "^1.0.4"

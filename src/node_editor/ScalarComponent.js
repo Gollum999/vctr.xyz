@@ -2,6 +2,7 @@ import _ from 'lodash';
 import NodeRenderer from './NodeRenderer.vue';
 import Rete from 'rete';
 import sockets from './sockets';
+import { ColorControl } from './ColorControl.js';
 import { ScalarControl } from './ScalarControl.js';
 
 export class ScalarComponent extends Rete.Component {
@@ -13,7 +14,8 @@ export class ScalarComponent extends Rete.Component {
     builder(node) {
         node.addInput(new Rete.Input('scalar', 'Value', sockets.scalar));
 
-        node.addControl(new ScalarControl(this.editor, 'value'));
+        node.addControl(new ScalarControl(this.editor, 'value', 1));
+        node.addControl(new ColorControl(this.editor, 'color', 2));
 
         node.addOutput(new Rete.Output('scalar', 'Value', sockets.scalar));
 

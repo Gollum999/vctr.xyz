@@ -11,9 +11,9 @@
       @md-opened="colorPickerOpened"
       @md-closed="colorPickerClosed"
   >
-    <div class="color-picker-button" :style="{'background-color': color}" md-menu-trigger>
+    <div class="color-picker-button" :style="{'background-color': color.hex}" md-menu-trigger>
       <md-menu-content class="color-picker-popup">
-        <color-picker :value="color" @input="colorUpdated" disableAlpha />
+        <color-picker :value="color.hex" @input="colorUpdated" disableAlpha />
       </md-menu-content>
     </div>
   </md-menu>
@@ -42,7 +42,7 @@ export default {
 
     data() {
         return {
-            color: null,
+            color: { hex: '#ff00ff' },
         };
     },
 
@@ -51,7 +51,12 @@ export default {
     },
 
     mounted() {
+        if (!this.dataKey) {
+            throw new Error('dataKey was null??');
+        }
         this.color = this.getData(this.dataKey) || '#FFFF00';
+        /* console.log('ColorControlView mounted', this.color); */
+        this.putData(this.dataKey, this.color);
     },
 
     // watch: {
@@ -71,7 +76,7 @@ export default {
         },
         colorUpdated(color) {
             /* console.log('colorUpdated:', color); */
-            this.color = color.hex;
+            this.color = color;
             if (this.dataKey) {
                 this.putData(this.dataKey, this.color);
             }

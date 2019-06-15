@@ -36,9 +36,10 @@ export default {
 
     methods: {
         onChange(event) {
-            /* console.log('onChange', this.value, event); */
-            this.emitter.trigger('addhistory', new FieldChangeAction(this.value, event.target.value, val => { this.value = val; }));
-            this.value = event.target.value;
+            /* console.log('onChange', this.value, typeof this.value, event); */
+            const value = parseFloat(event.target.value);
+            this.emitter.trigger('addhistory', new FieldChangeAction(this.value, value, val => { this.value = val; }));
+            this.value = value;
         },
     },
 

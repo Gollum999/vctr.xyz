@@ -363,7 +363,7 @@ class MultiplyOperation extends BaseOperation {
         } else if (lhs.type === 'vector' && rhs.type === 'scalar') {
             const out = vec3.create();
             return vec3.scale(out, lhs.value, rhs.value);
-        } else if (lhs.type === 'vector' && rhs.type === 'matrix') {
+        } else if (lhs.type === 'vector' && rhs.type === 'matrix') { // TODO Do I have these backwards?
             const out = vec3.create();
             const rhsT = mat4.create();
             mat4.transpose(rhsT, rhs.value); // gl-matrix is column-major, but I am row-major; transpose before calculating
