@@ -7,22 +7,48 @@
     <h4>Settings</h4>
 
     <form id="settings-form">
+      <!-- TODO make selected tab a URL param? -->
       <md-tabs>
 
         <md-tab md-label="Viewport">
-          <md-checkbox v-model="viewportSettings.showAxis" @change="save">Show axis</md-checkbox>
-          <md-checkbox v-model="viewportSettings.showGrid" @change="save">Show grid</md-checkbox>
+          <md-checkbox v-model="settings.viewport_settings.showAxis" @change="save">Show axis</md-checkbox>
+          <md-checkbox v-model="settings.viewport_settings.showGrid" @change="save">Show grid</md-checkbox>
         </md-tab>
 
         <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
-        <md-tab md-label="Node Editor" md-disabled>
+        <md-tab md-label="Node Editor">
           <!-- TODO This should be a component -->
-          <!-- <div class="color-picker-button" :style="{'background-color': nodeEditorSettings.defaultVectorColor}" md-menu-trigger> -->
-          <!--   <md-menu-content class="color-picker-popup"> -->
-          <!--     <color-picker v-model="nodeEditorSettings.defaultVectorColor" disableAlpha /> -->
-          <!--   </md-menu-content> -->
-          <!-- </div> -->
-          <!-- Default vector color -->
+          <div class="color-picker-option">
+            <md-menu
+                class="color-picker"
+                md-size="auto"
+                md-direction="bottom-start"
+                md-align-trigger
+            >
+              <div class="color-picker-button" :style="{'background-color': settings.node_editor_settings.defaultScalarColor.hex}" md-menu-trigger>
+                <md-menu-content class="color-picker-popup">
+                  <color-picker v-model="settings.node_editor_settings.defaultScalarColor" @input="save" disableAlpha />
+                </md-menu-content>
+              </div>
+            </md-menu>
+            <label class="color-picker-label">Default scalar color</label>
+          </div>
+
+          <div class="color-picker-option">
+            <md-menu
+                class="color-picker"
+                md-size="auto"
+                md-direction="bottom-start"
+                md-align-trigger
+            >
+              <div class="color-picker-button" :style="{'background-color': settings.node_editor_settings.defaultVectorColor.hex}" md-menu-trigger>
+                <md-menu-content class="color-picker-popup">
+                  <color-picker v-model="settings.node_editor_settings.defaultVectorColor" @input="save" disableAlpha />
+                </md-menu-content>
+              </div>
+            </md-menu>
+            <label class="color-picker-label">Default vector color</label>
+          </div>
         </md-tab>
 
       </md-tabs>
@@ -35,25 +61,24 @@
 </template>
 
 <script>
+import { Chrome } from 'vue-color';
+import settingsUtil from './settings';
 import { EventBus } from './EventBus';
 
 export default {
     name: 'SettingsModal',
+    components: {
+        'color-picker': Chrome,
+    },
     data() {
         return {
-            viewportSettings: JSON.parse(window.localStorage.getItem('viewport_settings')) || {
-                showAxis: true,
-                showGrid: true,
-            },
-            nodeEditorSettings: JSON.parse(window.localStorage.getItem('node_editor_settings')) || {
-                defaultVectorColor: '#FFFF00',
-            },
+            settings: settingsUtil.loadSettings(),
         };
     },
     methods: {
         save(event) {
-            window.localStorage.setItem('viewport_settings', JSON.stringify(this.viewportSettings));
-            window.localStorage.setItem('node_editor_settings', JSON.stringify(this.nodeEditorSettings));
+            console.log('SettingsModal saving settings', this.settings);
+            settingsUtil.saveSettings(this.settings['viewport_settings'], this.settings['node_editor_settings']);
             EventBus.$emit('settings-updated');
         },
         close() {
@@ -71,7 +96,7 @@ export default {
     background-color: rgba(50, 50, 50, 0.5);
     height: 100vh;
     width: 100vw;
-    z-index: 10; /* md-button uses z-index 5 */
+    z-index: 8; /* md-button uses z-index 5 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -95,13 +120,22 @@ export default {
     margin-top: 8px;
     margin-bottom: 0px;
 }
+.color-picker-option {
+    text-align: left;
+}
+.md-menu.color-picker {
+    vertical-align: middle;
+}
 .color-picker-button {
     grid-column: controls;
-    width: 1.4em;
-    height: 1.4em;
+    width: 20px;
+    height: 20px;
     /* background-color: yellow; */
     border: 1px solid rgba(128, 128, 128, 0.4);
-    margin: 0.5em;
+    margin: 8px 0px 8px 8px;
+}
+.color-picker-label {
+    padding-left: 9px;
 }
 /* color-picker { */
 /*     transform: none; */

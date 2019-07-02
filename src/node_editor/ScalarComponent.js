@@ -4,6 +4,7 @@ import Rete from 'rete';
 import sockets from './sockets';
 import { ColorControl } from './ColorControl.js';
 import { ScalarControl } from './ScalarControl.js';
+import settings from '../settings';
 
 export class ScalarComponent extends Rete.Component {
     constructor() {
@@ -15,7 +16,7 @@ export class ScalarComponent extends Rete.Component {
         node.addInput(new Rete.Input('scalar', 'Value', sockets.scalar));
 
         node.addControl(new ScalarControl(this.editor, 'value', 1));
-        node.addControl(new ColorControl(this.editor, 'color', 2));
+        node.addControl(new ColorControl(this.editor, 'color', 2, settings.loadSettings('node_editor_settings').defaultScalarColor));
 
         node.addOutput(new Rete.Output('scalar', 'Value', sockets.scalar));
 

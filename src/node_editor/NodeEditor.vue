@@ -71,6 +71,7 @@ import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import contextMenu from 'vue-context-menu';
 import { EventBus } from '../EventBus';
+import settings from '../settings';
 
 // TODO is there a library for this?
 class Rect {
@@ -123,9 +124,7 @@ export default {
         return {
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
             // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
-            settings: {
-                defaultVectorColor: '#FFFF00',
-            },
+            settings: settings.defaultSettings['node_editor_settings'],
             lastNodePosition: null,
             newNodesShouldBeCentered: true,
             container: null,
@@ -318,13 +317,13 @@ export default {
 
         async createDemoNodes() {
             const [in1, in2, out, vec, vec2, vecOp, vecOut] = await Promise.all([
-                this.components['scalar'].createNode({'value': 5}),
-                this.components['scalar'].createNode({'value': 4}),
+                this.components['scalar'].createNode({ 'value': 5 }),
+                this.components['scalar'].createNode({ 'value': 4 }),
                 this.components['add_old'].createNode(),
-                this.components['vector'].createNode({'value': [3, 2, 1], 'color': '#00FFFF'}),
-                this.components['vector'].createNode({'value': [2, 2, 2], 'color': '#00FFFF'}),
+                this.components['vector'].createNode({ 'value': [3, 2, 1], 'color': { hex: '#00ffff' } }),
+                this.components['vector'].createNode({ 'value': [2, 2, 2], 'color': { hex: '#00ffff' } }),
                 this.components['operation-add'].createNode(),
-                this.components['vector'].createNode({'value': [2, 2, 2]}),
+                this.components['vector'].createNode({ 'value': [2, 2, 2] }),
             ]);
             in1.position = [20, 40];
             in2.position = [20, 150];
@@ -381,11 +380,9 @@ export default {
     },
 
     mounted() {
-        const loadSettings = () => {
-            this.settings = JSON.parse(window.localStorage.getItem('node_editor_settings')) || this.settings;
-        };
-        loadSettings();
-        EventBus.$on('settings-updated', loadSettings);
+        this.settings = settings.loadSettings('node_editor_settings');
+        EventBus.$on('settings-updated', () => { this.settings = settings.loadSettings('node_editor_settings'); });
+        // console.log('NodeEditor loaded settings', this.settings);
 
         EventBus.$on('split-resized', () => {
             this.editor.view.resize();

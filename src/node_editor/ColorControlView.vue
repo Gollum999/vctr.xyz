@@ -33,16 +33,17 @@ import { FieldChangeAction } from './util';
 
 export default {
     props: {
-        getData: { type: Function, required: true }, // injected by Rete
-        putData: { type: Function, required: true }, // injected by Rete
-        emitter: { type: Object,   required: true },
-        dataKey: { type: String,   required: true },
-        rowIdx:  { type: Number,   required: true }, // used to position control within parent grid
+        getData:      { type: Function, required: true }, // injected by Rete
+        putData:      { type: Function, required: true }, // injected by Rete
+        emitter:      { type: Object,   required: true },
+        dataKey:      { type: String,   required: true },
+        rowIdx:       { type: Number,   required: true }, // used to position control within parent grid
+        defaultValue: { type: Object,   default: () => ({ hex: '#000000' }) },
     },
 
     data() {
         return {
-            color: { hex: '#ff00ff' },
+            color: { hex: this.defaultValue },
         };
     },
 
@@ -54,8 +55,8 @@ export default {
         if (!this.dataKey) {
             throw new Error('dataKey was null??');
         }
-        this.color = this.getData(this.dataKey) || '#FFFF00';
-        /* console.log('ColorControlView mounted', this.color); */
+        this.color = this.getData(this.dataKey) || this.defaultValue;
+        /* console.log('ColorControlView mounted', this.dataKey, this.color); */
         this.putData(this.dataKey, this.color);
     },
 

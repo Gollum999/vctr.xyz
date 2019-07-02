@@ -98,6 +98,7 @@
 import _ from 'lodash';
 import { vec3 } from 'gl-matrix';
 
+import settings from '../settings';
 import { EventBus } from '../EventBus';
 import Scalar from './Scalar';
 import Viewport from './Viewport';
@@ -125,10 +126,7 @@ export default {
     data() {
         return {
             // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
-            settings: {
-                showAxis: true,
-                showGrid: true,
-            },
+            settings: settings.defaultSettings['viewport_settings'],
             scalars: [],
             vectors: [],
             vec3: vec3, // For use in render
@@ -144,7 +142,7 @@ export default {
     },
     mounted() {
         const loadSettings = () => {
-            this.settings = JSON.parse(window.localStorage.getItem('viewport_settings')) || this.settings;
+            this.settings = settings.loadSettings('viewport_settings');
             console.log('Viewport settings loaded:', this.settings);
 
             this.$nextTick(() => {
@@ -186,6 +184,8 @@ export default {
                     this.vectors.push(new VectorView(node.data.value, node.data.color.hex)); // TODO need to figure out best practices for handling data in engine
                 }
             }
+            // console.log('NodeEditor rendering scalars:', this.scalars);
+            // console.log('NodeEditor rendering vectors:', this.vectors);
         });
     },
     methods: {
