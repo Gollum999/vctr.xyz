@@ -5,8 +5,9 @@ export default {
             showGrid: true,
         },
         'node_editor_settings': {
-            defaultScalarColor: { hex: '#7676dd' },
-            defaultVectorColor: { hex: '#ff4444' },
+            // TODO Can I somehow use the class that vue-color uses?
+            defaultScalarColor: { hex: '#7676dd', rgba: { r: 118, g: 118, b: 221 } },
+            defaultVectorColor: { hex: '#ff4444', rgba: { r: 255, g:  68, b:  68 } },
         },
     },
 
