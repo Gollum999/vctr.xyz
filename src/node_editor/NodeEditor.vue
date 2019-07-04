@@ -143,7 +143,6 @@ export default {
                 'operation-divide':   new allComponents.BasicOperationComponent('DIVIDE'),
                 'operation-dot':      new allComponents.BasicOperationComponent('DOT'),
                 'operation-cross':    new allComponents.BasicOperationComponent('CROSS'),
-                'add_old':            new allComponents.AddComponent(),
             },
         };
     },
