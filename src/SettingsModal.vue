@@ -1,33 +1,31 @@
 <template>
-<div class="modal-background" @click.prevent.stop="close">
-  <div class="modal-body" @click.prevent.stop>
-    <md-button class="close-button md-icon-button" @click.prevent.stop="close">
-      <md-icon>close</md-icon>
-    </md-button>
-    <h4>Settings</h4>
+<modal name="settings-modal" classes="modal-body" @closed="closed">
+  <md-button class="close-button md-icon-button" @click="close">
+    <md-icon>close</md-icon>
+  </md-button>
+  <h4>Settings</h4>
 
-    <form id="settings-form">
-      <!-- TODO make selected tab a URL param? -->
-      <md-tabs>
+  <form id="settings-form">
+    <!-- TODO make selected tab a URL param? -->
+    <md-tabs>
 
-        <md-tab md-label="Viewport">
-          <md-checkbox v-model="settings.viewport_settings.showAxis" @change="save">Show axis</md-checkbox>
-          <md-checkbox v-model="settings.viewport_settings.showGrid" @change="save">Show grid</md-checkbox>
-        </md-tab>
+      <md-tab md-label="Viewport">
+        <md-checkbox v-model="settings.viewport_settings.showAxis" @change="save">Show axis</md-checkbox>
+        <md-checkbox v-model="settings.viewport_settings.showGrid" @change="save">Show grid</md-checkbox>
+      </md-tab>
 
-        <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
-        <md-tab md-label="Node Editor">
-          <color-picker-setting v-model="settings.node_editor_settings.defaultScalarColor" @input="save">Default scalar color</color-picker-setting>
-          <color-picker-setting v-model="settings.node_editor_settings.defaultVectorColor" @input="save">Default vector color</color-picker-setting>
-        </md-tab>
+      <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
+      <md-tab md-label="Node Editor">
+        <color-picker-setting v-model="settings.node_editor_settings.defaultScalarColor" @input="save">Default scalar color</color-picker-setting>
+        <color-picker-setting v-model="settings.node_editor_settings.defaultVectorColor" @input="save">Default vector color</color-picker-setting>
+      </md-tab>
 
-      </md-tabs>
-    </form>
+    </md-tabs>
+  </form>
 
-    <router-view />
+  <router-view />
 
-  </div>
-</div>
+</modal>
 </template>
 
 <script>
@@ -45,6 +43,9 @@ export default {
             settings: settingsUtil.loadSettings(),
         };
     },
+    mounted() {
+        this.$modal.show('settings-modal');
+    },
     methods: {
         save(event) {
             console.log('SettingsModal saving settings', this.settings);
@@ -52,6 +53,9 @@ export default {
             EventBus.$emit('settings-updated');
         },
         close() {
+            this.$modal.hide('settings-modal');
+        },
+        closed() {
             this.$router.back();
         },
     },
@@ -59,23 +63,6 @@ export default {
 </script>
 
 <style scoped>
-.modal-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: rgba(50, 50, 50, 0.5);
-    height: 100vh;
-    width: 100vw;
-    z-index: 8; /* md-button uses z-index 5 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.modal-body {
-    display: inline-block;
-    background-color: white;
-    flex: none;
-}
 .close-button {
     position: absolute;
     top: 0;
@@ -89,5 +76,11 @@ export default {
 .md-checkbox {
     margin-top: 8px;
     margin-bottom: 0px;
+}
+</style>
+
+<style>
+.modal-body {
+    background-color: white;
 }
 </style>
