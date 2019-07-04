@@ -25,7 +25,7 @@ export default {
         pos:           { type: String, default: '0 0 0' }, // TODO I think to support this I need to use a vgl "billboard"
 
         value:         { type: Number, required: true },
-        color:         { type: Object, default: () => ({r: 0, g: 255, b: 255}) },
+        color:         { type: Object, default: () => ({r: 255, g: 0, b: 0}) },
         canvasSize:    { type: Object, required: true },
         lineThickness: { type: Number, default: 0.1 },
         numSegments:   { type: Number, default: 12.0 },

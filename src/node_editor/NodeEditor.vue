@@ -316,36 +316,41 @@ export default {
         },
 
         async createDemoNodes() {
-            const [in1, in2, out, vec, vec2, vecOp, vecOut] = await Promise.all([
-                this.components['scalar'].createNode({ 'value': 5 }),
-                this.components['scalar'].createNode({ 'value': 4 }),
-                this.components['add_old'].createNode(),
+            const [scalarLhs, scalarRhs, scalarAdd, scalarOut, vecLhs, vecRhs, vecAdd, vecOut] = await Promise.all([
+                // TODO color stuff is still pretty gross
+                this.components['scalar'].createNode({ 'value': 5, 'color': { hex: '#ff7f00', rgba: { r: 255, g: 127, b: 0 } } }),
+                this.components['scalar'].createNode({ 'value': 4, 'color': { hex: '#ff7f00', rgba: { r: 255, g: 127, b: 0 } } }),
+                this.components['operation-add'].createNode(),
+                this.components['scalar'].createNode({ 'value': 0 }),
                 this.components['vector'].createNode({ 'value': [3, 2, 1], 'color': { hex: '#00ffff' } }),
                 this.components['vector'].createNode({ 'value': [2, 2, 2], 'color': { hex: '#00ffff' } }),
                 this.components['operation-add'].createNode(),
-                this.components['vector'].createNode({ 'value': [2, 2, 2] }),
+                this.components['vector'].createNode(),
             ]);
-            in1.position = [20, 40];
-            in2.position = [20, 150];
-            out.position = [180, 75];
-            vec.position = [320, 40];
-            vec2.position = [320, 200];
-            vecOp.position = [590, 120];
-            vecOut.position = [720, 100];
+            scalarLhs.position = [20, 80];
+            scalarRhs.position = [20, 190];
+            scalarAdd.position = [180, 120];
+            scalarOut.position = [300, 120];
+            vecLhs.position = [460, 80];
+            vecRhs.position = [460, 240];
+            vecAdd.position = [730, 160];
+            vecOut.position = [860, 140];
 
-            this.editor.addNode(in1);
-            this.editor.addNode(in2);
-            this.editor.addNode(out);
-            this.editor.addNode(vec);
-            this.editor.addNode(vec2);
-            this.editor.addNode(vecOp);
+            this.editor.addNode(scalarLhs);
+            this.editor.addNode(scalarRhs);
+            this.editor.addNode(scalarAdd);
+            this.editor.addNode(scalarOut);
+            this.editor.addNode(vecLhs);
+            this.editor.addNode(vecRhs);
+            this.editor.addNode(vecAdd);
             this.editor.addNode(vecOut);
 
-            this.editor.connect(in1.outputs.get('scalar'), out.inputs.get('scalar1'));
-            this.editor.connect(in2.outputs.get('scalar'), out.inputs.get('scalar2'));
-            this.editor.connect(vec.outputs.get('vector'), vecOp.inputs.get('lhs'));
-            this.editor.connect(vec2.outputs.get('vector'), vecOp.inputs.get('rhs'));
-            this.editor.connect(vecOp.outputs.get('result'), vecOut.inputs.get('vector'));
+            this.editor.connect(scalarLhs.outputs.get('scalar'), scalarAdd.inputs.get('lhs'));
+            this.editor.connect(scalarRhs.outputs.get('scalar'), scalarAdd.inputs.get('rhs'));
+            this.editor.connect(scalarAdd.outputs.get('result'), scalarOut.inputs.get('scalar'));
+            this.editor.connect(vecLhs.outputs.get('vector'), vecAdd.inputs.get('lhs'));
+            this.editor.connect(vecRhs.outputs.get('vector'), vecAdd.inputs.get('rhs'));
+            this.editor.connect(vecAdd.outputs.get('result'), vecOut.inputs.get('vector'));
         },
 
         saveState() {
