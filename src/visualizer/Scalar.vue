@@ -16,9 +16,7 @@
 </template>
 
 <script>
-import VglShaderMaterial from './ShaderMaterial.js';
 export default {
-    components: {'vgl-shader-material': VglShaderMaterial},
     props: {
         idx:           { type: Number, required: true },
         displayType:   { type: String, required: true },
