@@ -1,44 +1,10 @@
 <template>
-  <div class="quad-viewport">
-    <vgl-namespace class="vgl-namespace">
-      <vgl-scene name="main_scene" ref="scene">
+  <div class="fill">
+    <vgl-namespace class="fill">
+      <vgl-scene name="main_scene" ref="scene" class="fill vgl-scene">
         <!-- <template v-for="(v, idx) in vectors"> -->
         <!--   {{idx}} {{v}} {{v.value}} {{v.color}} -->
         <!-- </template> -->
-        <vgl-grid-helper
-            ref="grid_free"
-            v-if="settings.showGrid"
-            :size="20"
-            :divisions="20"
-            :color-center-line="'#888888'"
-            :color-grid="'#444444'"
-        />
-        <vgl-grid-helper
-            ref="grid_top"
-            v-if="settings.showGrid"
-            :size="200"
-            :divisions="200"
-            :color-center-line="'#888888'"
-            :color-grid="'#444444'"
-        />
-        <vgl-grid-helper
-            ref="grid_front"
-            v-if="settings.showGrid"
-            :rotation="`${Math.PI / 2} 0 0`"
-            :size="200"
-            :divisions="200"
-            :color-center-line="'#888888'"
-            :color-grid="'#444444'"
-        />
-        <vgl-grid-helper
-            ref="grid_side"
-            v-if="settings.showGrid"
-            :rotation="`0 0 ${Math.PI / 2}`"
-            :size="200"
-            :divisions="200"
-            :color-center-line="'#888888'"
-            :color-grid="'#444444'"
-        />
         <vgl-arrow-helper v-for="(v, idx) in renderVectors"
             :key="`vector-${idx}`"
             :position="'0 0 0'"
@@ -65,43 +31,42 @@
         <vgl-ambient-light color="#ffeecc" />
         <vgl-directional-light position="0 1 1" />
         <vgl-axes-helper v-if="settings.showAxis" size="5" />
-      </vgl-scene>
 
-      <div v-if="expandedView" class="viewport-container viewport-container-expanded">
-        <Viewport :view="expandedView" scene="main_scene" @expand-viewport="expandViewport" expanded />
-      </div>
-      <template v-else>
-        <div class="flex-row">
-          <!-- TODO its probably better to use a dynamic class rather than style -->
-          <div class="viewport-container" :style="getStyle('top')">
-            <Viewport view="top" scene="main_scene" @expand-viewport="expandViewport" />
-          </div>
-          <div ref="viewportFree" class="viewport-container" :style="getStyle('free')">
-            <Viewport view="free" scene="main_scene" @expand-viewport="expandViewport" />
-          </div>
+        <div v-if="expandedView" class="viewport-container viewport-container-expanded">
+          <Viewport :view="expandedView" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" expanded />
         </div>
-        <div class="flex-row">
-          <div class="viewport-container" :style="getStyle('front')">
-            <Viewport view="front" scene="main_scene" @expand-viewport="expandViewport" />
+        <template v-else>
+          <div class="flex-row">
+            <!-- TODO its probably better to use a dynamic class rather than style -->
+            <div :class="['viewport-container', isHidden('top') ? 'hidden' : '']">
+              <Viewport view="top" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+            </div>
+            <div ref="viewportFree" :class="['viewport-container', isHidden('free') ? 'hidden' : '']">
+              <Viewport view="free" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+            </div>
           </div>
-          <div class="viewport-container" :style="getStyle('side')">
-            <Viewport view="side" scene="main_scene" @expand-viewport="expandViewport" />
+          <div class="flex-row">
+            <div :class="['viewport-container', isHidden('front') ? 'hidden' : '']">
+              <Viewport view="front" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+            </div>
+            <div :class="['viewport-container', isHidden('side') ? 'hidden' : '']">
+              <Viewport view="side" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+            </div>
           </div>
-        </div>
-      </template>
+        </template>
+      </vgl-scene>
     </vgl-namespace>
   </div>
 </template>
 
 <script>
 /* import * as THREE from 'three'; */
-import _ from 'lodash';
 import { vec3 } from 'gl-matrix';
 
 import settings from '../settings';
-import { EventBus } from '../EventBus';
 import Scalar from './Scalar';
 import Viewport from './Viewport';
+import { EventBus } from '../EventBus';
 
 class ScalarView {
     constructor(value, color) {
@@ -144,25 +109,6 @@ export default {
         const loadSettings = () => {
             this.settings = settings.loadSettings('viewport_settings');
             console.log('Viewport settings loaded:', this.settings);
-
-            this.$nextTick(() => {
-                // TODO This is kind of a hack; figure out best practices with v-if plus stateful components
-                // TODO maybe I can just hide the grids or set the color to transparent
-                // TODO It may make more sense to just duplicate the scene and everything in it for each viewport
-                if (!_.isNil(this.$refs.grid_free)) {
-                    this.$refs.grid_free.inst.layers.set(1);
-                }
-                if (!_.isNil(this.$refs.grid_top)) {
-                    this.$refs.grid_top.inst.layers.set(2);
-                }
-                if (!_.isNil(this.$refs.grid_front)) {
-                    this.$refs.grid_front.inst.layers.set(3);
-                }
-                if (!_.isNil(this.$refs.grid_side)) {
-                    this.$refs.grid_side.inst.layers.set(4);
-                }
-                this.$forceUpdate(); // TODO bit of a hack; if showAxis is toggled, the ortho views don't re-render immediately
-            });
         };
         loadSettings();
         EventBus.$on('settings-updated', loadSettings);
@@ -205,29 +151,21 @@ export default {
                 this.expandedView = view;
             }
         },
-        getStyle(view) {
-            let vis = 'hidden';
-            if (this.expandedView === null || this.expandedView === view) {
-                vis = 'visible';
-            }
-            return {
-                visibility: vis,
-            };
+        isHidden(view) {
+            return (this.expandedView !== null && this.expandedView !== view);
         },
     },
 };
 </script>
 
 <style scoped>
-.quad-viewport {
+.fill {
     width: 100%;
     height: 100%;
 }
-.vgl-namespace {
+.vgl-scene {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
 }
 .flex-row {
     display: flex;
@@ -241,5 +179,8 @@ export default {
 }
 .viewport-container-expanded {
     height: 100%;
+}
+.hidden {
+    visibility: hidden;
 }
 </style>

@@ -1,6 +1,16 @@
 <template>
   <div class="viewport">
-    <vgl-renderer ref="renderer" :scene="scene" :camera="view" antialias style="height: 100%; flex: 1;">
+    <vgl-grid-helper
+        :ref="`grid-${this.view}`"
+        v-if="settings.showGrid"
+        :rotation="VIEW_VALUES[this.view].grid_rotation"
+        :size="VIEW_VALUES[this.view].grid_size"
+        :divisions="VIEW_VALUES[this.view].grid_divisions"
+        color-center-line="#888888"
+        color-grid="#444444"
+    />
+
+    <vgl-renderer ref="renderer" :scene="sceneName" :camera="view" antialias style="height: 100%; flex: 1;">
       <template v-if="view === 'free'">
         <vgl-perspective-camera ref="camera" :name="view" :orbit-position="orbit_pos" />
       </template>
@@ -16,38 +26,64 @@
 
 <script>
 import * as THREE from 'three';
+import _ from 'lodash';
 import CameraControls from 'camera-controls';
+
+import settings from '../settings';
+import { EventBus } from '../EventBus';
 
 CameraControls.install({ THREE: THREE });
 
 export default {
     props: {
-        view:     { type: String, required: true, validator: (value) => { return ['side', 'front', 'top', 'free'].indexOf(value) !== -1; } },
-        scene:    { type: String, required: true },
-        expanded: { type: Boolean, default: false },
+        view:      { type: String, required: true, validator: value => { return ['side', 'front', 'top', 'free'].indexOf(value) !== -1; } },
+        sceneName: { type: String, required: true },
+        scene:     { required: true, validator: value => { return value instanceof Object || _.isNil(value); } },
+        expanded:  { type: Boolean, default: false },
     },
     data() {
         return {
+            VIEW_VALUES: {
+                top: {
+                    layer: 1,
+                    initial_camera_pos: new THREE.Spherical(20, 0, 0),
+                    grid_size: 200,
+                    grid_divisions: 200,
+                    grid_rotation: '0 0 0',
+                },
+                free: {
+                    layer: 2,
+                    initial_camera_pos: new THREE.Spherical(20, Math.PI / 4.0, Math.PI / 4.0),
+                    grid_size: 20,
+                    grid_divisions: 20,
+                    grid_rotation: '0 0 0',
+                },
+                front: {
+                    layer: 3,
+                    initial_camera_pos: new THREE.Spherical(20, Math.PI / 2.0, 0),
+                    grid_size: 200,
+                    grid_divisions: 200,
+                    grid_rotation: `${Math.PI / 2} 0 0`,
+                },
+                side: {
+                    layer: 4,
+                    initial_camera_pos: new THREE.Spherical(20, Math.PI / 2.0, Math.PI / 2.0),
+                    grid_size: 200,
+                    grid_divisions: 200,
+                    grid_rotation: `0 0 ${Math.PI / 2}`,
+                },
+            },
+            settings: settings.defaultSettings['viewport_settings'],
             controls: null,
             clock: new THREE.Clock(),
-
-            orbit_pos: (() => {
-                var result = null;
-                if (this.view === 'side') {
-                    result = new THREE.Spherical(20, Math.PI / 2.0, Math.PI / 2.0);
-                } else if (this.view === 'front') {
-                    result = new THREE.Spherical(20, Math.PI / 2.0, 0);
-                } else if (this.view === 'top') {
-                    result = new THREE.Spherical(20, 0, 0);
-                } else if (this.view === 'free') {
-                    result = new THREE.Spherical(20, Math.PI / 4.0, Math.PI / 4.0);
-                } else {
-                    throw new Error('Viewport.view must be one of ["side", "front", "top", "free"]');
-                }
-                console.log(`Setting orbit_pos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`);
-                return `${result.radius} ${result.phi} ${result.theta}`; // TODO can I avoid this string step?
-            })(),
         };
+    },
+    computed: {
+        orbit_pos() {
+            var result = this.VIEW_VALUES[this.view].initial_camera_pos;
+            console.log(`Setting orbit_pos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`);
+            return `${result.radius} ${result.phi} ${result.theta}`; // TODO can I avoid this string step?
+        },
     },
     filters: {
         capitalize(value) {
@@ -59,18 +95,28 @@ export default {
         },
     },
     mounted() {
-        console.log(`Viewport mounted ${this.view} ${this.scene}`);
+        console.log(`Viewport mounted ${this.view} ${this.sceneName}`);
 
+        const loadSettings = () => {
+            this.settings = settings.loadSettings('viewport_settings');
+            console.log('Viewport settings loaded:', this.settings);
+
+            this.$nextTick(() => {
+                // TODO This feels like a hack; figure out best practices with v-if plus stateful components
+                // TODO maybe I can just hide the grids or set the color to transparent
+                // TODO It may make more sense to just duplicate the scene and everything in it for each viewport
+                if (!_.isNil(this.$refs[`grid-${this.view}`])) {
+                    this.$refs[`grid-${this.view}`].inst.layers.set(this.VIEW_VALUES[this.view].layer);
+                }
+                this.$forceUpdate(); // TODO bit of a hack; if showAxis is toggled, the ortho views don't re-render immediately
+            });
+        };
+        loadSettings();
+        EventBus.$on('settings-updated', loadSettings);
+
+        // TODO give Viewport a layer idx; move any dependent objects into here and automatically set their layers to match
         this.$refs.camera.inst.layers.set(0);
-        if (this.view === 'free') {
-            this.$refs.camera.inst.layers.enable(1);
-        } else if (this.view === 'top') {
-            this.$refs.camera.inst.layers.enable(2);
-        } else if (this.view === 'front') {
-            this.$refs.camera.inst.layers.enable(3);
-        } else if (this.view === 'side') {
-            this.$refs.camera.inst.layers.enable(4);
-        }
+        this.$refs.camera.inst.layers.enable(this.VIEW_VALUES[this.view].layer);
 
         // TODO maybe separate these into two components
         this.controls = new CameraControls(this.$refs.camera.inst, this.$refs.renderer.inst.domElement);
@@ -115,7 +161,8 @@ export default {
             }
         },
         render() {
-            this.$refs.renderer.inst.render(this.$parent.$parent.$refs.scene.inst, this.$refs.camera.inst);
+            // TODO might be cleaner to emit a 'render' event
+            this.$refs.renderer.inst.render(this.scene.inst, this.$refs.camera.inst);
         },
 
         expandThis() {
