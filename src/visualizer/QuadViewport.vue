@@ -116,7 +116,7 @@ export default {
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
         /* this.$refs.scene.inst.background = new THREE.Color(0xffffff); */
 
-        this.$root.$on('node_engine_processed', editorJson => {
+        EventBus.$on('node_engine_processed', editorJson => {
             console.log('QuadViewport handling process event');
             this.scalars = [];
             this.vectors = [];

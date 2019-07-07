@@ -379,7 +379,7 @@ export default {
             this.saveState();
 
             this.$emit('process', this.editor.toJSON());
-            this.$root.$emit('node_engine_processed', this.editor.toJSON());
+            EventBus.$emit('node_engine_processed', this.editor.toJSON());
         },
     },
 
