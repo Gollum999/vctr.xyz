@@ -9,9 +9,12 @@ fi
 pushd $(dirname "$0")/.. &&
 npm run build &&
 pushd ./dist &&
+git init &&
+git remote add origin "git@bitbucket.org:Gollum999/gollum999.bitbucket.io.git" &&
+git fetch origin &&
 git add --all &&
-git commit --amend -m "Initial commit" &&
+git commit -m "Initial commit" &&
 # export GIT_ASKPASS="echo $pw"
-git push --force &&
+git push --force --set-upstream origin master &&
 popd &&
 popd
