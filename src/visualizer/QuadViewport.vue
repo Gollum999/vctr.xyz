@@ -14,46 +14,22 @@
             :head-length="0.5"
             :head-width="0.5"
         />
-        <!-- <div v-for="(s, idx) in scalars"
-             :key="`scalar-${idx}`">
-             {{idx}} {{s}} ({{s.color}} {{s.value}})
-             </div> -->
-        <!-- TODO use node id here?  or hash? -->
-        <Scalar v-for="(s, idx) in scalars"
-            :key="`scalar-${idx}`"
-            :idx="idx"
-            display-type="circle"
-            :value="s.value"
-            :color="s.color"
-            :canvas-size="canvasSize()"
-            :line-thickness="0.1"
-        />
         <vgl-ambient-light color="#ffeecc" />
         <vgl-directional-light position="0 1 1" />
         <vgl-axes-helper v-if="settings.showAxis" size="5" />
 
-        <div v-if="expandedView" class="viewport-container viewport-container-expanded">
-          <Viewport :view="expandedView" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" expanded />
+        <div :class="['viewport-container', isHidden('top') ? 'hidden' : '', isExpanded('top') ? 'fill' : '']">
+          <Viewport ref="viewport_top" view="top" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
         </div>
-        <template v-else>
-          <div class="flex-row">
-            <!-- TODO its probably better to use a dynamic class rather than style -->
-            <div :class="['viewport-container', isHidden('top') ? 'hidden' : '']">
-              <Viewport view="top" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
-            </div>
-            <div ref="viewportFree" :class="['viewport-container', isHidden('free') ? 'hidden' : '']">
-              <Viewport view="free" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
-            </div>
-          </div>
-          <div class="flex-row">
-            <div :class="['viewport-container', isHidden('front') ? 'hidden' : '']">
-              <Viewport view="front" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
-            </div>
-            <div :class="['viewport-container', isHidden('side') ? 'hidden' : '']">
-              <Viewport view="side" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
-            </div>
-          </div>
-        </template>
+        <div :class="['viewport-container', isHidden('free') ? 'hidden' : '', isExpanded('free') ? 'fill' : '']">
+          <Viewport ref="viewport_free" view="free" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+        </div>
+        <div :class="['viewport-container', isHidden('front') ? 'hidden' : '', isExpanded('front') ? 'fill' : '']">
+          <Viewport ref="viewport_front" view="front" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+        </div>
+        <div :class="['viewport-container', isHidden('side') ? 'hidden' : '', isExpanded('side') ? 'fill' : '']">
+          <Viewport ref="viewport_side" view="side" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+        </div>
       </vgl-scene>
     </vgl-namespace>
   </div>
@@ -64,16 +40,8 @@
 import { vec3 } from 'gl-matrix';
 
 import settings from '../settings';
-import Scalar from './Scalar';
 import Viewport from './Viewport';
 import { EventBus } from '../EventBus';
-
-class ScalarView {
-    constructor(value, color) {
-        this.value = value;
-        this.color = color;
-    }
-};
 
 class VectorView {
     constructor(value, color) {
@@ -85,14 +53,12 @@ class VectorView {
 export default {
     name: 'QuadViewport',
     components: {
-        Scalar,
         Viewport,
     },
     data() {
         return {
             // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
             settings: settings.defaultSettings['viewport_settings'],
-            scalars: [],
             vectors: [],
             vec3: vec3, // For use in render
             expandedView: null,
@@ -118,31 +84,20 @@ export default {
 
         EventBus.$on('node_engine_processed', editorJson => {
             console.log('QuadViewport handling process event');
-            this.scalars = [];
             this.vectors = [];
             // TODO may be a more ideomatic way to write this (filter?)
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
-                if (node.name === 'Scalar') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
-                    this.scalars.push(new ScalarView(node.data.value, node.data.color.rgba));
-                    /* console.log('pushed scalar', this.scalars, node.data); */
-                } else if (node.name === 'Vector') {
+                if (node.name === 'Vector') {
                     this.vectors.push(new VectorView(node.data.value, node.data.color.hex)); // TODO need to figure out best practices for handling data in engine
                 }
             }
-            // console.log('NodeEditor rendering scalars:', this.scalars);
-            // console.log('NodeEditor rendering vectors:', this.vectors);
+            // console.log('QuadViewport rendering vectors:', this.vectors);
         });
     },
     methods: {
-        canvasSize() {
-            // TODO HACK: need to move the scene and all related things into Viewport; right now the data flow is spaghetti
-            return {
-                x: this.$refs.viewportFree.getBoundingClientRect().width - 4,
-                y: this.$refs.viewportFree.getBoundingClientRect().height - 4,
-            };
-        },
         expandViewport(view) {
+            console.log('QuadViewport expanding', view);
             if (this.expandedView) {
                 console.log(`un-expanding ${view}`);
                 this.expandedView = null;
@@ -150,37 +105,42 @@ export default {
                 console.log(`expanding ${view}`);
                 this.expandedView = view;
             }
+
+            // Make sure scalars see the new canvas size so they can draw correctly
+            ['top', 'free', 'front', 'side'].forEach(view => this.$refs[`viewport_${view}`].updateCanvasSize());
         },
         isHidden(view) {
+            /* console.log('checking', view, 'for hidden', (this.expandedView !== null && this.expandedView !== view)); */
             return (this.expandedView !== null && this.expandedView !== view);
+        },
+        isExpanded(view) {
+            /* console.log('checking', view, 'for expanded', this.expandedView === view); */
+            return this.expandedView === view;
         },
     },
 };
 </script>
 
 <style scoped>
-.fill {
-    width: 100%;
-    height: 100%;
-}
 .vgl-scene {
-    display: flex;
-    flex-direction: column;
-}
-.flex-row {
-    display: flex;
-    flex-direction: row;
-    height: 50%;
+    line-height: 0px;
 }
 .viewport-container {
+    display: inline-block;
     box-sizing: border-box;
     border: 2px solid #dddddd;
-    width: 100%;
+    width: 50%;
+    height: 50%;
+    line-height: initial;
 }
 .viewport-container-expanded {
     height: 100%;
 }
+.fill {
+    width: 100%;
+    height: 100%;
+}
 .hidden {
-    visibility: hidden;
+    display: none;
 }
 </style>

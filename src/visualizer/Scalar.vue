@@ -1,16 +1,16 @@
 <template>
 <div>
   <div v-if="displayType === 'circle'">
-    <vgl-icosahedron-geometry :name="`scalar-geo-${this.idx}`" :radius="geoRadius" detail="2" />
+    <vgl-icosahedron-geometry :name="`scalar-geo-${this.scalarKey}`" :radius="geoRadius" detail="2" />
     <!-- TODO is ref necessary? -->
     <vgl-shader-material
-        :ref="`scalar-mat-${this.idx}`"
-        :name="`scalar-mat-${this.idx}`"
+        :ref="`scalar-mat-${this.scalarKey}`"
+        :name="`scalar-mat-${this.scalarKey}`"
         :uniforms="uniforms"
         :vertex-shader="vertexShader"
         :fragment-shader="fragmentShader"
     />
-    <vgl-mesh :geometry="`scalar-geo-${this.idx}`" :material="`scalar-mat-${this.idx}`" :position="pos" />
+    <vgl-mesh :ref="`scalar-mesh-${this.scalarKey}`" :geometry="`scalar-geo-${this.scalarKey}`" :material="`scalar-mat-${this.scalarKey}`" :position="pos" />
   </div>
 </div>
 </template>
@@ -18,8 +18,9 @@
 <script>
 export default {
     props: {
-        idx:           { type: Number, required: true },
+        scalarKey:     { type: String, required: true },
         displayType:   { type: String, required: true },
+        layer:         { type: Number, default: 0 },
         pos:           { type: String, default: '0 0 0' }, // TODO I think to support this I need to use a vgl "billboard"
 
         value:         { type: Number, required: true },
@@ -42,6 +43,9 @@ export default {
         lineThickness(newVal, oldVal) {
             /* console.log('lineThickness updated', oldVal, newVal); */
             this.uniforms.lineThickness.value = newVal;
+        },
+        canvasSize(newVal, oldVal) {
+            this.uniforms.canvasSize.value = [newVal.x, newVal.y];
         },
     },
     computed: {
@@ -134,7 +138,8 @@ export default {
         };
     },
     mounted() {
-        /* console.log('Scalar mounted:', this.displayType, this.color, this.pos, this.value, this.circleStyle); */
+        /* console.log('Scalar mounted:', this.displayType, this.color, this.pos, this.value, this.circleStyle, this.layer); */
+        this.$refs[`scalar-mesh-${this.scalarKey}`].inst.layers.set(this.layer);
     },
 };
 </script>

@@ -23,10 +23,10 @@ export default {
     watch: {
         // TODO I think this is the more correct way to handle this (rather than using @input) to avoid duplicate callbacks; use this pattern everywhere?
         value(newVal, oldVal) {
-            console.log('ScalarControlView value watcher, calling updateData', this.dataKey, this.value, newVal, oldVal);
+            /* console.log('ScalarControlView value watcher, calling updateData', this.dataKey, this.value, newVal, oldVal); */
             // TODO don't want to call this when undoing...
             /* this.emitter.trigger('addhistory', new FieldChangeAction(oldVal, newVal, val => { this.value = val; })); */
-            console.log(`ScalarControlView updateData() ${this.dataKey} ${this.value}`);
+            /* console.log(`ScalarControlView updateData() ${this.dataKey} ${this.value}`); */
             if (this.dataKey) {
                 this.putData(this.dataKey, this.value);
             }

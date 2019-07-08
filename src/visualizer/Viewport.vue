@@ -1,22 +1,37 @@
 <template>
-  <div class="viewport">
+  <div ref="viewport" class="viewport">
     <vgl-grid-helper
-        :ref="`grid-${this.view}`"
+        :ref="`grid-${view}`"
         v-if="settings.showGrid"
-        :rotation="VIEW_VALUES[this.view].grid_rotation"
-        :size="VIEW_VALUES[this.view].grid_size"
-        :divisions="VIEW_VALUES[this.view].grid_divisions"
+        :rotation="VIEW_VALUES[view].grid_rotation"
+        :size="VIEW_VALUES[view].grid_size"
+        :divisions="VIEW_VALUES[view].grid_divisions"
         color-center-line="#888888"
         color-grid="#444444"
+    />
+    <!-- <div v-for="(s, idx) in scalars"
+         :key="`scalar-${idx}`">
+         {{idx}} {{s}} ({{s.color}} {{s.value}})
+         </div> -->
+    <!-- TODO use node id for key here?  or hash?  any way to access :key from inside component so I don't have to duplicate? -->
+    <Scalar v-for="(s, idx) in scalars"
+            :key="`scalar-${view}-${idx}`"
+            :scalarKey="`scalar-${view}-${idx}`"
+            :layer="VIEW_VALUES[view].layer"
+            display-type="circle"
+            :value="s.value"
+            :color="s.color"
+            :canvas-size="canvasSize"
+            :line-thickness="0.1"
     />
 
     <vgl-renderer ref="renderer" :scene="sceneName" :camera="view" antialias style="height: 100%; flex: 1;">
       <template v-if="view === 'free'">
-        <vgl-perspective-camera ref="camera" :name="view" :orbit-position="orbit_pos" />
+        <vgl-perspective-camera ref="camera" :name="view" :orbit-position="orbitPos" />
       </template>
       <template v-else>
         <!-- TODO how to get zoom to fill viewport on window resize like perspective camera does? -->
-        <vgl-orthographic-camera ref="camera" :name="view" :orbit-position="orbit_pos" />
+        <vgl-orthographic-camera ref="camera" :name="view" :orbit-position="orbitPos" />
       </template>
     </vgl-renderer>
     <span class="viewport-label">{{view | capitalize}}</span>
@@ -29,12 +44,23 @@ import * as THREE from 'three';
 import _ from 'lodash';
 import CameraControls from 'camera-controls';
 
+import Scalar from './Scalar';
 import settings from '../settings';
 import { EventBus } from '../EventBus';
 
 CameraControls.install({ THREE: THREE });
 
+class ScalarView {
+    constructor(value, color) {
+        this.value = value;
+        this.color = color;
+    }
+};
+
 export default {
+    components: {
+        Scalar,
+    },
     props: {
         view:      { type: String, required: true, validator: value => { return ['side', 'front', 'top', 'free'].indexOf(value) !== -1; } },
         sceneName: { type: String, required: true },
@@ -73,15 +99,20 @@ export default {
                     grid_rotation: `0 0 ${Math.PI / 2}`,
                 },
             },
+            canvasSize: {
+                x: 0,
+                y: 0,
+            },
             settings: settings.defaultSettings['viewport_settings'],
             controls: null,
             clock: new THREE.Clock(),
+            scalars: [],
         };
     },
     computed: {
-        orbit_pos() {
+        orbitPos() {
             var result = this.VIEW_VALUES[this.view].initial_camera_pos;
-            console.log(`Setting orbit_pos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`);
+            /* console.log(`Setting orbitPos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`); */
             return `${result.radius} ${result.phi} ${result.theta}`; // TODO can I avoid this string step?
         },
     },
@@ -95,7 +126,7 @@ export default {
         },
     },
     mounted() {
-        console.log(`Viewport mounted ${this.view} ${this.sceneName}`);
+        // console.log(`Viewport mounted ${this.view} ${this.sceneName}`, this, this.updateCanvasSize);
 
         const loadSettings = () => {
             this.settings = settings.loadSettings('viewport_settings');
@@ -114,11 +145,10 @@ export default {
         loadSettings();
         EventBus.$on('settings-updated', loadSettings);
 
-        // TODO give Viewport a layer idx; move any dependent objects into here and automatically set their layers to match
         this.$refs.camera.inst.layers.set(0);
         this.$refs.camera.inst.layers.enable(this.VIEW_VALUES[this.view].layer);
 
-        // TODO maybe separate these into two components
+        // TODO maybe move camera + controls to component
         this.controls = new CameraControls(this.$refs.camera.inst, this.$refs.renderer.inst.domElement);
         this.controls.draggingDampingFactor = 0.3;
         this.controls.dampingFactor = 0.3; // Damping after drag finished
@@ -143,15 +173,45 @@ export default {
         for (const iframe of this.$refs.renderer.$el.querySelectorAll('iframe')) {
             iframe.onload = () => {
                 // TODO internet says this won't work in IE, need to do block below?  depends if bug affects more than just Firefox
-                console.log('Viewport forcing resize event for VueGL renderer');
+                /* console.log('Viewport forcing resize event for VueGL renderer'); */
                 iframe.contentWindow.dispatchEvent(new Event('resize'));
                 // var resizeEvent = window.document.createEvent('UIEvents');
                 // resizeEvent .initUIEvent('resize', true, false, window, 0);
                 // window.dispatchEvent(resizeEvent);
             };
-        };
+        }
+
+        // TODO need to re-render when expanding, or somehow maintain state
+        EventBus.$on('node_engine_processed', this.renderScalars);
+
+        this.updateCanvasSize();
+        // TODO need to detect other resizes, e.g. from window
+        EventBus.$on('split-resized', this.updateCanvasSize);
+        /* this.$on('expand-viewport', this.updateCanvasSize); // This needs to happen for all viewports when any expanded or collapsed */
     },
     methods: {
+        renderScalars(editorJson) {
+            /* console.log('Viewport re-drawing scalars'); */
+            this.scalars = [];
+            // TODO may be a more ideomatic way to write this (filter?)
+            for (const key in editorJson.nodes) {
+                const node = editorJson.nodes[key];
+                if (node.name === 'Scalar') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
+                    this.scalars.push(new ScalarView(node.data.value, node.data.color.rgba));
+                    /* console.log('pushed scalar', this.scalars, node.data); */
+                }
+            }
+            /* console.log('Viewport rendering scalars:', this.scalars); */
+        },
+        updateCanvasSize() {
+            this.$nextTick(() => { // TODO pretty gross
+                /* console.log('updating canvas size', this.$refs.viewport, this.scalars); */
+                this.canvasSize = {
+                    x: this.$refs.viewport.getBoundingClientRect().width,
+                    y: this.$refs.viewport.getBoundingClientRect().height,
+                };
+            });
+        },
         anim() {
             const delta = this.clock.getDelta();
             const updated = this.controls.update(delta);

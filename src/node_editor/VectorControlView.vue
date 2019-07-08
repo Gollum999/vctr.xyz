@@ -56,11 +56,11 @@ export default {
     watch: {
         values: {
             handler: function (newVal, oldVal) {
-                console.log('VectorControlView value watcher, calling putData', this.dataKey, this.values, newVal, oldVal);
+                /* console.log('VectorControlView value watcher, calling putData', this.dataKey, this.values, newVal, oldVal); */
                 if (this.dataKey) {
                     /* console.log('VectorControlView putData key:', this.dataKey, 'values:', this.values, vectorWrapperToArray(this.values)); */
                     this.putData(this.dataKey, vectorWrapperToArray(this.values));
-                    console.log(this);
+                    /* console.log(this); */
                 }
             },
             deep: true,
@@ -85,7 +85,7 @@ export default {
             const newValues = this.values.map(i => ({...i})); // Make sure to deep copy the wrappers
             newValues[idx].val = parseFloat(event.target.value);
             /* console.log('VectorControlView onChange new values:', newValues, newValues[0].val, newValues[1].val, newValues[2].val); */
-            console.log('VectorControlView onChange', event, idx, this.values, newValues);
+            /* console.log('VectorControlView onChange', event, idx, this.values, newValues); */
             this.emitter.trigger('addhistory', new FieldChangeAction(this.values, newValues, val => { this.values = val; }));
             this.values = newValues;
 
