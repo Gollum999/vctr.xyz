@@ -113,7 +113,7 @@ describe('MultiplyOperation', () => {
             -2, 2, -2,  2,
         ));
         expect( Op.calculate({type: 'vector', value: [1, 2, 3]}, {type: 'scalar', value: -3})        ).toEqual(vec3.fromValues(-3, -6, -9));
-        expect( Op.calculate({type: 'vector', value: [1, 2, 3]}, {type: 'matrix', value: m1})        ).toEqual(vec3.fromValues(1, 2, 3));
+        expect( Op.calculate({type: 'matrix', value: m1},        {type: 'vector', value: [1, 2, 3]}) ).toEqual(vec3.fromValues(1, 2, 3));
         expect( Op.calculate({type: 'matrix', value: m2},        {type: 'scalar', value: -2})        ).toEqual(mat4.fromValues(
             -4, -2, -0,  2,
             -2, -4, -6, -8,
@@ -125,7 +125,7 @@ describe('MultiplyOperation', () => {
     it('should throw when given an unsupported combination of input types', () => {
         const msg = 'MultiplyOperation unsupported input types';
         expect( () => { Op.calculate({type: 'vector', value: [1, 1, 1]}, {type: 'vector', value: [0, 1, 0]}); } ).toThrow(msg);
-        expect( () => { Op.calculate({type: 'matrix', value: m1},        {type: 'vector', value: [0, 0, 0]}); } ).toThrow(msg);
+        expect( () => { Op.calculate({type: 'vector', value: [0, 0, 0]}, {type: 'matrix', value: m1});        } ).toThrow(msg);
         expect( () => { Op.calculate({type: 'scalar', value: 2},         {type: 'invalid', value: null});     } ).toThrow(msg);
     });
 });

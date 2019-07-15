@@ -341,13 +341,13 @@ class MultiplyOperation extends BaseOperation {
     static title = 'Multiply';
     static symbol = '*';
 
-    static lhsToRhsTypeMap = { 'scalar': s.anything, 'vector': s.scalarOrMatrix, 'matrix': s.scalarOrMatrix };
-    static rhsToLhsTypeMap = { 'scalar': s.anything, 'vector': s.scalar,         'matrix': s.anything       };
+    static lhsToRhsTypeMap = { 'scalar': s.anything, 'vector': s.scalar,         'matrix': s.anything       };
+    static rhsToLhsTypeMap = { 'scalar': s.anything, 'vector': s.scalarOrMatrix, 'matrix': s.scalarOrMatrix };
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,   'vector': s.vector,  'matrix': s.matrix },
-        'vector':   { 'scalar': s.vector,   'vector': s.invalid, 'matrix': s.vector },
-        'matrix':   { 'scalar': s.matrix,   'vector': s.invalid, 'matrix': s.matrix },
+        'scalar':   { 'scalar': s.scalar,   'vector': s.vector,  'matrix': s.matrix  },
+        'vector':   { 'scalar': s.vector,   'vector': s.invalid, 'matrix': s.invalid },
+        'matrix':   { 'scalar': s.matrix,   'vector': s.vector,  'matrix': s.matrix  },
     };
 
     static calculate(lhs, rhs) {
@@ -363,11 +363,11 @@ class MultiplyOperation extends BaseOperation {
         } else if (lhs.type === 'vector' && rhs.type === 'scalar') {
             const out = vec3.create();
             return vec3.scale(out, lhs.value, rhs.value);
-        } else if (lhs.type === 'vector' && rhs.type === 'matrix') { // TODO Do I have these backwards?
+        } else if (lhs.type === 'matrix' && rhs.type === 'vector') {
             const out = vec3.create();
-            const rhsT = mat4.create();
-            mat4.transpose(rhsT, rhs.value); // gl-matrix is column-major, but I am row-major; transpose before calculating
-            const result = vec3.transformMat4(out, lhs.value, rhsT);
+            const lhsT = mat4.create();
+            mat4.transpose(lhsT, lhs.value); // gl-matrix is column-major, but I am row-major; transpose before calculating
+            const result = vec3.transformMat4(out, rhs.value, lhsT);
             return result;
         } else if (lhs.type === 'matrix' && rhs.type === 'scalar') {
             const out = mat4.create();
