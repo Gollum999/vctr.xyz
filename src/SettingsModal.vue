@@ -10,14 +10,14 @@
     <md-tabs>
 
       <md-tab md-label="Viewport">
-        <md-checkbox v-model="settings.viewport_settings.showAxis" @change="save">Show axis</md-checkbox>
-        <md-checkbox v-model="settings.viewport_settings.showGrid" @change="save">Show grid</md-checkbox>
+        <md-checkbox v-model="settings.viewportSettings.showAxis" @change="save">Show axis</md-checkbox>
+        <md-checkbox v-model="settings.viewportSettings.showGrid" @change="save">Show grid</md-checkbox>
       </md-tab>
 
       <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <md-tab md-label="Node Editor">
-        <color-picker-setting v-model="settings.node_editor_settings.defaultScalarColor" @input="save">Default scalar color</color-picker-setting>
-        <color-picker-setting v-model="settings.node_editor_settings.defaultVectorColor" @input="save">Default vector color</color-picker-setting>
+        <color-picker-setting v-model="settings.nodeEditorSettings.defaultScalarColor" @input="save">Default scalar color</color-picker-setting>
+        <color-picker-setting v-model="settings.nodeEditorSettings.defaultVectorColor" @input="save">Default vector color</color-picker-setting>
       </md-tab>
 
     </md-tabs>
@@ -49,7 +49,7 @@ export default {
     methods: {
         save(event) {
             console.log('SettingsModal saving settings', this.settings);
-            settingsUtil.saveSettings(this.settings['viewport_settings'], this.settings['node_editor_settings']);
+            settingsUtil.saveSettings(this.settings['viewportSettings'], this.settings['nodeEditorSettings']);
             EventBus.$emit('settings-updated');
         },
         close() {

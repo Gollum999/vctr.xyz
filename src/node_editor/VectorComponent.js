@@ -20,7 +20,7 @@ export class VectorComponent extends Rete.Component {
 
         node.addControl(new VectorLabelControl(this.editor, 'label', -999));
         node.addControl(new VectorControl(this.editor, 'value', 1));
-        node.addControl(new ColorControl(this.editor, 'color', 2, settings.loadSettings('node_editor_settings').defaultVectorColor));
+        node.addControl(new ColorControl(this.editor, 'color', 2, settings.loadSettings('nodeEditorSettings').defaultVectorColor));
 
         node.addOutput(new Rete.Output('vector', 'Value', sockets.vector));
 

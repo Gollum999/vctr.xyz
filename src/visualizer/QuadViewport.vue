@@ -58,7 +58,7 @@ export default {
     data() {
         return {
             // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
-            settings: settings.defaultSettings['viewport_settings'],
+            settings: settings.defaultSettings['viewportSettings'],
             vectors: [],
             vec3: vec3, // For use in render
             expandedView: null,
@@ -73,7 +73,7 @@ export default {
     },
     mounted() {
         const loadSettings = () => {
-            this.settings = settings.loadSettings('viewport_settings');
+            this.settings = settings.loadSettings('viewportSettings');
             console.log('Viewport settings loaded:', this.settings);
         };
         loadSettings();

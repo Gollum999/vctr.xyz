@@ -103,7 +103,7 @@ export default {
                 x: 0,
                 y: 0,
             },
-            settings: settings.defaultSettings['viewport_settings'],
+            settings: settings.defaultSettings['viewportSettings'],
             controls: null,
             clock: new THREE.Clock(),
             scalars: [],
@@ -129,7 +129,7 @@ export default {
         // console.log(`Viewport mounted ${this.view} ${this.sceneName}`, this, this.updateCanvasSize);
 
         const loadSettings = () => {
-            this.settings = settings.loadSettings('viewport_settings');
+            this.settings = settings.loadSettings('viewportSettings');
             console.log('Viewport settings loaded:', this.settings);
 
             this.$nextTick(() => {

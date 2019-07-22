@@ -16,7 +16,7 @@ export class ScalarComponent extends Rete.Component {
         node.addInput(new Rete.Input('scalar', 'Value', sockets.scalar));
 
         node.addControl(new ScalarControl(this.editor, 'value', 1));
-        node.addControl(new ColorControl(this.editor, 'color', 2, settings.loadSettings('node_editor_settings').defaultScalarColor));
+        node.addControl(new ColorControl(this.editor, 'color', 2, settings.loadSettings('nodeEditorSettings').defaultScalarColor));
 
         node.addOutput(new Rete.Output('scalar', 'Value', sockets.scalar));
 
