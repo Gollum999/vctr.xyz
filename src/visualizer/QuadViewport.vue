@@ -1,3 +1,7 @@
+// "Global" objects can go in here, and they will be shared between all Viewports.
+// Anything that should only draw in a subset of Viewports, or anything that draws differently per Viewport, should be defined
+//   inside of Viewport and constrained to a single layer.
+
 <template>
   <div class="fill">
     <vgl-namespace class="fill">
@@ -13,6 +17,12 @@
             :length="`${vec3.length(v.value)}`"
             :head-length="0.5"
             :head-width="0.5"
+        />
+        <Matrix v-for="(m, idx) in matrices"
+            :key="`matrix-${idx}`"
+            display-type="vector-field"
+            :value="m.value"
+            :color="m.color"
         />
         <vgl-ambient-light color="#ffeecc" />
         <vgl-directional-light position="0 1 1" />
@@ -40,6 +50,7 @@
 import { vec3 } from 'gl-matrix';
 
 import settings from '../settings';
+import Matrix from './Matrix';
 import Viewport from './Viewport';
 import { EventBus } from '../EventBus';
 
@@ -50,9 +61,17 @@ class VectorView {
     }
 };
 
+class MatrixView { // TODO combine, move somewhere common?
+    constructor(value, color) {
+        this.value = value;
+        this.color = color;
+    }
+};
+
 export default {
     name: 'QuadViewport',
     components: {
+        Matrix,
         Viewport,
     },
     data() {
@@ -60,6 +79,7 @@ export default {
             // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
             settings: settings.defaultSettings['viewportSettings'],
             vectors: [],
+            matrices: [],
             vec3: vec3, // For use in render
             expandedView: null,
         };
@@ -85,14 +105,18 @@ export default {
         EventBus.$on('node_engine_processed', editorJson => {
             console.log('QuadViewport handling process event');
             this.vectors = [];
+            this.matrices = [];
             // TODO may be a more ideomatic way to write this (filter?)
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
                 if (node.name === 'Vector') {
                     this.vectors.push(new VectorView(node.data.value, node.data.color.hex)); // TODO need to figure out best practices for handling data in engine
+                } else if (node.name === 'Matrix') {
+                    this.matrices.push(new MatrixView(node.data.value, node.data.color.hex));
                 }
             }
             // console.log('QuadViewport rendering vectors:', this.vectors);
+            console.log('QuadViewport rendering matrices:', this.matrices);
         });
     },
     methods: {

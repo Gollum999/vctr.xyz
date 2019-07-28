@@ -3,6 +3,7 @@
   <div class="node-editor" @dblclick.capture.stop>
     <div class="rete" id="rete" />
 
+    <!-- TODO this container swallows clicks -->
     <div class="buttons-container">
       <div class="buttons-group buttons-add-nodes">
         <md-button class="md-icon-button md-dense md-raised" type="button" title="Add scalar" @click="addNode('scalar')">
