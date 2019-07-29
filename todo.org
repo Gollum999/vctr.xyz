@@ -91,12 +91,18 @@
 | M         |   | - | - | s |   | M         | m | - | - |   |
 | A         | a | - | - | s |   | A         | a | - | - |   |
 * 2D mode?
+* Named save/load support
+* Misc viewport
+** Draggable quadrants
 * Misc node editor
  - More operation types
 ** Undo/redo support
  - [ ] Current history plugin does not give access to undo stack, which prevents
    me from doing a couple things.  Maybe submit a patch to the plugin, or write
    my own, or just try to find some workarounds...
+   - https://github.com/retejs/history-plugin/issues/2
+     - [ ] Need to re-work BasicOperationComponent to not change any state in
+       worker().  Re-write functions to be pure, traverse graph myself.
    - [ ] "Collapse" multiple similar actions (node value updates, cascading
      socket type changes + connection changes, etc.)
    - [ ] Save undo/redo state between page loads?
@@ -108,20 +114,26 @@
  - [ ] Right click pan to match viewport?
  - [ ] Left click box select?
  - [X] When adding nodes, add to center of view and only reposition if node too close to center
-
 ** Nodes
  - [ ] More render settings
- - [ ] Togglable rendering
+   - [ ] "Render at pos"/"Origin"
+   - [ ] Togglable rendering, or maybe just alpha support
+   - [ ] Random output colors
+   - [ ] Hide some of these in a "show advanced render settings" option?
  - [ ] Custom node titles
    - [ ] Render node name in viewport?
- - [ ] Random output colors
  - [ ] Custom paste handler
  - [ ] Slightly wider vector input (enough for 3 digits + decimal)
+   - [ ] Configurable?
  - [ ] Truncate input display values?
  - [ ] Condense padding a bit more if possible
 ** Node types
- - [ ] Render scalar values somehow
- - [ ] Render matrices?  grid w/ transform?
+ - [ ] Render scalar values
+   - [ ] More render types:
+     - [ ] Vector?
+ - [-] Render matrices?
+   - [ ] grid w/ transform?
+   - [X] vector field?
 *** Matrix support
  - [ ] New matrix icon?
 ** Plugins
@@ -134,5 +146,7 @@
    - Generate JS from node editor (can I go the other way too?)
  - [[https://rete.js.org/#/docs/plugins/minimap][Minimap plugin]]
  - [[https://rete.js.org/#/docs/plugins/auto-arrange][Auto-arrange plugin]]
+   - Tried using this and it didn't seem to work...
  - [[https://rete.js.org/#/docs/plugins/history][History plugin]]
    - Undo/redo support!
+* Hosting/ads/etc
