@@ -1,19 +1,20 @@
 {
   "name": "vector_visualizer",
   "version": "1.0.0",
+  "private": true,
   "description": "Web app to visualize vector operations, transformations, etc.",
   "author": "Tim Sanders <gollum9999@gmail.com>",
-  "private": true,
   "scripts": {
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
     "serve": "vue-cli-service serve",
-    "serve:prod": "vue-cli-service serve --mode=production --port=8081",
+    "build": "vue-cli-service build",
     "test": "npm run test:unit && npm run test:e2e",
+    "lint": "vue-cli-service lint",
+    "serve:prod": "vue-cli-service serve --mode=production --port=8081",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@mdi/font": "^3.6.95",
     "bootstrap-vue": "^2.0.0-rc.18",
     "camera-controls": "^1.11.1",
     "core-js": "^2.6.5",
@@ -23,6 +24,7 @@
     "rete-connection-plugin": "^0.7.0",
     "rete-history-plugin": "^0.2.1",
     "rete-vue-render-plugin": "^0.3.5",
+    "roboto-fontface": "*",
     "three": "^0.105.2",
     "vue": "^2.6.6",
     "vue-color": "^2.7.0",
@@ -62,12 +64,15 @@
     "postcss-url": "^8.0.0",
     "pug": "^2.0.3",
     "pug-plain-loader": "^1.0.0",
+    "sass": "^1.17.4",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "url-loader": "^1.1.2",
+    "vue-cli-plugin-vuetify": "^0.6.1",
     "vue-jest": "^3.0.4",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.10",
+    "vuetify-loader": "^1.2.2",
     "webpack": "^4.30.0"
   }
 }

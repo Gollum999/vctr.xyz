@@ -518,7 +518,7 @@ export default {
 
 <style lang="sass" scoped>
 .node-editor
-  height: 100%; /* Make sure container is large enough when split is fully expanded */
+  height: 100% // Make sure container is large enough when split is fully expanded
   position: relative
   display: block
   width: 100%

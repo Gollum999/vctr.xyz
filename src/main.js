@@ -8,12 +8,14 @@ import router from './router';
 import * as VueGL from 'vue-gl';
 import VueMaterial from 'vue-material';
 import VModal from 'vue-js-modal';
+import vuetify from './plugins/vuetify';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import 'vue-material/dist/vue-material.min.css';
 import 'vue-material/dist/theme/default.css';
-
+import 'roboto-fontface/css/roboto/roboto-fontface.css';
+import '@mdi/font/css/materialdesignicons.css';
 import '../static/global.css';
 
 Vue.config.productionTip = false;
@@ -32,6 +34,7 @@ new Vue({
     el: '#app',
     router,
     components: { App },
+    vuetify,
     template: '<App/>',
 });
 /*
