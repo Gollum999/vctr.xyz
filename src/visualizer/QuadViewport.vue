@@ -23,6 +23,9 @@
             display-type="vector-field"
             :value="m.value"
             :color="m.color"
+            :vector-scale="settings.matrix.vectorScale"
+            :density="settings.matrix.fieldDensity"
+            :fieldSize="settings.matrix.fieldSize"
         />
         <vgl-ambient-light color="#ffeecc" />
         <vgl-directional-light position="0 1 1" />
@@ -76,8 +79,7 @@ export default {
     },
     data() {
         return {
-            // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
-            settings: settings.defaultSettings['viewportSettings'],
+            settings: null,
             vectors: [],
             matrices: [],
             vec3: vec3, // For use in render
@@ -91,14 +93,15 @@ export default {
             });
         },
     },
-    mounted() {
+    created() {
         const loadSettings = () => {
             this.settings = settings.loadSettings('viewportSettings');
             console.log('Viewport settings loaded:', this.settings);
         };
         loadSettings();
         EventBus.$on('settings-updated', loadSettings);
-
+    },
+    mounted() {
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
         /* this.$refs.scene.inst.background = new THREE.Color(0xffffff); */
 

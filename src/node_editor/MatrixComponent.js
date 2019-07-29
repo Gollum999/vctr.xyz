@@ -5,6 +5,7 @@ import sockets from './sockets';
 import { MatrixControl } from './MatrixControl';
 import { MatrixLabelControl } from './MatrixLabelControl';
 import { ColorControl } from './ColorControl';
+import settings from '../settings';
 
 export class MatrixComponent extends Rete.Component {
     constructor() {
@@ -19,7 +20,7 @@ export class MatrixComponent extends Rete.Component {
 
         node.addControl(new MatrixLabelControl(this.editor, 'label', -999));
         node.addControl(new MatrixControl(this.editor, 'value', 1));
-        node.addControl(new ColorControl(this.editor, 'color', 2));
+        node.addControl(new ColorControl(this.editor, 'color', 2, settings.loadSettings('nodeEditorSettings').defaultMatrixColor));
 
         node.addOutput(new Rete.Output('matrix', 'Value', sockets.matrix));
 

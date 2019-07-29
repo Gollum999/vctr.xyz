@@ -54,13 +54,13 @@ export default {
             for (let x = -this.fieldSize; x <= this.fieldSize; x += deltaPos) { // TODO cumulative float error
                 for (let y = -this.fieldSize; y <= this.fieldSize; y += deltaPos) {
                     for (let z = -this.fieldSize; z <= this.fieldSize; z += deltaPos) {
-                        console.log('processing x:', x, 'y:', y, 'z:', z);
+                        /* console.log('processing x:', x, 'y:', y, 'z:', z); */
                         const out = vec3.create();
                         const baseVec = vec3.fromValues(x, y, z);
                         const transposed = mat4.create();
                         mat4.transpose(transposed, this.value); // gl-matrix is column-major, but I am row-major; transpose before calculating
                         vec3.transformMat4(out, baseVec, transposed);
-                        console.log('adding vector', out, baseVec, this.value);
+                        /* console.log('adding vector', out, baseVec, this.value); */
                         vectors.push(new FieldVector(out, [x, y, z]));
                     }
                 }
