@@ -6,23 +6,22 @@
     <!-- TODO this container swallows clicks -->
     <div class="buttons-container">
       <div class="buttons-group buttons-add-nodes">
-        <md-button class="md-icon-button md-dense md-raised" type="button" title="Add scalar" @click="addNode('scalar')">
-          <md-icon class="custom-icon" :md-src="require('@/assets/scalar.svg')" />
-        </md-button>
-        <md-button class="md-icon-button md-dense md-raised" type="button" title="Add vector" @click="addNode('vector')">
-          <md-icon class="custom-icon" :md-src="require('@/assets/vector.svg')" />
-        </md-button>
-        <md-button class="md-icon-button md-dense md-raised" type="button" title="Add matrix" @click="addNode('matrix')">
-          <md-icon class="custom-icon" :md-src="require('@/assets/matrix.svg')" />
-        </md-button>
+        <v-btn fab x-small type="button" title="Add scalar" @click="addNode('scalar')">
+          <v-icon>$vuetify.icons.scalar</v-icon>
+        </v-btn>
+        <v-btn fab x-small type="button" title="Add vector" @click="addNode('vector')">
+          <v-icon>$vuetify.icons.vector</v-icon>
+        </v-btn>
+        <v-btn fab x-small type="button" title="Add matrix" @click="addNode('matrix')">
+          <v-icon>$vuetify.icons.matrix</v-icon>
+        </v-btn>
         <!-- TODO not sure why "auto" size seems truncated on the right (possibly doesn't take scroll bar width into account) -->
         <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
         <md-menu md-size="medium" md-align-trigger>
           <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
-          <md-button class="md-icon-button md-dense md-raised" type="button" title="Add basic operation" md-menu-trigger>
-            <md-icon class="custom-icon" :md-src="require('@/assets/operation.svg')" />
-          </md-button>
-
+          <v-btn fab x-small type="button" title="Add basic operation" md-menu-trigger>
+            <v-icon>$vuetify.icons.operation</v-icon>
+          </v-btn>
           <md-menu-content>
             <md-menu-item @click="addNode('operation-add')">Add</md-menu-item>
             <md-menu-item @click="addNode('operation-subtract')">Subtract</md-menu-item>
@@ -37,23 +36,25 @@
       <span class="buttons-group buttons-spacer" />
 
       <div class="buttons-group buttons-history">
-        <md-button class="md-icon-button md-dense md-raised" type="button" title="Undo" @click="onUndo">
-          <md-icon>undo</md-icon>
-        </md-button>
-        <md-button class="md-icon-button md-dense md-raised" type="button" title="Redo" @click="onRedo">
-          <md-icon>redo</md-icon>
-        </md-button>
+        <v-btn fab ripple x-small type="button" title="Undo" @click="onUndo">
+          <!-- TODO color not working -->
+          <!-- TODO should I pull *any* repeated things into custom components? -->
+          <v-icon>undo</v-icon>
+        </v-btn>
+        <v-btn fab x-small type="button" title="Redo" @click="onRedo">
+          <v-icon>redo</v-icon>
+        </v-btn>
       </div>
 
       <span class="buttons-group buttons-spacer" />
 
       <div class="buttons-group buttons-delete-nodes">
-        <md-button class="md-icon-button md-dense md-raised" type="button" title="Recenter view" @click="recenterView">
-          <md-icon>center_focus_weak</md-icon>
-        </md-button>
-        <md-button class="md-icon-button md-dense md-raised" type="button" title="Clear all nodes" @click="clearAllNodes">
-          <md-icon>delete</md-icon>
-        </md-button>
+        <v-btn fab x-small type="button" title="Recenter view" @click="recenterView">
+          <v-icon>center_focus_weak</v-icon>
+        </v-btn>
+        <v-btn fab x-small type="button" title="Clear all nodes" @click="clearAllNodes">
+          <v-icon>delete</v-icon>
+        </v-btn>
       </div>
 
       <context-menu id="context-menu" ref="ctxMenu">
@@ -509,11 +510,6 @@ export default {
       background: #aaaaaa
       background: linear-gradient(180deg, #7777dd 34%, #ff4444 34% 66%, #44ffff 66%)
       background: conic-gradient(#7777dd 120deg, #ff4444 120deg 240deg, #44ffff 240deg 360deg)
-  .custom-icon
-    svg
-      position: absolute // TODO: necessary to get icon positioned properly in button
-      top: 0px
-      left: 0px
 </style>
 
 <style lang="sass" scoped>
@@ -525,6 +521,17 @@ export default {
   min-height: 100px
   overflow-y: hidden
   .buttons-container
+    .buttons-group:first-child
+      margin-left: 8px
+    button.v-btn
+      // &:first-of-type
+      //   margin-left: 8px
+      margin-right: 8px
+      .v-icon
+        opacity: 0.5 // TODO Changing the color isn't working, but this does
+        height: 24px
+        width: 24px // TODO v-icon "size" attribute doesn't set this?
+        font-size: 24px
     display: flex
     position: absolute
     left: 5px
