@@ -7,9 +7,14 @@
 
   <form id="settings-form">
     <!-- TODO make selected tab a URL param? -->
-    <md-tabs>
+    <v-tabs>
 
-      <md-tab md-label="Viewport">
+      <v-tab>Viewport</v-tab>
+      <v-tab>Node Editor</v-tab>
+
+      <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
+      <v-tab-item>
+        <!-- TODO use switch instead of checkbox? -->
         <md-checkbox v-model="settings.viewportSettings.showAxis" @change="save">Show axis</md-checkbox>
         <md-checkbox v-model="settings.viewportSettings.showGrid" @change="save">Show grid</md-checkbox>
 
@@ -35,10 +40,9 @@
           </md-select>
         </md-field>
         -->
-      </md-tab>
+      </v-tab-item>
 
-      <!-- TODO The modal resizes when I change tabs, can I avoid that?  md-tabs-content is resizing programmatically -->
-      <md-tab md-label="Node Editor">
+      <v-tab-item>
         <color-picker-setting v-model="settings.nodeEditorSettings.defaultScalarColor" @input="save" disableAlpha>
           Default scalar color
         </color-picker-setting>
@@ -48,9 +52,9 @@
         <color-picker-setting v-model="settings.nodeEditorSettings.defaultMatrixColor" @input="save" disableAlpha>
           Default matrix color
         </color-picker-setting>
-      </md-tab>
+      </v-tab-item>
 
-    </md-tabs>
+    </v-tabs>
   </form>
 
   <router-view />
@@ -99,7 +103,7 @@ export default {
     right: 0;
     margin: 0;
 }
-.md-tab {
+.v-tab {
     display: flex;
     flex-direction: column;
 }
