@@ -9,6 +9,9 @@ import OperationIcon from '@/assets/operation.svg';
 Vue.use(Vuetify);
 
 export default new Vuetify({
+    theme: {
+        dark: true,
+    },
     icons: {
         iconfont: 'mdi',
         values: {
