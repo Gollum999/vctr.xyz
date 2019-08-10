@@ -15,22 +15,25 @@
       <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <v-tab-item>
         <!-- TODO use switch instead of checkbox? -->
-        <md-checkbox v-model="settings.viewportSettings.showAxis" @change="save">Show axis</md-checkbox>
-        <md-checkbox v-model="settings.viewportSettings.showGrid" @change="save">Show grid</md-checkbox>
+        <v-switch v-model="settings.viewportSettings.showAxis" @change="save" label="Show axis" hide-details></v-switch>
+        <v-switch v-model="settings.viewportSettings.showGrid" @change="save" label="Show grid" hide-details></v-switch>
 
-        <md-subheader>Matrix Rendering</md-subheader>
-        <md-field>
-          <label>Vector Scale</label>
-          <md-input type="number" step="0.1" @change="save" v-model.number="settings.viewportSettings.matrix.vectorScale"></md-input>
-        </md-field>
-        <md-field>
-          <label>Field Size</label>
-          <md-input type="number" step="0.1" @change="save" v-model.number="settings.viewportSettings.matrix.fieldSize"></md-input>
-        </md-field>
-        <md-field>
-          <label>Field Density</label>
-          <md-input type="number" step="0.1" @change="save" v-model.number="settings.viewportSettings.matrix.fieldDensity"></md-input>
-        </md-field>
+        <v-subheader>Matrix Rendering</v-subheader>
+        <v-slider step="0.1" min="0.1" max="1" @end="save" label="Vector Scale" v-model.number="settings.viewportSettings.matrix.vectorScale">
+          <template v-slot:append>
+            {{settings.viewportSettings.matrix.vectorScale}}
+          </template>
+        </v-slider>
+        <v-slider step="0.1" min="1" max="25" @end="save" label="Field Size" v-model.number="settings.viewportSettings.matrix.fieldSize">
+          <template v-slot:append>
+            {{settings.viewportSettings.matrix.fieldSize}}
+          </template>
+        </v-slider>
+        <v-slider step="0.1" min="0.1" max="5" @end="save" label="Field Density" v-model.number="settings.viewportSettings.matrix.fieldDensity">
+          <template v-slot:append>
+            {{settings.viewportSettings.matrix.fieldDensity}}
+          </template>
+        </v-slider>
         <!--
         <md-field>
           <md-select>

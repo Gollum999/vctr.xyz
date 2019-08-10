@@ -38,7 +38,6 @@
       <div class="buttons-group buttons-history">
         <v-btn fab ripple x-small type="button" title="Undo" @click="onUndo">
           <!-- TODO color not working -->
-          <!-- TODO should I pull *any* repeated things into custom components? -->
           <v-icon>undo</v-icon>
         </v-btn>
         <v-btn fab x-small type="button" title="Redo" @click="onRedo">
