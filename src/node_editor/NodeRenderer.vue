@@ -1,6 +1,7 @@
 <template lang="pug">
 // TODO may need to have manual control over class name
-md-card.node(md-with-hover :class="[selected(), node.name] | kebab")
+// TODO why is dark theme not applying?
+v-card.node(dark hover :class="[selected(), node.name] | kebab")
   // TODO editable titles
   .title {{node.name}}
 
@@ -40,10 +41,10 @@ export default {
 // These will propogate down to sockets and controls
 #app
   .node
-    .md-input
+    .v-text-field
       // border: 1px solid #555555
       // border-radius: 6px
-      flex: 0 1 auto // Fixes extra-wide number inputs in Firefox
+      // flex: 0 1 auto // Fixes extra-wide number inputs in Firefox
       font-size: 12px
     .md-field
       width: auto // Prevents control from overflowing grid cell... not sure why this is necessary or if there is a better way
@@ -76,7 +77,8 @@ export default {
 // @import "../../node_modules/rete-vue-render-plugin/src/vars"
 // $node-color: #aaaaaa
 $node-color: #ffffff
-$node-color-selected: #ffe2e2
+// $node-color-selected: #ffe2e2
+$node-color-selected: #78777e
 // I don't use the node group plugin...
 $group-color: rgba(15, 80, 255, 0.2)
 $group-handler-size: 40px
@@ -87,7 +89,7 @@ $socket-color: #96b38a
 $node-width: 100px
 
 .node
-  background: $node-color
+  // background: $node-color
   // border: 1px solid #555555
   // border-radius: 10px
   cursor: pointer
@@ -105,8 +107,8 @@ $node-width: 100px
     grid-template-rows: auto
     .item
       border: 1px solid black
-  &:hover
-    background: lighten($node-color,4%)
+  // &:hover
+  //   background: lighten($node-color,4%)
   &.selected
     background-color: $node-color-selected
     // border: 1px solid black // TODO temp, figure out a better indicator
@@ -153,7 +155,7 @@ $node-width: 100px
     // position: absolute
     // top: 50%
     // transform: translateY(-50%)
-    color: black
+    // color: black
     display: inline-block
     // font-family: sans-serif
     // font-size: 12px

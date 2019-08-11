@@ -1,15 +1,18 @@
 <template>
 <div class="matrix-control-container" :style="{'grid-row': rowIdx}">
-  <md-field v-for="(item, idx) in values" :key="`matrix-value-${idx}`">
-    <md-input
-      type="number"
-      :value="item.val"
-      :readonly="readOnly"
-      @change="onChange($event, idx)"
-      @copy.prevent.stop="onCopy"
-      @paste.prevent.stop="onPaste(idx, $event)"
-    />
-  </md-field>
+  <!-- TODO why is dark theme not applying? -->
+  <v-text-field
+    v-for="(item, idx) in values" :key="`matrix-value-${idx}`"
+    solo
+    dark
+    hide-details
+    type="number"
+    :value="item.val"
+    :readonly="readOnly"
+    @change="onChange($event, idx)"
+    @copy.prevent.stop="onCopy"
+    @paste.prevent.stop="onPaste(idx, $event)"
+  />
 </div>
 
 <!-- <template v-if="readOnly"> -->
@@ -136,15 +139,22 @@ export default {
     grid-template-columns: auto auto auto auto;
     grid-template-rows: auto auto auto auto;
 }
-.matrix input {
-    width: 3em;
+</style>
+
+<style>
+#app .matrix-control-container input {
+    width: 2em;
+    padding: 0;
 }
-#app .node.matrix .title {
-    /* background-color: #5f5fb9; */
-    /* border-radius: 10px 10px 0 0; */
+#app .matrix-control-container .v-input {
+    margin: inherit;
+    padding: 0px 4px;
 }
-#app .node.matrix .title {
-    /* background-color: #3fb73f; */
-    /* border-radius: 10px 10px 0 0; */
+#app .matrix-control-container .v-input__slot {
+    padding: 0px 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+#app .matrix-control-container .v-input__control {
+    min-height: 28px;
 }
 </style>

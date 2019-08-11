@@ -1,5 +1,6 @@
 <template>
-<md-field><md-input type="number" :value="value" :readonly="readOnly" @change="onChange" /></md-field>
+<!-- TODO why is dark theme not applying? -->
+<v-text-field solo dark hide-details type="number" :value="value" :readonly="readOnly" @change="onChange" />
 </template>
 
 <script>
@@ -54,5 +55,23 @@ export default {
     /* Smaller default size but stretch to fill */
     width: 3em;
     min-width: 100%;
+}
+</style>
+
+<style>
+#app .scalar input {
+    width: 2em;
+    padding: 0;
+}
+#app .scalar .v-input {
+    margin: inherit;
+    padding: 0px 4px;
+}
+#app .scalar .v-input__slot {
+    padding: 0px 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+#app .scalar .v-input__control {
+    min-height: 28px;
 }
 </style>

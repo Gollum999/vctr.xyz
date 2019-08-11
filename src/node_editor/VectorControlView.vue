@@ -1,15 +1,19 @@
 <template>
 <div class="vector-control-container" :style="{'grid-row': rowIdx}">
-  <md-field v-for="(axis, idx) in values" :key="idx">
-    <md-input
-      type="number"
-      :value="axis.val"
-      :readonly="readOnly"
-      @change="onChange($event, idx)"
-      @copy.prevent.stop="onCopy"
-      @paste.prevent.stop="onPaste(idx, $event)"
-    />
-  </md-field>
+  <!-- TODO why is dark theme not applying? -->
+  <!-- TODO pull this out to reuse for all node types -->
+  <v-text-field
+    v-for="(axis, idx) in values" :key="idx"
+    solo
+    dark
+    hide-details
+    type="number"
+    :value="axis.val"
+    :readonly="readOnly"
+    @change="onChange($event, idx)"
+    @copy.prevent.stop="onCopy"
+    @paste.prevent.stop="onPaste(idx, $event)"
+  />
 </div>
 
 <!-- <template v-if="readOnly"> -->
@@ -131,15 +135,22 @@ export default {
     grid-column: controls;
     display: flex;
 }
-.vector input {
-    width: 3em;
+</style>
+
+<style>
+#app .vector-control-container input {
+    width: 2em;
+    padding: 0;
 }
-#app .node.vector .title {
-    /* background-color: #5f5fb9; */
-    /* border-radius: 10px 10px 0 0; */
+#app .vector-control-container .v-input {
+    margin: inherit;
+    padding: 0px 4px;
 }
-#app .node.vector .title {
-    /* background-color: #3fb73f; */
-    /* border-radius: 10px 10px 0 0; */
+#app .vector-control-container .v-input__slot {
+    padding: 0px 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+#app .vector-control-container .v-input__control {
+    min-height: 28px;
 }
 </style>
