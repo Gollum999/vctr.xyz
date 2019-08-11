@@ -527,7 +527,6 @@ export default {
       //   margin-left: 8px
       margin-right: 8px
       .v-icon
-        opacity: 0.5 // TODO Changing the color isn't working, but this does
         height: 24px
         width: 24px // TODO v-icon "size" attribute doesn't set this?
         font-size: 24px
@@ -543,7 +542,16 @@ export default {
   height: 100%
   min-height: 100vh
   border: 2px solid #dddddd
-  background-color: #bbbbbb
 .split
   overflow-y: hidden
+.v-application.theme--light
+  .v-icon
+    opacity: 0.6 // TODO Changing the color isn't working, but this does
+  .rete
+    background-color: #bbbbbb
+.v-application.theme--dark
+  .v-icon
+    fill: white
+  .rete
+    background-color: #696969 // hehe
 </style>

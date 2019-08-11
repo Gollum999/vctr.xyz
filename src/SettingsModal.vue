@@ -24,12 +24,12 @@
             {{settings.viewportSettings.matrix.vectorScale}}
           </template>
         </v-slider>
-        <v-slider step="0.1" min="1" max="25" @end="save" label="Field Size" v-model.number="settings.viewportSettings.matrix.fieldSize">
+        <v-slider step="0.1" min="1" max="20" @end="save" label="Field Size" v-model.number="settings.viewportSettings.matrix.fieldSize">
           <template v-slot:append>
             {{settings.viewportSettings.matrix.fieldSize}}
           </template>
         </v-slider>
-        <v-slider step="0.1" min="0.1" max="5" @end="save" label="Field Density" v-model.number="settings.viewportSettings.matrix.fieldDensity">
+        <v-slider step="0.1" min="0.1" max="2" @end="save" label="Field Density" v-model.number="settings.viewportSettings.matrix.fieldDensity">
           <template v-slot:append>
             {{settings.viewportSettings.matrix.fieldDensity}}
           </template>
