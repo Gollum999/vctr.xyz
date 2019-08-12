@@ -1,9 +1,11 @@
 <template>
-<modal name="settings-modal" classes="modal-body" @closed="closed" height="auto">
-  <md-button class="close-button md-icon-button" @click="close">
-    <md-icon>close</md-icon>
-  </md-button>
-  <h4>Settings</h4>
+<v-card>
+  <v-card-title>
+    <v-btn text fab small class="close-button" @click="close">
+      <v-icon>close</v-icon>
+    </v-btn>
+    Settings
+  </v-card-title>
 
   <form id="settings-form">
     <!-- TODO make selected tab a URL param? -->
@@ -59,10 +61,7 @@
 
     </v-tabs>
   </form>
-
-  <router-view />
-
-</modal>
+</v-card>
 </template>
 
 <script>
@@ -117,7 +116,7 @@ export default {
 </style>
 
 <style>
-.modal-body {
-    background-color: white;
+.v-tabs-items {
+    padding: 16px;
 }
 </style>

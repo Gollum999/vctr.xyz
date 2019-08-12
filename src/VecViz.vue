@@ -1,9 +1,16 @@
 <template>
 <div class="vec-viz">
-  <md-button class="settings-button md-raised md-dense" to="/vecviz/settings">
-    <md-icon>settings</md-icon>
-    Settings
-  </md-button>
+  <v-dialog v-model="showSettingsDialog" class="settings-dialog-container" width="600">
+    <template v-slot:activator="{ on: showDialog }">
+      <v-btn class="settings-button" v-on="showDialog">
+        <v-icon>settings</v-icon>
+        Settings
+      </v-btn>
+    </template>
+
+    <SettingsModal />
+  </v-dialog>
+
   <Split direction="vertical" :gutterSize="8" @onDragStart="onDragStart" @onDrag="onDrag" @onDragEnd="onDragEnd">
     <SplitArea :size="50" :minSize="150">
       <QuadViewport />
@@ -12,7 +19,6 @@
       <NodeEditor @process="editorJson = $event"/>
     </SplitArea>
   </Split>
-  <router-view name="modal" />
   <p style="color: #333333">{{editorJson}}</p>
 </div>
 </template>
@@ -20,6 +26,7 @@
 <script>
 import QuadViewport from './visualizer/QuadViewport';
 import NodeEditor from './node_editor/NodeEditor';
+import SettingsModal from './SettingsModal';
 import { EventBus } from './EventBus';
 
 export default {
@@ -27,11 +34,13 @@ export default {
     data() {
         return {
             editorJson: '',
+            showSettingsDialog: false,
         };
     },
     components: {
         QuadViewport,
         NodeEditor,
+        SettingsModal,
     },
     methods: {
         onDrag(size) {
@@ -70,6 +79,10 @@ export default {
 .settings-button:hover {
     text-decoration: none;
 }
+.settings-dialog-container {
+    /* TODO this is a hack because v-dialog adds some extra space in the style of the element? */
+    display: none !important;
+}
 
 @media screen and (max-height: 920px) {
     .vec-viz { height: 800px; }
@@ -86,5 +99,12 @@ export default {
 }
 @media screen and (min-width: 1721px) {
     .vec-viz { width: 1600px; }
+}
+</style>
+
+<style>
+.v-dialog__container !important {
+    /* TODO below is a hack because v-dialog adds some extra space? and it's adding it in the style of the element... */
+    display: none;
 }
 </style>
