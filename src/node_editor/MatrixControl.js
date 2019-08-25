@@ -2,12 +2,12 @@ import Rete from 'rete';
 import MatrixControlView from './MatrixControlView.vue';
 
 export class MatrixControl extends Rete.Control {
-    constructor(emitter, key, rowIdx) {
+    constructor(emitter, key, rowIdx, globalVuetify) {
         // console.log('MatrixControl constructor');
         super(key);
         this.render = 'vue';
         this.component = MatrixControlView;
-        this.props = { emitter, dataKey: key, rowIdx };
+        this.props = { emitter, dataKey: key, rowIdx, globalVuetify };
     }
 
     setValue(val) {

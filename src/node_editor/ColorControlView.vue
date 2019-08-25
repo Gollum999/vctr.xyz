@@ -2,21 +2,19 @@
 <div class="color-control-container">
   <div class="color-label input-title" :style="{'grid-row': rowIdx}">Color</div>
 
-  <md-menu
+  <v-menu
       class="color-picker"
-      :style="{'grid-row': rowIdx}"
-      md-size="auto"
-      md-direction="bottom-start"
-      md-align-trigger
-      @md-opened="colorPickerOpened"
-      @md-closed="colorPickerClosed"
+      v-model="colorPickerShowing"
+      :close-on-content-click="false"
   >
-    <div class="color-picker-button" :style="{'background-color': color.hex}" md-menu-trigger>
-      <md-menu-content class="color-picker-popup">
-        <color-picker :value="color.hex" @input="colorUpdated" disableAlpha />
-      </md-menu-content>
-    </div>
-  </md-menu>
+    <template v-slot:activator="{ on: showColorPicker }">
+      <div class="color-picker-button" :style="{'background-color': color.hex, 'grid-row': rowIdx}" v-on="showColorPicker"></div>
+    </template>
+
+    <v-card class="color-picker-popup">
+      <v-color-picker v-model="color.hex" />
+    </v-card>
+  </v-menu>
 
   <!-- <div class="color-picker-button" :style="{'grid-row': rowIdx, 'background-color': color}"> -->
   <!--   <div @mousedown.stop @touchstart.stop> -->
@@ -28,61 +26,64 @@
 </template>
 
 <script>
-import { Chrome } from 'vue-color';
 import { FieldChangeAction } from './util';
 
 export default {
     props: {
-        getData:      { type: Function, required: true }, // injected by Rete
-        putData:      { type: Function, required: true }, // injected by Rete
-        emitter:      { type: Object,   required: true },
-        dataKey:      { type: String,   required: true },
-        rowIdx:       { type: Number,   required: true }, // used to position control within parent grid
-        defaultValue: { type: Object,   default: () => ({ hex: '#000000' }) },
+        getData:       { type: Function, required: true }, // injected by Rete
+        putData:       { type: Function, required: true }, // injected by Rete
+        emitter:       { type: Object,   required: true },
+        dataKey:       { type: String,   required: true },
+        rowIdx:        { type: Number,   required: true }, // used to position control within parent grid
+        globalVuetify: { type: Object,   required: true },
+        defaultValue:  { type: Object,   default: () => ({ hex: '#000000' }) },
     },
 
     data() {
         return {
-            color: { hex: this.defaultValue },
+            color: this.defaultValue,
+            prevColor: null,
+            colorPickerShowing: false,
         };
     },
 
-    components: {
-        'color-picker': Chrome,
+    created() {
+        // HACK: There is some bug when using Vuetify in local Vue contexts that causes certain components to break
+        // https://github.com/retejs/vue-render-plugin/issues/14
+        this.$vuetify = this.globalVuetify;
+    },
+
+    watch: {
+        colorPickerShowing(showing) {
+            /* console.log('colorPickerShowing CHANGED', showing, this.color); */
+            if (showing) {
+                /* console.log('colorPicker opened', this.color, this.prevColor); */
+                this.prevColor = Object.assign({}, this.color);
+            } else {
+                /* console.log('colorPicker closed', this.color, this.prevColor); */
+                this.emitter.trigger('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
+            }
+        },
+        color: {
+            deep: true,
+            handler(newVal, oldVal) {
+                /* console.log('color watcher', this.dataKey, this.color, oldVal, newVal); */
+                if (this.dataKey) {
+                    this.putData(this.dataKey, newVal);
+                }
+                this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
+            },
+        },
     },
 
     mounted() {
+        /* console.log('ColorControlView MOUNTED', this.color, this.getData(this.dataKey)); */
         if (!this.dataKey) {
             throw new Error('dataKey was null??');
         }
         this.color = this.getData(this.dataKey) || this.defaultValue;
         /* console.log('ColorControlView mounted', this.dataKey, this.color); */
         this.putData(this.dataKey, this.color);
-    },
-
-    // watch: {
-    //     color(newVal, oldVal) {
-    //         console.log('color watcher', oldVal, newVal);
-    //     },
-    // },
-
-    methods: {
-        colorPickerOpened(event) {
-            /* console.log('colorPickerOpened', event); */
-            this.prevColor = this.color;
-        },
-        colorPickerClosed(event) { // TODO I don't think vue-color supports the typical "change" action, so need to fudge it
-            /* console.log('colorPickerClosed', event); */
-            this.emitter.trigger('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
-        },
-        colorUpdated(color) {
-            /* console.log('colorUpdated:', color); */
-            this.color = color;
-            if (this.dataKey) {
-                this.putData(this.dataKey, this.color);
-            }
-            this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
-        },
     },
 };
 </script>

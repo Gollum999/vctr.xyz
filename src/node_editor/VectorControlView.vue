@@ -10,7 +10,7 @@
     type="number"
     :value="axis.val"
     :readonly="readOnly"
-    @change="onChange($event, idx)"
+    @input="onInput($event, idx)"
     @copy.prevent.stop="onCopy"
     @paste.prevent.stop="onPaste(idx, $event)"
   />
@@ -42,11 +42,12 @@ function arrayToVectorWrapper(array) {
 
 export default {
     props: {
-        getData:  { type: Function, required: true },
-        putData:  { type: Function, required: true },
-        emitter:  { type: Object,   required: true }, // injected by Rete
-        dataKey:  { type: String,   required: true }, // injected by Rete
-        rowIdx:   { type: Number,   required: true }, // used to position control within parent grid
+        getData:       { type: Function, required: true },
+        putData:       { type: Function, required: true },
+        emitter:       { type: Object,   required: true }, // injected by Rete
+        dataKey:       { type: String,   required: true }, // injected by Rete
+        globalVuetify: { type: Object,   required: true },
+        rowIdx:        { type: Number,   required: true }, // used to position control within parent grid
     },
 
     data() {
@@ -55,6 +56,12 @@ export default {
             values: DEFAULT_VECTOR_WRAPPER.slice(),
             readOnly: false,
         };
+    },
+
+    created() {
+        // HACK: There is some bug when using Vuetify in local Vue contexts that causes certain components to break
+        // https://github.com/retejs/vue-render-plugin/issues/14
+        this.$vuetify = this.globalVuetify;
     },
 
     watch: {
@@ -84,16 +91,16 @@ export default {
             }
         },
 
-        onChange(event, idx) {
-            /* console.log('VectorControlView onChange old values:', this.values, this.values[0].val, this.values[1].val, this.values[2].val); */
+        onInput(newValue, idx) {
+            /* console.log('VectorControlView onInput old values:', this.values, this.values[0].val, this.values[1].val, this.values[2].val); */
             const newValues = this.values.map(i => ({...i})); // Make sure to deep copy the wrappers
-            newValues[idx].val = parseFloat(event.target.value);
-            /* console.log('VectorControlView onChange new values:', newValues, newValues[0].val, newValues[1].val, newValues[2].val); */
-            /* console.log('VectorControlView onChange', event, idx, this.values, newValues); */
+            newValues[idx].val = parseFloat(newValue);
+            /* console.log('VectorControlView onInput new values:', newValues, newValues[0].val, newValues[1].val, newValues[2].val); */
+            /* console.log('VectorControlView onInput', newValue, idx, this.values, newValues); */
             this.emitter.trigger('addhistory', new FieldChangeAction(this.values, newValues, val => { this.values = val; }));
             this.values = newValues;
 
-            console.log('VectorControlView triggering engine process from onChange');
+            console.log('VectorControlView triggering engine process from onInput');
             this.emitter.trigger('process');
         },
 

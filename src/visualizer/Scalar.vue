@@ -36,8 +36,15 @@ export default {
             /* console.log('value updated', oldVal, newVal); */
             this.uniforms.radius.value = newVal;
         },
+        /* color: {
+         *     deep: true,
+         *     handler(newVal, oldVal) {
+         *         console.log('Scalar color updated', oldVal, newVal);
+         *         this.uniforms.color.value = this.colorObjToArray(newVal);
+         *     },
+         * }, */
         color(newVal, oldVal) {
-            /* console.log('color updated', oldVal, newVal); */
+            console.log('Scalar color updated', oldVal, newVal);
             this.uniforms.color.value = this.colorObjToArray(newVal);
         },
         lineThickness(newVal, oldVal) {

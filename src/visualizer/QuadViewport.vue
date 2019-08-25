@@ -112,6 +112,7 @@ export default {
             // TODO may be a more ideomatic way to write this (filter?)
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
+                /* console.log('adding node', node, 'to be rendered'); */
                 if (node.name === 'Vector') {
                     this.vectors.push(new VectorView(node.data.value, node.data.color.hex)); // TODO need to figure out best practices for handling data in engine
                 } else if (node.name === 'Matrix') {

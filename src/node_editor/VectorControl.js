@@ -2,12 +2,12 @@ import Rete from 'rete';
 import VectorControlView from './VectorControlView.vue';
 
 export class VectorControl extends Rete.Control {
-    constructor(emitter, key, rowIdx) {
+    constructor(emitter, key, rowIdx, globalVuetify) {
         // console.log('VectorControl constructor');
         super(key);
         this.render = 'vue';
         this.component = VectorControlView;
-        this.props = { emitter, dataKey: key, rowIdx };
+        this.props = { emitter, dataKey: key, rowIdx, globalVuetify };
     }
 
     setValue(val) {

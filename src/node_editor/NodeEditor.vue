@@ -17,20 +17,23 @@
         </v-btn>
         <!-- TODO not sure why "auto" size seems truncated on the right (possibly doesn't take scroll bar width into account) -->
         <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
-        <md-menu md-size="medium" md-align-trigger>
+        <v-menu>
           <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
-          <v-btn fab x-small type="button" title="Add basic operation" md-menu-trigger>
-            <v-icon>$vuetify.icons.operation</v-icon>
-          </v-btn>
-          <md-menu-content>
-            <md-menu-item @click="addNode('operation-add')">Add</md-menu-item>
-            <md-menu-item @click="addNode('operation-subtract')">Subtract</md-menu-item>
-            <md-menu-item @click="addNode('operation-multiply')">Multiply</md-menu-item>
-            <md-menu-item @click="addNode('operation-divide')">Divide</md-menu-item>
-            <md-menu-item @click="addNode('operation-dot')">Dot Product</md-menu-item>
-            <md-menu-item @click="addNode('operation-cross')">Cross Product</md-menu-item>
-          </md-menu-content>
-        </md-menu>
+          <template v-slot:activator="{ on: showMenu }">
+            <v-btn fab x-small type="button" title="Add basic operation" v-on="showMenu">
+              <v-icon>$vuetify.icons.operation</v-icon>
+            </v-btn>
+          </template>
+
+          <v-list dense>
+            <v-list-item @click="addNode('operation-add')">Add</v-list-item>
+            <v-list-item @click="addNode('operation-subtract')">Subtract</v-list-item>
+            <v-list-item @click="addNode('operation-multiply')">Multiply</v-list-item>
+            <v-list-item @click="addNode('operation-divide')">Divide</v-list-item>
+            <v-list-item @click="addNode('operation-dot')">Dot Product</v-list-item>
+            <v-list-item @click="addNode('operation-cross')">Cross Product</v-list-item>
+          </v-list>
+        </v-menu>
       </div>
 
       <span class="buttons-group buttons-spacer" />
@@ -135,9 +138,9 @@ export default {
             minZoom: 0.1,
             maxZoom: 3,
             components: {
-                'scalar':             new allComponents.ScalarComponent(),
-                'vector':             new allComponents.VectorComponent(),
-                'matrix':             new allComponents.MatrixComponent(),
+                'scalar':             new allComponents.ScalarComponent(this.$vuetify),
+                'vector':             new allComponents.VectorComponent(this.$vuetify),
+                'matrix':             new allComponents.MatrixComponent(this.$vuetify),
 
                 'operation-add':      new allComponents.BasicOperationComponent('ADD'),
                 'operation-subtract': new allComponents.BasicOperationComponent('SUBTRACT'),

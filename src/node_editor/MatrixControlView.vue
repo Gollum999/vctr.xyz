@@ -46,11 +46,12 @@ function arrayToMatrixWrapper(array) {
 
 export default {
     props: {
-        getData:  { type: Function, required: true }, // injected by Rete
-        putData:  { type: Function, required: true }, // injected by Rete
-        emitter:  { type: Object,   required: true },
-        dataKey:  { type: String,   required: true },
-        rowIdx:   { type: Number,   required: true }, // used to position control within parent grid
+        getData:       { type: Function, required: true }, // injected by Rete
+        putData:       { type: Function, required: true }, // injected by Rete
+        emitter:       { type: Object,   required: true },
+        dataKey:       { type: String,   required: true },
+        globalVuetify: { type: Object,   required: true },
+        rowIdx:        { type: Number,   required: true }, // used to position control within parent grid
     },
 
     data() {
@@ -59,6 +60,12 @@ export default {
             values: DEFAULT_MATRIX_WRAPPER.slice(),
             readOnly: false,
         };
+    },
+
+    created() {
+        // HACK: There is some bug when using Vuetify in local Vue contexts that causes certain components to break
+        // https://github.com/retejs/vue-render-plugin/issues/14
+        this.$vuetify = this.globalVuetify;
     },
 
     watch: {

@@ -8,19 +8,21 @@ import { ColorControl } from './ColorControl';
 import settings from '../settings';
 
 export class VectorComponent extends Rete.Component {
-    constructor() {
+    constructor(globalVuetify) {
         // TODO should consider patching Rete to allow specifying extra attributes or something
         // TODO   not sure of the best design since render plugin is entirely separate from components
         super('Vector'); // Note that the node name affects the element class as well as the node title
+        this.globalVuetify = globalVuetify;
         this.data.component = NodeRenderer;
     }
 
     builder(node) {
+        // console.log('VectorComponent builder: this: ', this, 'globalVuetify:', this.globalVuetify);
         node.addInput(new Rete.Input('vector', 'Value', sockets.vector));
 
         node.addControl(new VectorLabelControl(this.editor, 'label', -999));
-        node.addControl(new VectorControl(this.editor, 'value', 1));
-        node.addControl(new ColorControl(this.editor, 'color', 2, settings.loadSettings('nodeEditorSettings').defaultVectorColor));
+        node.addControl(new VectorControl(this.editor, 'value', 1, this.globalVuetify));
+        node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify, settings.loadSettings('nodeEditorSettings').defaultVectorColor));
 
         node.addOutput(new Rete.Output('vector', 'Value', sockets.vector));
 

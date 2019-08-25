@@ -7,16 +7,17 @@ import { ScalarControl } from './ScalarControl.js';
 import settings from '../settings';
 
 export class ScalarComponent extends Rete.Component {
-    constructor() {
+    constructor(globalVuetify) {
         super('Scalar');
+        this.globalVuetify = globalVuetify;
         this.data.component = NodeRenderer;
     }
 
     builder(node) {
         node.addInput(new Rete.Input('scalar', 'Value', sockets.scalar));
 
-        node.addControl(new ScalarControl(this.editor, 'value', 1));
-        node.addControl(new ColorControl(this.editor, 'color', 2, settings.loadSettings('nodeEditorSettings').defaultScalarColor));
+        node.addControl(new ScalarControl(this.editor, 'value', this.globalVuetify));
+        node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify, settings.loadSettings('nodeEditorSettings').defaultScalarColor));
 
         node.addOutput(new Rete.Output('scalar', 'Value', sockets.scalar));
 

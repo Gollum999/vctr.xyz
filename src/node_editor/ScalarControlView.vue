@@ -8,10 +8,11 @@ import { FieldChangeAction } from './util';
 
 export default {
     props: {
-        getData:  { type: Function, required: true },
-        putData:  { type: Function, required: true },
-        emitter:  { type: Object,   required: true }, // injected by Rete
-        dataKey:  { type: String,   required: true }, // injected by Rete
+        getData:       { type: Function, required: true },
+        putData:       { type: Function, required: true },
+        emitter:       { type: Object,   required: true }, // injected by Rete
+        dataKey:       { type: String,   required: true }, // injected by Rete
+        globalVuetify: { type: Object,   required: true },
     },
 
     data() {
@@ -19,6 +20,12 @@ export default {
             value: 0,
             readOnly: false,
         };
+    },
+
+    created() {
+        // HACK: There is some bug when using Vuetify in local Vue contexts that causes certain components to break
+        // https://github.com/retejs/vue-render-plugin/issues/14
+        this.$vuetify = this.globalVuetify;
     },
 
     watch: {
