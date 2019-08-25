@@ -17,8 +17,8 @@
       <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <v-tab-item>
         <!-- TODO use switch instead of checkbox? -->
-        <v-switch v-model="settings.viewportSettings.showAxis" @change="save" label="Show axis" hide-details></v-switch>
-        <v-switch v-model="settings.viewportSettings.showGrid" @change="save" label="Show grid" hide-details></v-switch>
+        <v-switch color="primary" v-model="settings.viewportSettings.showAxis" @change="save" label="Show axis" hide-details></v-switch>
+        <v-switch color="primary" v-model="settings.viewportSettings.showGrid" @change="save" label="Show grid" hide-details></v-switch>
 
         <v-subheader>Matrix Rendering</v-subheader>
         <v-slider step="0.1" min="0.1" max="1" @end="save" label="Vector Scale" v-model.number="settings.viewportSettings.matrix.vectorScale">
@@ -108,10 +108,6 @@ export default {
 .v-tab {
     display: flex;
     flex-direction: column;
-}
-.md-checkbox {
-    margin-top: 8px;
-    margin-bottom: 0px;
 }
 </style>
 

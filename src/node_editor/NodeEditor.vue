@@ -56,6 +56,7 @@
         </v-btn>
       </div>
 
+      <!-- TODO can I do this with Vuetify? (mainly just for consistent styling and fewer dependencies) -->
       <context-menu id="context-menu" ref="ctxMenu">
         <li class="ctx-item" @click="deleteNode">Delete</li>
       </context-menu>
@@ -155,10 +156,10 @@ export default {
             var node = null;
             switch (nodeType) {
             case 'scalar':
-                node = await this.components['scalar'].createNode({'value': 0});
+                node = await this.components['scalar'].createNode({'value': 1});
                 break;
             case 'vector':
-                node = await this.components['vector'].createNode({'value': [0, 0, 0]});
+                node = await this.components['vector'].createNode({'value': [1, 1, 1]});
                 break;
             case 'matrix':
                 node = await this.components['matrix'].createNode({'value': [
@@ -541,7 +542,7 @@ export default {
   display: block
   height: 100%
   min-height: 100vh
-  border: 2px solid #dddddd
+  border: 2px solid #bbbbbb
 .split
   overflow-y: hidden
 .v-application.theme--light

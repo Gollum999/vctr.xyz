@@ -46,29 +46,6 @@ export default {
       // border-radius: 6px
       // flex: 0 1 auto // Fixes extra-wide number inputs in Firefox
       font-size: 12px
-    .md-field
-      width: auto // Prevents control from overflowing grid cell... not sure why this is necessary or if there is a better way
-      box-sizing: border-box
-      padding-left: 4px
-      background-color: rgba(128, 128, 128, 0.2)
-      padding-top: 0px
-      margin: 0px 2px
-      min-height: 12px
-      .md-input,.md-textarea
-        height: 28px
-        line-height: 28px
-// TODO this doesn't work, Socket is overriding
-// .socket // TODO This is just a hack to avoid customizing Socket, but I may have to do that anyway
-//   .number-value
-//     background: #7777dd
-//   .vector-value
-//     background: #ff4444
-//   width: 16px
-//   height: 16px
-//   .input
-//     margin-left: -8px
-//   .output
-//     margin-right: -8px
 </style>
 
 <style lang="sass" scoped>

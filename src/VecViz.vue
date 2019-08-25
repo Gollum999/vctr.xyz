@@ -62,8 +62,8 @@ export default {
 }
 .vec-viz {
     position: relative;
-    border: 1px solid #dddddd;
-    border-bottom: 3px solid #dddddd; /* TODO this is a hack to put a bottom border despite NodeEditor's hidden overflow */
+    border: 1px solid #bbbbbb;
+    border-bottom: 3px solid #bbbbbb; /* TODO this is a hack to put a bottom border despite NodeEditor's hidden overflow */
     margin-left: auto;
     margin-right: auto;
 }

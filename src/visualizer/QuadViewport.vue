@@ -155,7 +155,7 @@ export default {
 .viewport-container {
     display: inline-block;
     box-sizing: border-box;
-    border: 2px solid #dddddd;
+    border: 2px solid #bbbbbb;
     width: 50%;
     height: 50%;
     line-height: initial;
