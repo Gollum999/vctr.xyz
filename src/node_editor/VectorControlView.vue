@@ -1,11 +1,9 @@
 <template>
 <div class="vector-control-container" :style="{'grid-row': rowIdx}">
-  <!-- TODO why is dark theme not applying? -->
   <!-- TODO pull this out to reuse for all node types -->
   <v-text-field
     v-for="(axis, idx) in values" :key="idx"
     solo
-    dark
     hide-details
     type="number"
     :value="axis.val"

@@ -1,6 +1,5 @@
 <template>
-<!-- TODO why is dark theme not applying? -->
-<v-text-field solo dark hide-details type="number" :value="value" :readonly="readOnly" @change="onChange" />
+<v-text-field solo hide-details type="number" :value="value" :readonly="readOnly" @input="onInput" />
 </template>
 
 <script>
@@ -43,9 +42,9 @@ export default {
     },
 
     methods: {
-        onChange(event) {
-            /* console.log('onChange', this.value, typeof this.value, event); */
-            const value = parseFloat(event.target.value);
+        onInput(newValue) {
+            /* console.log('onInput', this.value, typeof this.value, event); */
+            const value = parseFloat(newValue);
             this.emitter.trigger('addhistory', new FieldChangeAction(this.value, value, val => { this.value = val; }));
             this.value = value;
         },
