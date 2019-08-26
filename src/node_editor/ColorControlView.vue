@@ -36,12 +36,11 @@ export default {
         dataKey:       { type: String,   required: true },
         rowIdx:        { type: Number,   required: true }, // used to position control within parent grid
         globalVuetify: { type: Object,   required: true },
-        defaultValue:  { type: Object,   default: () => ({ hex: '#000000' }) },
     },
 
     data() {
         return {
-            color: this.defaultValue,
+            color: '#000000',
             prevColor: null,
             colorPickerShowing: false,
         };
@@ -81,7 +80,7 @@ export default {
         if (!this.dataKey) {
             throw new Error('dataKey was null??');
         }
-        this.color = this.getData(this.dataKey) || this.defaultValue;
+        this.color = this.getData(this.dataKey) || '#000000';
         /* console.log('ColorControlView mounted', this.dataKey, this.color); */
         this.putData(this.dataKey, this.color);
     },

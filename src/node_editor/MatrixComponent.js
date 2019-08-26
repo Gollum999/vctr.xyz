@@ -5,7 +5,6 @@ import sockets from './sockets';
 import { MatrixControl } from './MatrixControl';
 import { MatrixLabelControl } from './MatrixLabelControl';
 import { ColorControl } from './ColorControl';
-import settings from '../settings';
 
 export class MatrixComponent extends Rete.Component {
     constructor(globalVuetify) {
@@ -21,7 +20,7 @@ export class MatrixComponent extends Rete.Component {
 
         node.addControl(new MatrixLabelControl(this.editor, 'label', -999));
         node.addControl(new MatrixControl(this.editor, 'value', 1, this.globalVuetify));
-        node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify, settings.loadSettings('nodeEditorSettings').defaultMatrixColor));
+        node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
 
         node.addOutput(new Rete.Output('matrix', 'Value', sockets.matrix));
 

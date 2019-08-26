@@ -159,18 +159,27 @@ export default {
             var node = null;
             switch (nodeType) {
             case 'scalar':
-                node = await this.components['scalar'].createNode({'value': 1});
+                node = await this.components['scalar'].createNode({
+                    'color': this.settings.defaultScalarColor,
+                    'value': 1,
+                });
                 break;
             case 'vector':
-                node = await this.components['vector'].createNode({'value': [1, 1, 1]});
+                node = await this.components['vector'].createNode({
+                    'color': this.settings.defaultVectorColor,
+                    'value': [1, 1, 1],
+                });
                 break;
             case 'matrix':
-                node = await this.components['matrix'].createNode({'value': [
-                    1, 0, 0, 0,
-                    0, 1, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 0, 1,
-                ]});
+                node = await this.components['matrix'].createNode({
+                    'color': this.settings.defaultMatrixColor,
+                    'value': [
+                        1, 0, 0, 0,
+                        0, 1, 0, 0,
+                        0, 0, 1, 0,
+                        0, 0, 0, 1,
+                    ],
+                });
                 break;
             case 'operation-add':
             case 'operation-subtract':
@@ -325,11 +334,11 @@ export default {
                 this.components['scalar'].createNode({ 'value': 5, 'color': { hex: '#ff7f00', rgba: { r: 255, g: 127, b: 0 } } }),
                 this.components['scalar'].createNode({ 'value': 4, 'color': { hex: '#ff7f00', rgba: { r: 255, g: 127, b: 0 } } }),
                 this.components['operation-add'].createNode(),
-                this.components['scalar'].createNode({ 'value': 0 }),
+                this.components['scalar'].createNode({ 'value': 0, 'color': this.settings.defaultScalarColor }),
                 this.components['vector'].createNode({ 'value': [3, 2, 1], 'color': { hex: '#00ffff' } }),
                 this.components['vector'].createNode({ 'value': [2, 2, 2], 'color': { hex: '#00ffff' } }),
                 this.components['operation-add'].createNode(),
-                this.components['vector'].createNode(),
+                this.components['vector'].createNode({ 'color': this.settings.defaultVectorColor }),
             ]);
             scalarLhs.position = [20, 80];
             scalarRhs.position = [20, 190];
