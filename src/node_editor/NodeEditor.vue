@@ -59,10 +59,11 @@
         </v-btn>
       </div>
 
-      <!-- TODO can I do this with Vuetify? (mainly just for consistent styling and fewer dependencies) -->
-      <context-menu id="context-menu" ref="ctxMenu">
-        <li class="ctx-item" @click="deleteNode">Delete</li>
-      </context-menu>
+      <v-menu v-model="showContextMenu" :position-x="contextMenuPos.x" :position-y="contextMenuPos.y" absolute>
+        <v-list dense>
+          <v-list-item @click="deleteNode">Delete</v-list-item>
+        </v-list>
+      </v-menu>
     </div>
   </div>
 </template>
@@ -74,7 +75,6 @@ import HistoryPlugin from 'rete-history-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
-import contextMenu from 'vue-context-menu';
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 
@@ -122,21 +122,26 @@ function clamp(num, min, max) {
 
 export default {
     name: 'NodeEditor',
-    components: {
-        contextMenu,
-    },
     data() {
         return {
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
             // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
             settings: settings.defaultSettings['nodeEditorSettings'],
+
             lastNodePosition: null,
             newNodesShouldBeCentered: true,
+
             container: null,
             editor: null,
             engine: null,
+
+            // TODO switch to use Rete Area Plugin?
             minZoom: 0.1,
             maxZoom: 3,
+
+            showContextMenu: false,
+            contextMenuPos: { x: 0, y: 0 },
+
             components: {
                 'scalar':             new allComponents.ScalarComponent(this.$vuetify),
                 'vector':             new allComponents.VectorComponent(this.$vuetify),
@@ -435,11 +440,13 @@ export default {
         })();
 
         this.editor.on('nodecreated', node => {
+            // TODO why am I doing this to every node instead of only the one that was just created?
             Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
                 nodeView.addEventListener('contextmenu', event => {
                     event.preventDefault();
                     event.stopPropagation();
-                    this.$refs.ctxMenu.open(event, {node: node, nodeView: nodeView});
+                    this.contextMenuPos = { x: event.clientX, y: event.clientY };
+                    this.showContextMenu = true;
                 });
             });
         });
