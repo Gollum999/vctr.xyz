@@ -79,9 +79,6 @@ export default {
             settings: settingsUtil.loadSettings(),
         };
     },
-    mounted() {
-        this.$modal.show('settings-modal');
-    },
     methods: {
         save(event) {
             console.log('SettingsModal saving settings', this.settings);
@@ -89,10 +86,7 @@ export default {
             EventBus.$emit('settings-updated');
         },
         close() {
-            this.$modal.hide('settings-modal');
-        },
-        closed() {
-            this.$router.back();
+            this.$emit('settings-modal-closed');
         },
     },
 };
