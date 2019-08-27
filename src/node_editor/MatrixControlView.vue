@@ -9,7 +9,7 @@
     type="number"
     :value="item.val"
     :readonly="readOnly"
-    @change="onChange($event, idx)"
+    @input="onInput($event, idx)"
     @copy.prevent.stop="onCopy"
     @paste.prevent.stop="onPaste(idx, $event)"
   />
@@ -94,16 +94,16 @@ export default {
             }
         },
 
-        onChange(event, idx) {
-            /* console.log('MatrixControlView onChange old values:', this.values); */
+        onInput(newValue, idx) {
+            /* console.log('MatrixControlView onInput old values:', this.values); */
             const newValues = this.values.map(i => ({...i})); // Make sure to deep copy the wrappers
-            newValues[idx].val = parseFloat(event.target.value);
-            /* console.log('MatrixControlView onChange new values:', newValues); */
+            newValues[idx].val = parseFloat(newValue);
+            /* console.log('MatrixControlView onInput new values:', newValues); */
             /* console.log('MatrixControlView adding history', event, idx, this.values, newValues); */
             this.emitter.trigger('addhistory', new FieldChangeAction(this.values, newValues, val => { this.values = val; }));
             this.values = newValues;
 
-            /* console.log('MatrixControlView triggering engine process from onChange'); */
+            /* console.log('MatrixControlView triggering engine process from onInput'); */
             this.emitter.trigger('process');
         },
 
