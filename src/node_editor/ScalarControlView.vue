@@ -57,11 +57,6 @@ export default {
 </script>
 
 <style scoped>
-.scalar .md-input {
-    /* Smaller default size but stretch to fill */
-    width: 3em;
-    min-width: 100%;
-}
 </style>
 
 <style>

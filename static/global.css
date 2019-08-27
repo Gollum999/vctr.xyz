@@ -7,15 +7,3 @@
     /* color: #2c3e50; */
     padding: 60px 60px 60px;
 }
-
-/* These are outside of the #app div */
-body .md-select-menu {
-    font-family: Ubuntu, Avenir, Helvetica, Arial, sans-serif;
-    font-size: 12px;
-    /* TODO hack, not sure why the default style is transparent for material select menu */
-    background-color: white;
-}
-body .md-select-menu.md-menu-content {
-    width: initial;
-    /* min-width: 100px; */
-}

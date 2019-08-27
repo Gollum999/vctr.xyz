@@ -35,7 +35,7 @@
       </template>
     </vgl-renderer>
     <span class="viewport-label">{{view | capitalize}}</span>
-    <i class="viewport-expand-icon material-icons md-24 md-light" @click="expandThis">{{expanded ? 'fullscreen_exit' : 'fullscreen'}}</i>
+    <v-icon class="viewport-expand-icon" @click="expandThis">{{expanded ? 'fullscreen_exit' : 'fullscreen'}}</v-icon>
   </div>
 </template>
 

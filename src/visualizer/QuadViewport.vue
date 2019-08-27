@@ -32,16 +32,16 @@
         <vgl-axes-helper v-if="settings.showAxis" size="5" />
 
         <div :class="['viewport-container', isHidden('top') ? 'hidden' : '', isExpanded('top') ? 'fill' : '']">
-          <Viewport ref="viewport_top" view="top" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+          <Viewport ref="viewport_top" view="top" sceneName="main_scene" :scene="$refs.scene" :expanded="isExpanded('top')" @expand-viewport="expandViewport" />
         </div>
         <div :class="['viewport-container', isHidden('free') ? 'hidden' : '', isExpanded('free') ? 'fill' : '']">
-          <Viewport ref="viewport_free" view="free" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+          <Viewport ref="viewport_free" view="free" sceneName="main_scene" :scene="$refs.scene" :expanded="isExpanded('free')" @expand-viewport="expandViewport" />
         </div>
         <div :class="['viewport-container', isHidden('front') ? 'hidden' : '', isExpanded('front') ? 'fill' : '']">
-          <Viewport ref="viewport_front" view="front" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+          <Viewport ref="viewport_front" view="front" sceneName="main_scene" :scene="$refs.scene" :expanded="isExpanded('front')" @expand-viewport="expandViewport" />
         </div>
         <div :class="['viewport-container', isHidden('side') ? 'hidden' : '', isExpanded('side') ? 'fill' : '']">
-          <Viewport ref="viewport_side" view="side" sceneName="main_scene" :scene="$refs.scene" @expand-viewport="expandViewport" />
+          <Viewport ref="viewport_side" view="side" sceneName="main_scene" :scene="$refs.scene" :expanded="isExpanded('side')" @expand-viewport="expandViewport" />
         </div>
       </vgl-scene>
     </vgl-namespace>

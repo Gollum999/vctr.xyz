@@ -15,7 +15,6 @@
         <v-btn fab x-small type="button" title="Add matrix" @click="addNode('matrix')">
           <v-icon>$vuetify.icons.matrix</v-icon>
         </v-btn>
-        <!-- TODO not sure why "auto" size seems truncated on the right (possibly doesn't take scroll bar width into account) -->
         <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
         <v-menu>
           <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->

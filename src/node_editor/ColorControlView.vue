@@ -116,11 +116,4 @@ export default {
 body .color-picker-popup {
     max-height: initial;
 }
-body .color-picker-popup .md-menu-content-container {
-    border-radius: 2px; /* TODO Is there a good way to make this match value from md-card? */
-}
-body .color-picker-popup .md-list {
-    padding-inline-start: initial;
-    padding: initial;
-}
 </style>
