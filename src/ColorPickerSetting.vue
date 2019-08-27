@@ -1,54 +1,57 @@
 <template>
   <div class="color-picker-option">
-    <md-menu
+    <v-menu
         class="color-picker"
-        md-size="auto"
-        md-direction="bottom-start"
-        md-align-trigger
+        v-model="colorPickerShowing"
+        :close-on-content-click="false"
     >
-      <div class="color-picker-button" :style="{'background-color': color.hex}" md-menu-trigger>
-        <md-menu-content class="color-picker-popup">
-          <color-picker v-model="color" :disableAlpha="disableAlpha" />
-        </md-menu-content>
-      </div>
-    </md-menu>
-    <label class="color-picker-label"><slot></slot></label>
+      <template v-slot:activator="{ on: showColorPicker }">
+        <v-input hide-details>
+          <template v-slot:prepend><div class="color-picker-button" :style="{'background-color': color.hex}" v-on="showColorPicker"></div></template>
+          <v-label class="color-picker-label"><slot></slot></v-label>
+        </v-input>
+      </template>
+
+      <v-card class="color-picker-popup">
+        <v-color-picker v-model="color.hex" />
+      </v-card>
+    </v-menu>
   </div>
 </template>
 
 <script>
-import { Chrome } from 'vue-color';
-
 export default {
     name: 'ColorPickerSetting',
     props: {
         value:        { type: Object, required: true },
         disableAlpha: { type: Boolean, default: false },
     },
-    components: {
-        'color-picker': Chrome,
-    },
     data() {
         return {
             color: this.value,
+            colorPickerShowing: false,
         };
     },
     watch: {
-        color(newVal, oldVal) {
-            this.$emit('input', newVal);
+        color: {
+            deep: true,
+            handler(newVal, oldVal) {
+                this.$emit('input', newVal);
+            },
         },
     },
 };
 </script>
 
 <style scoped>
+.v-label {
+    line-height: 44px; /* TODO: Seems like there should be a better way to center things... */
+}
 .color-picker-option {
     text-align: left;
 }
-.md-menu.color-picker {
-    vertical-align: middle;
-}
 .color-picker-button {
+    display: inline-block;
     grid-column: controls;
     width: 20px;
     height: 20px;
@@ -68,12 +71,5 @@ export default {
 body .color-picker-popup {
     max-height: initial;
     z-index: 1000; /* vue-js-modal uses z-index 999 */
-}
-body .color-picker-popup .md-menu-content-container {
-    border-radius: 2px; /* TODO Is there a good way to make this match value from md-card? */
-}
-body .color-picker-popup .md-list {
-    padding-inline-start: initial;
-    padding: initial;
 }
 </style>
