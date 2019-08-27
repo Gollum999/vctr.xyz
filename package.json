@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@mdi/font": "^3.6.95",
-    "bootstrap-vue": "^2.0.0-rc.18",
     "camera-controls": "^1.11.1",
     "core-js": "^2.6.5",
     "gl-matrix": "^3.0.0",
@@ -27,11 +26,7 @@
     "roboto-fontface": "*",
     "three": "^0.105.2",
     "vue": "^2.6.6",
-    "vue-color": "^2.7.0",
-    "vue-context-menu": "^2.0.6",
     "vue-gl": "^0.15.0",
-    "vue-js-modal": "^1.3.31",
-    "vue-material": "^1.0.0-beta-10.2",
     "vue-router": "^3.0.1",
     "vue-split-panel": "^1.0.4",
     "vuetify": "^2.0.2"
