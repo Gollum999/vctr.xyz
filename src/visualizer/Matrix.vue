@@ -45,23 +45,24 @@ export default {
     },
     computed: {
         fieldVectors() {
-            const vectorsPerAxis = this.fieldSize * this.density; // Note that the *actual* number of vectors in each direction will be this * 2 + 1
-            const deltaPos = 1.0 / this.density;
-            console.log('fieldVectors vectorsPerAxis:', vectorsPerAxis, 'deltaPos:', deltaPos);
+            const vectorsPerAxis = this.fieldSize * 2 * this.density; // Include both sides
+            const bounds = Math.floor(vectorsPerAxis) / 2.0;
+            const spacing = 1.0 / this.density;
+            console.log('fieldVectors vectorsPerAxis:', vectorsPerAxis, 'bounds:', bounds, 'spacing:', spacing);
 
             const vectors = [];
             // TODO Is there a way to simplify this with a single matrix multiplication?
-            for (let x = -this.fieldSize; x <= this.fieldSize; x += deltaPos) { // TODO cumulative float error
-                for (let y = -this.fieldSize; y <= this.fieldSize; y += deltaPos) {
-                    for (let z = -this.fieldSize; z <= this.fieldSize; z += deltaPos) {
-                        /* console.log('processing x:', x, 'y:', y, 'z:', z); */
+            for (let xIdx = -bounds; xIdx <= bounds; xIdx += 1) {
+                for (let yIdx = -bounds; yIdx <= bounds; yIdx += 1) {
+                    for (let zIdx = -bounds; zIdx <= bounds; zIdx += 1) {
+                        /* console.log('processing x:', xIdx, 'y:', yIdx, 'z:', zIdx); */
                         const out = vec3.create();
-                        const baseVec = vec3.fromValues(x, y, z);
+                        const baseVec = vec3.fromValues(xIdx * spacing, yIdx * spacing, zIdx * spacing);
                         const transposed = mat4.create();
                         mat4.transpose(transposed, this.value); // gl-matrix is column-major, but I am row-major; transpose before calculating
                         vec3.transformMat4(out, baseVec, transposed);
                         /* console.log('adding vector', out, baseVec, this.value); */
-                        vectors.push(new FieldVector(out, [x, y, z]));
+                        vectors.push(new FieldVector(out, baseVec));
                     }
                 }
             }
