@@ -23,17 +23,17 @@
         <v-subheader>Matrix Rendering</v-subheader>
         <v-slider step="0.1" min="0.1" max="1" @end="save" label="Vector Scale" v-model.number="settings.viewportSettings.matrix.vectorScale">
           <template v-slot:append>
-            {{settings.viewportSettings.matrix.vectorScale}}
+            {{settings.viewportSettings.matrix.vectorScale | formatMatrixSliderValue}}
           </template>
         </v-slider>
-        <v-slider step="0.1" min="1" max="20" @end="save" label="Field Size" v-model.number="settings.viewportSettings.matrix.fieldSize">
+        <v-slider step="0.1" min="1" :max="fieldSizeMax" @end="save" label="Field Size" v-model.number="settings.viewportSettings.matrix.fieldSize">
           <template v-slot:append>
-            {{settings.viewportSettings.matrix.fieldSize}}
+            {{settings.viewportSettings.matrix.fieldSize | formatMatrixSliderValue}}
           </template>
         </v-slider>
-        <v-slider step="0.1" min="0.1" max="2" @end="save" label="Field Density" v-model.number="settings.viewportSettings.matrix.fieldDensity">
+        <v-slider step="0.1" min="0.1" :max="fieldDensityMax" @end="save" label="Field Density" v-model.number="settings.viewportSettings.matrix.fieldDensity">
           <template v-slot:append>
-            {{settings.viewportSettings.matrix.fieldDensity}}
+            {{settings.viewportSettings.matrix.fieldDensity | formatMatrixSliderValue}}
           </template>
         </v-slider>
         <!--
@@ -69,6 +69,8 @@ import settingsUtil from './settings';
 import { EventBus } from './EventBus';
 import ColorPickerSetting from './ColorPickerSetting';
 
+const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too much
+
 export default {
     name: 'SettingsModal',
     components: {
@@ -78,6 +80,20 @@ export default {
         return {
             settings: settingsUtil.loadSettings(),
         };
+    },
+    filters: {
+        formatMatrixSliderValue(value) {
+            return value.toFixed(1);
+        },
+    },
+    computed: {
+        // 2 * fieldSize * fieldDensity <= MAX_VECTORS_PER_SIDE
+        fieldSizeMax() {
+            return (MAX_VECTORS_PER_SIDE / (this.settings.viewportSettings.matrix.fieldDensity * 2)).toFixed(1);
+        },
+        fieldDensityMax() {
+            return (MAX_VECTORS_PER_SIDE / (this.settings.viewportSettings.matrix.fieldSize * 2)).toFixed(1);
+        },
     },
     methods: {
         save(event) {
