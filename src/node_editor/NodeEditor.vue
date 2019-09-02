@@ -164,7 +164,7 @@ export default {
             var node = null;
             switch (nodeType) {
             case 'scalar': {
-                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...util.getRandomColor()) } : this.settings.defaultScalarColor;
+                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...Object.values(util.getRandomColor())) } : this.settings.defaultScalarColor;
                 node = await this.components['scalar'].createNode({
                     'color': color,
                     'value': 1,
@@ -172,7 +172,7 @@ export default {
                 break;
             }
             case 'vector': {
-                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...util.getRandomColor()) } : this.settings.defaultVectorColor;
+                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...Object.values(util.getRandomColor())) } : this.settings.defaultVectorColor;
                 node = await this.components['vector'].createNode({
                     'color': color,
                     'value': [1, 1, 1],
@@ -180,7 +180,7 @@ export default {
                 break;
             }
             case 'matrix': {
-                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...util.getRandomColor()) } : this.settings.defaultMatrixColor;
+                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...Object.values(util.getRandomColor())) } : this.settings.defaultMatrixColor;
                 node = await this.components['matrix'].createNode({
                     'color': color,
                     'value': [

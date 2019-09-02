@@ -52,7 +52,7 @@ export default {
             b = hue2rgb(p, q, h - 1 / 3);
         }
 
-        return [r * 255, g * 255, b * 255];
+        return { r: r * 255, g: g * 255, b: b * 255 };
     },
 
     // Stolen and slightly modified from https://stackoverflow.com/a/5624139/3282436
