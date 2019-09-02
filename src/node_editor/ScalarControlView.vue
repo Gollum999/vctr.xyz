@@ -1,5 +1,6 @@
 <template>
-<v-text-field solo hide-details type="number" :value="value" :readonly="readOnly" @input="onInput" />
+<!-- TODO why is dark theme not applying to font color? -->
+<v-text-field solo dark hide-details type="number" :value="value" :readonly="readOnly" @input="onInput" />
 </template>
 
 <script>

@@ -1,6 +1,6 @@
 <template>
 <div class="matrix-control-container" :style="{'grid-row': rowIdx}">
-  <!-- TODO why is dark theme not applying? -->
+  <!-- TODO why is dark theme not applying to font color? -->
   <v-text-field
     v-for="(item, idx) in values" :key="`matrix-value-${idx}`"
     solo
