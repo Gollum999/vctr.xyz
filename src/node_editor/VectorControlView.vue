@@ -26,7 +26,7 @@
 
 <script>
 import _ from 'lodash';
-import { FieldChangeAction } from './util';
+import { FieldChangeAction } from '../util';
 
 const DEFAULT_VECTOR_WRAPPER = Object.freeze([{val: 0}, {val: 0}, {val: 0}]);
 

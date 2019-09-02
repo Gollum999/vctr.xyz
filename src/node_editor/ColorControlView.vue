@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { FieldChangeAction } from './util';
+import { FieldChangeAction } from '../util';
 
 export default {
     props: {

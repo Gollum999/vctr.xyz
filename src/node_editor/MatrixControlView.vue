@@ -27,7 +27,7 @@
 
 <script>
 import _ from 'lodash';
-import { FieldChangeAction } from './util';
+import { FieldChangeAction } from '../util';
 
 const DEFAULT_MATRIX_WRAPPER = Object.freeze([
     {val: 1}, {val: 0}, {val: 0}, {val: 0},

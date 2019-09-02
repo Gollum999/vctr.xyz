@@ -76,7 +76,7 @@ import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { EventBus } from '../EventBus';
 import settings from '../settings';
-import util from './util';
+import util from '../util';
 
 // TODO is there a library for this?
 class Rect {

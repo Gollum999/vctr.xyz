@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import util from '../node_editor/util'; // TODO move this somewhere more sensible
+import util from '../util';
 
 export default {
     props: {

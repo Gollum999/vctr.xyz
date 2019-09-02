@@ -4,7 +4,7 @@ import Rete from 'rete';
 
 import NodeRenderer from './NodeRenderer.vue';
 import sockets from './sockets';
-import util from './util';
+import util from '../util';
 
 const invalid = 'INVALID'; // Sentinel indicating that the specified combination should never happen (raise an error if it does)
 const ignore = 'IGNORE'; // Sentinel indicating that no changes need to be made
