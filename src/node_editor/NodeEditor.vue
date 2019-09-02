@@ -116,10 +116,6 @@ class Rect {
     }
 }
 
-function clamp(num, min, max) {
-    return Math.min(Math.max(num, min), max);
-}
-
 export default {
     name: 'NodeEditor',
     data() {
@@ -302,7 +298,7 @@ export default {
             const nodeEditorHeight = this.editor.view.container.parentElement.parentElement.clientHeight;
             const widthRatio = nodeEditorWidth / viewRect.width();
             const heightRatio = nodeEditorHeight / viewRect.height();
-            const scale = clamp(Math.min(widthRatio, heightRatio), this.minZoom, this.maxZoom); // Determine how far we should zoom in/out to fit everything
+            const scale = util.clamp(Math.min(widthRatio, heightRatio), this.minZoom, this.maxZoom); // Determine how far we should zoom in/out to fit everything
 
             // x/y here is in screen space
             this.editor.view.area.transform = {

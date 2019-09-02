@@ -19,6 +19,10 @@ export class FieldChangeAction extends Action {
 }
 
 export default {
+    clamp(num, min, max) {
+        return Math.min(Math.max(num, min), max);
+    },
+
     /**
      * Stolen and slightly modified from https://gist.github.com/mjackson/5311256
      * Converts an HSL color value to RGB. Conversion formula adapted from http://en.wikipedia.org/wiki/HSL_color_space.
