@@ -76,6 +76,7 @@ import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { EventBus } from '../EventBus';
 import settings from '../settings';
+import util from './util';
 
 // TODO is there a library for this?
 class Rect {
@@ -162,21 +163,26 @@ export default {
 
             var node = null;
             switch (nodeType) {
-            case 'scalar':
+            case 'scalar': {
+                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...util.getRandomColor()) } : this.settings.defaultScalarColor;
                 node = await this.components['scalar'].createNode({
-                    'color': this.settings.defaultScalarColor,
+                    'color': color,
                     'value': 1,
                 });
                 break;
-            case 'vector':
+            }
+            case 'vector': {
+                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...util.getRandomColor()) } : this.settings.defaultVectorColor;
                 node = await this.components['vector'].createNode({
-                    'color': this.settings.defaultVectorColor,
+                    'color': color,
                     'value': [1, 1, 1],
                 });
                 break;
-            case 'matrix':
+            }
+            case 'matrix': {
+                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...util.getRandomColor()) } : this.settings.defaultMatrixColor;
                 node = await this.components['matrix'].createNode({
-                    'color': this.settings.defaultMatrixColor,
+                    'color': color,
                     'value': [
                         1, 0, 0, 0,
                         0, 1, 0, 0,
@@ -185,6 +191,7 @@ export default {
                     ],
                 });
                 break;
+            }
             case 'operation-add':
             case 'operation-subtract':
             case 'operation-multiply':

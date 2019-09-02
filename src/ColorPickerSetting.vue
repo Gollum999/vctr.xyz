@@ -6,8 +6,11 @@
         :close-on-content-click="false"
     >
       <template v-slot:activator="{ on: showColorPicker }">
-        <v-input hide-details>
-          <template v-slot:prepend><div class="color-picker-button" :style="{'background-color': color.hex}" v-on="showColorPicker"></div></template>
+        <v-input hide-details :disabled="disabled">
+          <template v-slot:prepend>
+            <div class="color-picker-button" v-on="showColorPicker"
+                 :style="{'background-color': color.hex, 'opacity': disabled ? 0.5 : 1.0}" />
+          </template>
           <v-label class="color-picker-label"><slot></slot></v-label>
         </v-input>
       </template>
@@ -24,6 +27,7 @@ export default {
     name: 'ColorPickerSetting',
     props: {
         value:        { type: Object, required: true },
+        disabled:     { type: Boolean, default: false },
         disableAlpha: { type: Boolean, default: false },
     },
     data() {

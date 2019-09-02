@@ -48,13 +48,17 @@
       </v-tab-item>
 
       <v-tab-item>
-        <color-picker-setting v-model="settings.nodeEditorSettings.defaultScalarColor" @input="save" disableAlpha>
+        <v-switch color="primary" v-model="settings.nodeEditorSettings.useRandomColors" @change="save" label="Use random colors" hide-details></v-switch>
+        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" @input="save" disableAlpha
+                              v-model="settings.nodeEditorSettings.defaultScalarColor">
           Default scalar color
         </color-picker-setting>
-        <color-picker-setting v-model="settings.nodeEditorSettings.defaultVectorColor" @input="save" disableAlpha>
+        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" @input="save" disableAlpha
+                              v-model="settings.nodeEditorSettings.defaultVectorColor">
           Default vector color
         </color-picker-setting>
-        <color-picker-setting v-model="settings.nodeEditorSettings.defaultMatrixColor" @input="save" disableAlpha>
+        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" @input="save" disableAlpha
+                              v-model="settings.nodeEditorSettings.defaultMatrixColor">
           Default matrix color
         </color-picker-setting>
       </v-tab-item>
