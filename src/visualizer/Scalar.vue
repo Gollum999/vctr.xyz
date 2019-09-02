@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import util from '../node_editor/util'; // TODO move this somewhere more sensible
+
 export default {
     props: {
         scalarKey:     { type: String, required: true },
@@ -24,7 +26,7 @@ export default {
         pos:           { type: String, default: '0 0 0' }, // TODO I think to support this I need to use a vgl "billboard"
 
         value:         { type: Number, required: true },
-        color:         { type: Object, default: () => ({r: 255, g: 0, b: 0}) },
+        color:         { type: String, default: '#000000' },
         canvasSize:    { type: Object, required: true },
         lineThickness: { type: Number, default: 0.1 },
         numSegments:   { type: Number, default: 12.0 },
@@ -40,12 +42,12 @@ export default {
          *     deep: true,
          *     handler(newVal, oldVal) {
          *         console.log('Scalar color updated', oldVal, newVal);
-         *         this.uniforms.color.value = this.colorObjToArray(newVal);
+         *         this.uniforms.color.value = this.colorObjToArray(util.hexToRgb(newVal));
          *     },
          * }, */
         color(newVal, oldVal) {
             console.log('Scalar color updated', oldVal, newVal);
-            this.uniforms.color.value = this.colorObjToArray(newVal);
+            this.uniforms.color.value = this.colorObjToArray(util.hexToRgb(newVal));
         },
         lineThickness(newVal, oldVal) {
             /* console.log('lineThickness updated', oldVal, newVal); */
@@ -73,7 +75,7 @@ export default {
         return {
             uniforms: {
                 radius:                         { value: this.value },
-                color:                          { value: this.colorObjToArray(this.color) },
+                color:                          { value: this.colorObjToArray(util.hexToRgb(this.color)) },
                 canvasSize:                     { value: [this.canvasSize.x, this.canvasSize.y] },
                 lineThickness:                  { value: this.lineThickness },
                 numSegments:                    { value: this.numSegments },
