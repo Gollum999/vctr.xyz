@@ -5,6 +5,7 @@ import Rete from 'rete';
 import NodeRenderer from './NodeRenderer.vue';
 import sockets from './sockets';
 import util from '../util';
+import nodeUtil from './node_util';
 
 const invalid = 'INVALID'; // Sentinel indicating that the specified combination should never happen (raise an error if it does)
 const ignore = 'IGNORE'; // Sentinel indicating that no changes need to be made
@@ -486,7 +487,7 @@ export class BasicOperationComponent extends Rete.Component {
     }
 
     worker(engineNode, inputs, outputs) {
-        const editorNode = util.getEditorNode(this.editor, engineNode);
+        const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
 
         // console.log(`TEST BasicOperationComponent worker (${editorNode.name})`);
         // console.log(this.editor);
@@ -533,8 +534,8 @@ export class BasicOperationComponent extends Rete.Component {
         // Then update output socket type based on input socket types
         operation.updateOutputSocketTypes(this.editor, editorNode);
 
-        const lhsValue = util.getInputValue('lhs', inputs, engineNode.data);
-        const rhsValue = util.getInputValue('rhs', inputs, engineNode.data);
+        const lhsValue = nodeUtil.getInputValue('lhs', inputs, engineNode.data);
+        const rhsValue = nodeUtil.getInputValue('rhs', inputs, engineNode.data);
         if (_.isNil(lhsValue) || _.isNil(rhsValue)) {
             return;
         }

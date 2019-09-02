@@ -5,6 +5,7 @@ import sockets from './sockets';
 import { VectorControl } from './VectorControl';
 import { VectorLabelControl } from './VectorLabelControl';
 import { ColorControl } from './ColorControl';
+import util from './node_util';
 
 export class VectorComponent extends Rete.Component {
     constructor(globalVuetify) {
@@ -38,15 +39,9 @@ export class VectorComponent extends Rete.Component {
         //   Also note that anything in data will be saved between sessions
         // console.log('VectorComponent worker', node.name, node.data);
 
-        // TODO pull this out somewhere
-        function getInput(name) {
-            // Assumes only a single connection per input, which is currently enforced by the editor
-            return inputs[name].length ? inputs[name][0] : node.data[name];
-        }
+        const editorNode = util.getEditorNode(this.editor, node);
 
-        const editorNode = this.editor.nodes.find(n => n.id === node.id);
-
-        const input = getInput('vector');
+        const input = util.getInput('vector', inputs, node.data);
         if (_.isNil(input)) {
             // console.log('VectorComponent worker, input empty, setting readonly = false');
             editorNode.controls.get('value').setReadOnly(false);
