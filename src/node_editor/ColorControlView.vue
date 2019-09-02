@@ -8,11 +8,11 @@
       :close-on-content-click="false"
   >
     <template v-slot:activator="{ on: showColorPicker }">
-      <div class="color-picker-button" :style="{'background-color': color.hex, 'grid-row': rowIdx}" v-on="showColorPicker"></div>
+      <div class="color-picker-button" :style="{'background-color': color, 'grid-row': rowIdx}" v-on="showColorPicker"></div>
     </template>
 
     <v-card class="color-picker-popup">
-      <v-color-picker v-model="color.hex" />
+      <v-color-picker v-model="color" />
     </v-card>
   </v-menu>
 

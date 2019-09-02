@@ -114,9 +114,9 @@ export default {
                 const node = editorJson.nodes[key];
                 /* console.log('adding node', node, 'to be rendered'); */
                 if (node.name === 'Vector') {
-                    this.vectors.push(new VectorView(node.data.value, node.data.color.hex)); // TODO need to figure out best practices for handling data in engine
+                    this.vectors.push(new VectorView(node.data.value, node.data.color)); // TODO need to figure out best practices for handling data in engine
                 } else if (node.name === 'Matrix') {
-                    this.matrices.push(new MatrixView(node.data.value, node.data.color.hex));
+                    this.matrices.push(new MatrixView(node.data.value, node.data.color));
                 }
             }
             // console.log('QuadViewport rendering vectors:', this.vectors);

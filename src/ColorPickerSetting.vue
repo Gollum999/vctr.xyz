@@ -9,14 +9,14 @@
         <v-input hide-details :disabled="disabled">
           <template v-slot:prepend>
             <div class="color-picker-button" v-on="showColorPicker"
-                 :style="{'background-color': color.hex, 'opacity': disabled ? 0.5 : 1.0}" />
+                 :style="{'background-color': color, 'opacity': disabled ? 0.5 : 1.0}" />
           </template>
           <v-label class="color-picker-label"><slot></slot></v-label>
         </v-input>
       </template>
 
       <v-card class="color-picker-popup">
-        <v-color-picker v-model="color.hex" />
+        <v-color-picker v-model="color" />
       </v-card>
     </v-menu>
   </div>
@@ -26,7 +26,7 @@
 export default {
     name: 'ColorPickerSetting',
     props: {
-        value:        { type: Object, required: true },
+        value:        { type: String, required: true },
         disabled:     { type: Boolean, default: false },
         disableAlpha: { type: Boolean, default: false },
     },
@@ -37,11 +37,8 @@ export default {
         };
     },
     watch: {
-        color: {
-            deep: true,
-            handler(newVal, oldVal) {
-                this.$emit('input', newVal);
-            },
+        color(newVal, oldVal) {
+            this.$emit('input', newVal);
         },
     },
 };

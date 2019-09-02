@@ -23,11 +23,11 @@ export default {
             },
         },
         nodeEditorSettings: {
-            // TODO Can I somehow use the class that vue-color uses?
             useRandomColors: false,
-            defaultScalarColor: { hex: '#7676dd', rgba: { r: 118, g: 118, b: 221 } },
-            defaultVectorColor: { hex: '#ff4444', rgba: { r: 255, g:  68, b:  68 } },
-            defaultMatrixColor: { hex: '#44ffff', rgba: { r: 68,  g: 255, b: 255 } },
+            // TODO Can I somehow use the class that vue-color uses?
+            defaultScalarColor: '#7676dd',
+            defaultVectorColor: '#ff4444',
+            defaultMatrixColor: '#44ffff',
         },
     },
 

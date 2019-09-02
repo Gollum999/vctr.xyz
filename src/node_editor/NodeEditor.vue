@@ -164,7 +164,7 @@ export default {
             var node = null;
             switch (nodeType) {
             case 'scalar': {
-                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...Object.values(util.getRandomColor())) } : this.settings.defaultScalarColor;
+                const color = this.settings.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.defaultScalarColor;
                 node = await this.components['scalar'].createNode({
                     'color': color,
                     'value': 1,
@@ -172,7 +172,7 @@ export default {
                 break;
             }
             case 'vector': {
-                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...Object.values(util.getRandomColor())) } : this.settings.defaultVectorColor;
+                const color = this.settings.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.defaultVectorColor;
                 node = await this.components['vector'].createNode({
                     'color': color,
                     'value': [1, 1, 1],
@@ -180,7 +180,7 @@ export default {
                 break;
             }
             case 'matrix': {
-                const color = this.settings.useRandomColors ? { hex: util.rgbToHex(...Object.values(util.getRandomColor())) } : this.settings.defaultMatrixColor;
+                const color = this.settings.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.defaultMatrixColor;
                 node = await this.components['matrix'].createNode({
                     'color': color,
                     'value': [
@@ -342,12 +342,12 @@ export default {
         async createDemoNodes() {
             const [scalarLhs, scalarRhs, scalarAdd, scalarOut, vecLhs, vecRhs, vecAdd, vecOut] = await Promise.all([
                 // TODO color stuff is still pretty gross
-                this.components['scalar'].createNode({ 'value': 5, 'color': { hex: '#ff7f00', rgba: { r: 255, g: 127, b: 0 } } }),
-                this.components['scalar'].createNode({ 'value': 4, 'color': { hex: '#ff7f00', rgba: { r: 255, g: 127, b: 0 } } }),
+                this.components['scalar'].createNode({ 'value': 5, 'color': '#ff7f00' }),
+                this.components['scalar'].createNode({ 'value': 4, 'color': '#ff7f00' }),
                 this.components['operation-add'].createNode(),
                 this.components['scalar'].createNode({ 'value': 0, 'color': this.settings.defaultScalarColor }),
-                this.components['vector'].createNode({ 'value': [3, 2, 1], 'color': { hex: '#00ffff' } }),
-                this.components['vector'].createNode({ 'value': [2, 2, 2], 'color': { hex: '#00ffff' } }),
+                this.components['vector'].createNode({ 'value': [3, 2, 1], 'color': '#00ffff' }),
+                this.components['vector'].createNode({ 'value': [2, 2, 2], 'color': '#00ffff' }),
                 this.components['operation-add'].createNode(),
                 this.components['vector'].createNode({ 'color': this.settings.defaultVectorColor }),
             ]);
