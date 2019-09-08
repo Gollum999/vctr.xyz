@@ -138,7 +138,7 @@ export default {
 
 <style scoped>
 .vector-control-container {
-    margin: 2px 4px;
+    margin-right: 8px;
     grid-column: controls;
     display: flex;
 }
@@ -146,15 +146,14 @@ export default {
 
 <style>
 #app .vector-control-container input {
-    width: 2em;
+    width: 3em;
     padding: 0;
 }
 #app .vector-control-container .v-input {
-    margin: inherit;
-    padding: 0px 4px;
+    padding: 0px 6px; /* This must include the .v-input__slot padding to avoid overlap */
 }
 #app .vector-control-container .v-input__slot {
-    padding: 0px 6px;
+    padding: 0px 4px; /* This is the padding between the container bounds and the actual contained input */
     background-color: rgba(255, 255, 255, 0.05);
 }
 #app .vector-control-container .v-input__control {

@@ -28,6 +28,7 @@ export default {
             defaultScalarColor: '#7676dd',
             defaultVectorColor: '#ff4444',
             defaultMatrixColor: '#44ffff',
+            showAdvancedRenderSettings: false,
         },
     },
 

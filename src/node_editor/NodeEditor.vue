@@ -77,6 +77,7 @@ import allComponents from './components';
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 import util from '../util';
+import { GraphTraveler } from './node_util';
 import Rect from './Rect';
 
 export default {
@@ -84,7 +85,6 @@ export default {
     data() {
         return {
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
-            // TODO how to use the defaults defined in SettingsModal?  I think I either have to pass them down as props, or just define them in some common location
             settings: settings.defaultSettings['nodeEditorSettings'],
 
             lastNodePosition: null,
@@ -365,11 +365,35 @@ export default {
             this.$emit('process', this.editor.toJSON());
             EventBus.$emit('node_engine_processed', this.editor.toJSON());
         },
+
+        showOrHideAdvancedRenderSettings(show) {
+            console.log('NodeEditor showAdvancedRenderSettings toggled', show);
+            const graphTraveler = new GraphTraveler(this.engine, this.editor);
+            graphTraveler.applyToAllEditorNodes(node => {
+                // TODO name is maybe not the best key
+                const component = this.components[node.name.toLowerCase()];
+                if (component === undefined) {
+                    return;
+                }
+                if (show && typeof component.addAdvancedRenderControls === 'function') {
+                    component.addAdvancedRenderControls(node);
+                } else if (!show && typeof component.removeAdvancedRenderControls === 'function') {
+                    component.removeAdvancedRenderControls(node);
+                }
+                node.update();
+            });
+        },
     },
 
     mounted() {
         this.settings = settings.loadSettings('nodeEditorSettings');
-        EventBus.$on('settings-updated', () => { this.settings = settings.loadSettings('nodeEditorSettings'); });
+        EventBus.$on('settings-updated', () => {
+            const oldShowAdvancedRenderSettings = this.settings.showAdvancedRenderSettings;
+            this.settings = settings.loadSettings('nodeEditorSettings');
+            if (this.settings.showAdvancedRenderSettings !== oldShowAdvancedRenderSettings) {
+                this.showOrHideAdvancedRenderSettings(this.settings.showAdvancedRenderSettings);
+            }
+        });
         // console.log('NodeEditor loaded settings', this.settings);
 
         EventBus.$on('split-resized', () => {
@@ -449,14 +473,11 @@ export default {
 
 <style lang="sass">
 /* Global overrides for Rete style */
+// TODO move these to NodeRenderer?
 #app
   .node
     .control
       padding: 8px // TODO doesn't work because of display: contents
-    .input-title
-      margin: 2px
-    .output-title
-      margin: 2px
 
   .connection
     /* Fix display bug with connections */
@@ -472,9 +493,9 @@ export default {
     width: 14px
     height: 14px
     &.input
-      margin-left: -8px
+      margin-left: -7px
     &.output
-      margin-right: -8px
+      margin-right: -7px
     &.scalar-value
       background: #7777dd
     &.vector-value

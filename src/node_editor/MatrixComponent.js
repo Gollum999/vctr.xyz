@@ -5,6 +5,8 @@ import sockets from './sockets';
 import { MatrixControl } from './MatrixControl';
 import { MatrixLabelControl } from './MatrixLabelControl';
 import { ColorControl } from './ColorControl';
+import { VectorControl } from './VectorControl.js';
+import settings from '../settings';
 
 export class MatrixComponent extends Rete.Component {
     constructor(globalVuetify) {
@@ -16,15 +18,38 @@ export class MatrixComponent extends Rete.Component {
     }
 
     builder(node) {
+        const nodeSettings = settings.loadSettings('nodeEditorSettings');
+
         node.addInput(new Rete.Input('matrix', 'Value', sockets.matrix));
+        node.addInput(new Rete.Input('color_label', 'Color', null));
 
         node.addControl(new MatrixLabelControl(this.editor, 'label', -999));
         node.addControl(new MatrixControl(this.editor, 'value', 1, this.globalVuetify));
         node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
+        if (nodeSettings.showAdvancedRenderSettings) {
+            this.addAdvancedRenderControls(node);
+        }
 
         node.addOutput(new Rete.Output('matrix', 'Value', sockets.matrix));
 
         return node;
+    }
+
+    addAdvancedRenderControls(node) {
+        node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
+        node.addControl(new VectorControl(this.editor, 'pos', 3, this.globalVuetify));
+    }
+
+    removeAdvancedRenderControls(node) {
+        const input = node.inputs.get('pos');
+        if (input != null) {
+            node.removeInput(input);
+        }
+
+        const control = node.controls.get('pos');
+        if (control != null) {
+            node.removeControl(control);
+        }
     }
 
     worker(node, inputs, outputs) {

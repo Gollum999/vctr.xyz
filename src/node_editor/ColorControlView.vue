@@ -1,7 +1,5 @@
 <template>
 <div class="color-control-container">
-  <div class="color-label input-title" :style="{'grid-row': rowIdx}">Color</div>
-
   <v-menu
       class="color-picker"
       v-model="colorPickerShowing"

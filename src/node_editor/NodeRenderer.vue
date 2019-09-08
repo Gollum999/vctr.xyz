@@ -4,16 +4,16 @@
 v-card.node(dark hover :class="[selected(), node.name] | kebab")
   // TODO editable titles
   .title {{node.name}}
+  // .title {{node.name}} ({{node.id}})
 
   .node-body
     // Inputs
     // 0 indexed
     // TODO there was some warning here about duplicate key 'vec', fixed by adding idx to key but I'm not entirely sure how that worked or whether that is correct
     .input(v-for='(input, idx) in inputs()' :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
-      .input-wrapper
-        Socket(v-socket:input="input" type="input" :socket="input.socket")
-        .input-title(v-show='!input.showControl()') {{input.name}}
-        .input-control(v-show='input.showControl()' v-control="input.control")
+      Socket(v-if="input.socket !== null" v-socket:input="input" type="input" :socket="input.socket")
+      .input-title(v-show='!input.showControl()') {{input.name}}
+      .input-control(v-show='input.showControl()' v-control="input.control")
 
     // Controls
     .control(v-for='(control, idx) in controls()' v-control="control")
@@ -60,10 +60,18 @@ $node-color-selected: #4d4d4d
 $group-color: rgba(15, 80, 255, 0.2)
 $group-handler-size: 40px
 $group-handler-offset: -10px
-$socket-size: 20px
-$socket-margin: 6px
+$socket-size: 14px
+$socket-margin: 4px
 $socket-color: #96b38a
 $node-width: 100px
+
+#app .socket
+  position: absolute
+  margin: 0px
+  min-height: initial
+  &.output
+    left: 100%
+    transform: translate(-50%)
 
 .node
   // background: $node-color
@@ -98,44 +106,27 @@ $node-width: 100px
     margin: 0px 16px 4px
     border-bottom: 1px solid rgba(128, 128, 128, 0.4)
     // border-radius: 10px 10px 0 0
+  .input,.output
+    height: 100%
+    display: flex
+    flex-direction: column
+    justify-content: center
+    min-height: 30px
+  .input-title,.output-title
+    line-height: $socket-size
   .input
     grid-column: inputs
-    margin-right: 4px
-    //*
-    //border: 1px solid black
-    // display: flex
-    // flex-direction: column
-    // justify-content: center
-    // align-items: center
-    // position: relative
-  .input-wrapper
-    height: 100%
+  .input-title
     text-align: left
-    // margin: auto 0px
-  .input-control
-    z-index: 1
-    width: calc(100% - #{$socket-size + 2*$socket-margin})
-    vertical-align: middle
-    display: inline-block
+    margin-left: $socket-size/2 + $socket-margin
   .control
-    padding: $socket-margin $socket-size/2 + $socket-margin
+    // padding: $socket-margin $socket-size/2 + $socket-margin
     grid-column: controls
     display: contents
     // margin: 0px 4px // TODO doesn't work because display: contents
   .output
-    text-align: right
     grid-column: outputs
-    margin-left: 4px
-  .input-title,.output-title
-    vertical-align: middle
-    text-align: left
-    // position: absolute
-    // top: 50%
-    // transform: translateY(-50%)
-    // color: black
-    display: inline-block
-    // font-family: sans-serif
-    // font-size: 12px
-    margin: $socket-margin
-    line-height: $socket-size
+  .output-title
+    text-align: right
+    margin-right: $socket-size/2 + $socket-margin
 </style>

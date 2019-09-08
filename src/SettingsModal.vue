@@ -61,6 +61,8 @@
                               v-model="settings.nodeEditorSettings.defaultMatrixColor">
           Default matrix color
         </color-picker-setting>
+        <!-- TODO add confirm dialog when toggling this off, since doing so will remove some controls -->
+        <v-switch color="primary" v-model="settings.nodeEditorSettings.showAdvancedRenderSettings" @change="save" label="Show advanced render settings" hide-details></v-switch>
       </v-tab-item>
 
     </v-tabs>

@@ -4,6 +4,8 @@ import Rete from 'rete';
 import sockets from './sockets';
 import { ColorControl } from './ColorControl.js';
 import { ScalarControl } from './ScalarControl.js';
+import { VectorControl } from './VectorControl.js';
+import settings from '../settings';
 
 export class ScalarComponent extends Rete.Component {
     constructor(globalVuetify) {
@@ -13,14 +15,37 @@ export class ScalarComponent extends Rete.Component {
     }
 
     builder(node) {
+        const nodeSettings = settings.loadSettings('nodeEditorSettings');
+
         node.addInput(new Rete.Input('scalar', 'Value', sockets.scalar));
+        node.addInput(new Rete.Input('color_label', 'Color', null));
 
         node.addControl(new ScalarControl(this.editor, 'value', this.globalVuetify));
         node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
+        if (nodeSettings.showAdvancedRenderSettings) {
+            this.addAdvancedRenderControls(node);
+        }
 
         node.addOutput(new Rete.Output('scalar', 'Value', sockets.scalar));
 
         return node;
+    }
+
+    addAdvancedRenderControls(node) {
+        node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
+        node.addControl(new VectorControl(this.editor, 'pos', 3, this.globalVuetify));
+    }
+
+    removeAdvancedRenderControls(node) {
+        const input = node.inputs.get('pos');
+        if (input != null) {
+            node.removeInput(input);
+        }
+
+        const control = node.controls.get('pos');
+        if (control != null) {
+            node.removeControl(control);
+        }
     }
 
     worker(node, inputs, outputs) {

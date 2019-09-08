@@ -5,6 +5,7 @@ import sockets from './sockets';
 import { VectorControl } from './VectorControl';
 import { VectorLabelControl } from './VectorLabelControl';
 import { ColorControl } from './ColorControl';
+import settings from '../settings';
 import util from './node_util';
 
 export class VectorComponent extends Rete.Component {
@@ -18,15 +19,38 @@ export class VectorComponent extends Rete.Component {
 
     builder(node) {
         // console.log('VectorComponent builder: this: ', this, 'globalVuetify:', this.globalVuetify);
+        const nodeSettings = settings.loadSettings('nodeEditorSettings');
+
         node.addInput(new Rete.Input('vector', 'Value', sockets.vector));
+        node.addInput(new Rete.Input('color_label', 'Color', null));
 
         node.addControl(new VectorLabelControl(this.editor, 'label', -999));
         node.addControl(new VectorControl(this.editor, 'value', 1, this.globalVuetify));
         node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
+        if (nodeSettings.showAdvancedRenderSettings) {
+            this.addAdvancedRenderControls(node);
+        }
 
         node.addOutput(new Rete.Output('vector', 'Value', sockets.vector));
 
         return node;
+    }
+
+    addAdvancedRenderControls(node) {
+        node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
+        node.addControl(new VectorControl(this.editor, 'pos', 3, this.globalVuetify));
+    }
+
+    removeAdvancedRenderControls(node) {
+        const input = node.inputs.get('pos');
+        if (input != null) {
+            node.removeInput(input);
+        }
+
+        const control = node.controls.get('pos');
+        if (control != null) {
+            node.removeControl(control);
+        }
     }
 
     worker(node, inputs, outputs) {
@@ -41,7 +65,7 @@ export class VectorComponent extends Rete.Component {
 
         const editorNode = util.getEditorNode(this.editor, node);
 
-        const input = util.getInput('vector', inputs, node.data);
+        const input = util.getInputValue('vector', inputs, node.data);
         if (_.isNil(input)) {
             // console.log('VectorComponent worker, input empty, setting readonly = false');
             editorNode.controls.get('value').setReadOnly(false);

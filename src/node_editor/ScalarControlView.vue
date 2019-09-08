@@ -62,15 +62,14 @@ export default {
 
 <style>
 #app .scalar input {
-    width: 2em;
+    width: 3em;
     padding: 0;
 }
 #app .scalar .v-input {
-    margin: inherit;
-    padding: 0px 4px;
+    padding: 0px 6px; /* This must include the .v-input__slot padding to avoid overlap */
 }
 #app .scalar .v-input__slot {
-    padding: 0px 6px;
+    padding: 0px 4px; /* This is the padding between the container bounds and the actual contained input */
     background-color: rgba(255, 255, 255, 0.05);
 }
 #app .scalar .v-input__control {
