@@ -81,8 +81,8 @@ export default {
 
     getRandomColor() {
         const h = Math.random();
-        const s = this.randomInRange(0.3, 1.0);
-        const l = this.randomInRange(0.2, 0.8);
+        const s = this.randomInRange(0.4, 1.0);
+        const l = this.randomInRange(0.3, 0.7);
         return this.hslToRgb(h, s, l);
     },
 
