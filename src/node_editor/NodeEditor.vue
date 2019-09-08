@@ -471,52 +471,6 @@ export default {
 };
 </script>
 
-<style lang="sass">
-/* Global overrides for Rete style */
-// TODO move these to NodeRenderer?
-#app
-  .node
-    .control
-      padding: 8px // TODO doesn't work because of display: contents
-
-  .connection
-    /* Fix display bug with connections */
-    /* TODO I think something with bootstrap causes the svg element to be aligned to center */
-    position: absolute
-    left: 0px
-    z-index: -5
-    .main-path
-      stroke: black
-      stroke-width: 3px
-
-  .socket
-    width: 14px
-    height: 14px
-    &.input
-      margin-left: -7px
-    &.output
-      margin-right: -7px
-    &.scalar-value
-      background: #7777dd
-    &.vector-value
-      background: #ff4444
-    &.matrix-value
-      background: #44ffff
-    &.scalar-or-vector
-      background: #bb5d90 // TODO is there a more graceful way to have a "fallback" style?  media query?
-      background: linear-gradient(180deg, #7777dd 50%, #ff4444 50%)
-    &.scalar-or-matrix
-      background: #5dbbee
-      background: linear-gradient(180deg, #7777dd 50%, #44ffff 50%)
-    &.vector-or-matrix
-      background: #a1a1a1
-      background: linear-gradient(180deg, #ff4444 50%, #44ffff 50%)
-    &.anything
-      background: #aaaaaa
-      background: linear-gradient(180deg, #7777dd 34%, #ff4444 34% 66%, #44ffff 66%)
-      background: conic-gradient(#7777dd 120deg, #ff4444 120deg 240deg, #44ffff 240deg 360deg)
-</style>
-
 <style lang="sass" scoped>
 .node-editor
   height: 100% // Make sure container is large enough when split is fully expanded
