@@ -17,23 +17,27 @@
       <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <v-tab-item>
         <!-- TODO use switch instead of checkbox? -->
-        <v-switch color="primary" v-model="settings.viewportSettings.showAxis" @change="save" label="Show axis" hide-details></v-switch>
-        <v-switch color="primary" v-model="settings.viewportSettings.showGrid" @change="save" label="Show grid" hide-details></v-switch>
+        <v-switch color="primary" v-model="settings.viewportSettings.showAxis" label="Show axis" hide-details></v-switch>
+        <v-switch color="primary" v-model="settings.viewportSettings.showGrid" label="Show grid" hide-details></v-switch>
 
         <v-subheader>Matrix Rendering</v-subheader>
-        <v-slider step="0.1" min="0.1" max="1" @end="save" label="Vector Scale" v-model.number="settings.viewportSettings.matrix.vectorScale">
+        <!-- Keep a separate model for these so we get high precision for "live" updates, but only trigger watchers from specific events -->
+        <v-slider step="0.1" min="0.1" max="1" label="Vector Scale" v-model.number="vectorScale"
+                  @change="updateSetting('settings.viewportSettings.matrix.vectorScale', $event)">
           <template v-slot:append>
-            {{settings.viewportSettings.matrix.vectorScale | formatMatrixSliderValue}}
+            {{vectorScale | formatMatrixSliderValue}}
           </template>
         </v-slider>
-        <v-slider step="0.1" min="1" :max="fieldSizeMax" @end="save" label="Field Size" v-model.number="settings.viewportSettings.matrix.fieldSize">
+        <v-slider step="0.1" min="1" :max="fieldSizeMax" label="Field Size" v-model.number="fieldSize"
+                  @change="updateSetting('settings.viewportSettings.matrix.fieldSize', $event)">
           <template v-slot:append>
-            {{settings.viewportSettings.matrix.fieldSize | formatMatrixSliderValue}}
+            {{fieldSize | formatMatrixSliderValue}}
           </template>
         </v-slider>
-        <v-slider step="0.1" min="0.1" :max="fieldDensityMax" @end="save" label="Field Density" v-model.number="settings.viewportSettings.matrix.fieldDensity">
+        <v-slider step="0.1" min="0.1" :max="fieldDensityMax" label="Field Density" v-model.number="fieldDensity"
+                  @change="updateSetting('settings.viewportSettings.matrix.fieldDensity', $event)">
           <template v-slot:append>
-            {{settings.viewportSettings.matrix.fieldDensity | formatMatrixSliderValue}}
+            {{fieldDensity | formatMatrixSliderValue}}
           </template>
         </v-slider>
         <!--
@@ -48,21 +52,21 @@
       </v-tab-item>
 
       <v-tab-item>
-        <v-switch color="primary" v-model="settings.nodeEditorSettings.useRandomColors" @change="save" label="Use random colors" hide-details></v-switch>
-        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" @input="save" disableAlpha
+        <v-switch color="primary" v-model="settings.nodeEditorSettings.useRandomColors" label="Use random colors" hide-details></v-switch>
+        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" disableAlpha
                               v-model="settings.nodeEditorSettings.defaultScalarColor">
           Default scalar color
         </color-picker-setting>
-        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" @input="save" disableAlpha
+        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" disableAlpha
                               v-model="settings.nodeEditorSettings.defaultVectorColor">
           Default vector color
         </color-picker-setting>
-        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" @input="save" disableAlpha
+        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" disableAlpha
                               v-model="settings.nodeEditorSettings.defaultMatrixColor">
           Default matrix color
         </color-picker-setting>
         <!-- TODO add confirm dialog when toggling this off, since doing so will remove some controls -->
-        <v-switch color="primary" v-model="settings.nodeEditorSettings.showAdvancedRenderSettings" @change="save" label="Show advanced render settings" hide-details></v-switch>
+        <v-switch color="primary" v-model="settings.nodeEditorSettings.showAdvancedRenderSettings" label="Show advanced render settings" hide-details />
       </v-tab-item>
 
     </v-tabs>
@@ -71,9 +75,11 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import settingsUtil from './settings';
 import { EventBus } from './EventBus';
 import ColorPickerSetting from './ColorPickerSetting';
+import { FieldChangeAction } from './util';
 
 const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too much
 
@@ -83,14 +89,44 @@ export default {
         'color-picker-setting': ColorPickerSetting,
     },
     data() {
+        const settings = settingsUtil.loadSettings();
         return {
-            settings: settingsUtil.loadSettings(),
+            settings,
+
+            vectorScale: settings.viewportSettings.matrix.vectorScale,
+            fieldSize: settings.viewportSettings.matrix.fieldSize,
+            fieldDensity: settings.viewportSettings.matrix.fieldDensity,
         };
     },
     filters: {
         formatMatrixSliderValue(value) {
             return value.toFixed(1);
         },
+    },
+    watch: {
+        ...Object.fromEntries([
+            'settings.viewportSettings.showAxis',
+            'settings.viewportSettings.showGrid',
+            'settings.viewportSettings.matrix.colorStyle',
+            'settings.viewportSettings.matrix.vectorScale',
+            'settings.viewportSettings.matrix.fieldSize',
+            'settings.viewportSettings.matrix.fieldDensity',
+            'settings.nodeEditorSettings.useRandomColors',
+            'settings.nodeEditorSettings.defaultScalarColor',
+            'settings.nodeEditorSettings.defaultVectorColor',
+            'settings.nodeEditorSettings.defaultMatrixColor',
+            'settings.nodeEditorSettings.showAdvancedRenderSettings',
+        ].map(function (key) {
+            const handler = function (newVal, oldVal) {
+                // Bit of a hack -- using Rete's 'History' plugin even for non-Rete undo/redo
+                EventBus.$emit('addhistory', new FieldChangeAction(oldVal, newVal, val => {
+                    _.set(this, key, val);
+                }));
+
+                this.save(newVal);
+            };
+            return [key, handler];
+        })),
     },
     computed: {
         // 2 * fieldSize * fieldDensity <= MAX_VECTORS_PER_SIDE
@@ -102,13 +138,16 @@ export default {
         },
     },
     methods: {
-        save(event) {
+        save(newValue) {
             console.log('SettingsModal saving settings', this.settings);
             settingsUtil.saveSettings(this.settings['viewportSettings'], this.settings['nodeEditorSettings']);
             EventBus.$emit('settings-updated');
         },
         close() {
             this.$emit('settings-modal-closed');
+        },
+        updateSetting(key, value) {
+            _.set(this, key, value);
         },
     },
 };

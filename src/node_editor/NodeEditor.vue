@@ -94,6 +94,8 @@ export default {
             editor: null,
             engine: null,
 
+            currentlyHandlingHistoryAction: false,
+
             // TODO switch to use Rete Area Plugin?
             minZoom: 0.1,
             maxZoom: 3,
@@ -221,9 +223,13 @@ export default {
         onUndo() {
             console.log('UNDO');
             try {
+                this.currentlyHandlingHistoryAction = true;
                 /* console.log('before trigger undo', this.editor.plugins); */
-                this.editor.trigger('undo');
-                /* console.log('after trigger undo'); */
+                this.editor.trigger('undo'); // TODO sometimes a dragnodeaction is getting added when I click to change values
+                /* console.log('after trigger undo', result); */
+                this.$nextTick(() => {
+                    this.currentlyHandlingHistoryAction = false;
+                });
             } catch (error) {
                 console.warn('caught error in undo event', error);
             }
@@ -231,7 +237,11 @@ export default {
 
         onRedo() {
             console.log('REDO');
+            this.currentlyHandlingHistoryAction = true;
             this.editor.trigger('redo');
+            this.$nextTick(() => {
+                this.currentlyHandlingHistoryAction = false;
+            });
         },
 
         recenterView() {
@@ -396,9 +406,6 @@ export default {
         });
         // console.log('NodeEditor loaded settings', this.settings);
 
-        EventBus.$on('split-resized', () => {
-            this.editor.view.resize();
-        });
         this.container = document.getElementById('rete');
         this.editor = new Rete.NodeEditor(this.version, this.container);
 
@@ -410,6 +417,19 @@ export default {
         // console.log('NodeEditor mounted, connectionremoved handlers:', this.editor.events['connectionremoved'].handlers);
 
         this.engine = new Rete.Engine(this.version);
+
+        EventBus.$on('split-resized', () => {
+            this.editor.view.resize();
+        });
+        EventBus.$on('addhistory', action => {
+            // Bit of a hack; prevent changes that happen as a result of undo/redo from themselves being added to the history stack
+            // (which would erase any potential redo-able actions)
+            // The History plugin already does something like this to prevent infinite recursion, but that only works within the same
+            // stack frame, whereas this works for the whole Vue tick
+            if (!this.currentlyHandlingHistoryAction) {
+                this.editor.trigger('addhistory', action);
+            }
+        });
 
         Object.keys(this.components).map(key => {
             this.editor.register(this.components[key]);
