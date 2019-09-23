@@ -7,6 +7,7 @@ import { MatrixLabelControl } from './MatrixLabelControl';
 import { ColorControl } from './ColorControl';
 import { VectorControl } from './VectorControl.js';
 import settings from '../settings';
+import util from './node_util';
 
 export class MatrixComponent extends Rete.Component {
     constructor(globalVuetify) {
@@ -41,8 +42,11 @@ export class MatrixComponent extends Rete.Component {
     }
 
     removeAdvancedRenderControls(node) {
+        node.data.pos = [0, 0, 0];
+
         const input = node.inputs.get('pos');
         if (input != null) {
+            input.connections.map(this.editor.removeConnection.bind(this.editor)); // node.removeInput removes the data connections, but not the view connections
             node.removeInput(input);
         }
 
@@ -63,21 +67,24 @@ export class MatrixComponent extends Rete.Component {
         // console.log(`MatrixComponent worker "${node.name}"`);
         // console.log(node.data);
 
-        // TODO pull this out somewhere
-        function getInput(name) {
-            // Assumes only a single connection per input, which is currently enforced by the editor
-            return inputs[name].length ? inputs[name][0] : node.data[name];
-        }
-
         const editorNode = this.editor.nodes.find(n => n.id === node.id);
 
-        const input = getInput('matrix');
-        if (_.isNil(input)) {
-            editorNode.controls.get('value').setReadOnly(false);
-        } else {
-            node.data.value = input.slice(); // Make a copy to avoid sharing the same object between nodes
-            editorNode.controls.get('value').setValue(input);
+        if (util.hasInput(inputs, 'matrix')) {
+            const inputValue = util.getInputValue('matrix', inputs, node.data);
+            node.data.value = inputValue.slice(); // Make a copy to avoid sharing the same object between nodes
+            editorNode.controls.get('value').setValue(inputValue);
             editorNode.controls.get('value').setReadOnly(true);
+        } else {
+            editorNode.controls.get('value').setReadOnly(false);
+        }
+
+        if (util.hasInput(inputs, 'pos')) {
+            const inputPos = util.getInputValue('pos', inputs, node.data);
+            node.data.pos = inputPos.slice(); // Make a copy to avoid sharing the same object between nodes
+            editorNode.controls.get('pos').setValue(inputPos);
+            editorNode.controls.get('pos').setReadOnly(true);
+        } else {
+            editorNode.controls.get('pos').setReadOnly(false);
         }
 
         if (!_.isNil(node.data.value)) {

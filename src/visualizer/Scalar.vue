@@ -10,20 +10,21 @@
         :vertex-shader="vertexShader"
         :fragment-shader="fragmentShader"
     />
-    <vgl-mesh :ref="`scalar-mesh-${this.scalarKey}`" :geometry="`scalar-geo-${this.scalarKey}`" :material="`scalar-mat-${this.scalarKey}`" :position="pos" />
+    <vgl-mesh :ref="`scalar-mesh-${this.scalarKey}`" :geometry="`scalar-geo-${this.scalarKey}`" :material="`scalar-mat-${this.scalarKey}`" />
   </div>
 </div>
 </template>
 
 <script>
 import util from '../util';
+import { vec3 } from 'gl-matrix';
 
 export default {
     props: {
         scalarKey:     { type: String, required: true },
         displayType:   { type: String, required: true },
         layer:         { type: Number, default: 0 },
-        pos:           { type: String, default: '0 0 0' }, // TODO I think to support this I need to use a vgl "billboard"
+        pos:           { type: Array,  default: () => vec3.create() }, // TODO I think to support this I need to use a vgl "billboard"
 
         value:         { type: Number, required: true },
         color:         { type: String, default: '#000000' },
@@ -48,6 +49,9 @@ export default {
         color(newVal, oldVal) {
             console.log('Scalar color updated', oldVal, newVal);
             this.uniforms.color.value = this.colorObjToArray(util.hexToRgb(newVal));
+        },
+        pos(newVal, oldVal) {
+            this.uniforms.posOffset.value = newVal;
         },
         lineThickness(newVal, oldVal) {
             /* console.log('lineThickness updated', oldVal, newVal); */
@@ -76,6 +80,7 @@ export default {
             uniforms: {
                 radius:                         { value: this.value },
                 color:                          { value: this.colorObjToArray(util.hexToRgb(this.color)) },
+                posOffset:                      { value: this.pos },
                 canvasSize:                     { value: [this.canvasSize.x, this.canvasSize.y] },
                 lineThickness:                  { value: this.lineThickness },
                 numSegments:                    { value: this.numSegments },
@@ -83,12 +88,14 @@ export default {
                 lineThicknessScaleWithDistance: { value: true }, // TODO broken
             },
             vertexShader: `
+                uniform vec3 posOffset;
+
                 varying vec4 objectPos;
                 varying mat4 projMat;
 
                 void main() {
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    objectPos = projectionMatrix * modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0); // TODO I can't remember the math here; can I drop the 0,0,0?
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + posOffset, 1.0);
+                    objectPos = projectionMatrix * modelViewMatrix * vec4(posOffset, 1.0); // TODO I can't remember the math here; can I drop the 0,0,0?
                     projMat = projectionMatrix;
                 }
             `,

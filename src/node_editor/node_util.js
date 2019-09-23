@@ -85,6 +85,10 @@ export class GraphTraveler {
 export default {
     getEditorNode,
 
+    hasInput(inputs, name) {
+        return inputs[name] !== undefined && inputs[name].length;
+    },
+
     getInputValue(name, inputs, data) {
         // Assumes only a single connection per input, which is currently enforced by the editor
         return inputs[name].length ? inputs[name][0] : data[name];

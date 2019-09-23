@@ -6,6 +6,7 @@ import { ColorControl } from './ColorControl.js';
 import { ScalarControl } from './ScalarControl.js';
 import { VectorControl } from './VectorControl.js';
 import settings from '../settings';
+import util from './node_util';
 
 export class ScalarComponent extends Rete.Component {
     constructor(globalVuetify) {
@@ -37,8 +38,11 @@ export class ScalarComponent extends Rete.Component {
     }
 
     removeAdvancedRenderControls(node) {
+        node.data.pos = [0, 0, 0];
+
         const input = node.inputs.get('pos');
         if (input != null) {
+            input.connections.map(this.editor.removeConnection.bind(this.editor)); // node.removeInput removes the data connections, but not the view connections
             node.removeInput(input);
         }
 
@@ -49,22 +53,24 @@ export class ScalarComponent extends Rete.Component {
     }
 
     worker(node, inputs, outputs) {
-        // TODO pull this out somewhere
-        function getInput(name) {
-            // Assumes only a single connection per input, which is currently enforced by the editor
-            return inputs[name].length ? inputs[name][0] : node.data[name];
+        const editorNode = this.editor.nodes.find(n => n.id === node.id);
+
+        if (util.hasInput(inputs, 'scalar')) {
+            const inputValue = util.getInputValue('scalar', inputs, node.data);
+            node.data.value = inputValue;
+            editorNode.controls.get('value').setValue(inputValue);
+            editorNode.controls.get('value').setReadOnly(true);
+        } else {
+            editorNode.controls.get('value').setReadOnly(false);
         }
 
-        const editorNode = this.editor.nodes.find(n => n.id === node.id);
-        // console.log('editorNode.controls', editorNode.controls);
-
-        const input = getInput('scalar');
-        if (_.isNil(input)) {
-            editorNode.controls.get('value').setReadOnly(false);
+        if (util.hasInput(inputs, 'pos')) {
+            const inputPos = util.getInputValue('pos', inputs, node.data);
+            node.data.pos = inputPos.slice(); // Make a copy to avoid sharing the same object between nodes
+            editorNode.controls.get('pos').setValue(inputPos);
+            editorNode.controls.get('pos').setReadOnly(true);
         } else {
-            node.data.value = input;
-            editorNode.controls.get('value').setValue(input);
-            editorNode.controls.get('value').setReadOnly(true);
+            editorNode.controls.get('pos').setReadOnly(false);
         }
 
         if (!_.isNil(node.data.value)) {

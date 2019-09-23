@@ -33,10 +33,11 @@ export default {
 
         value:         { /* type: mat4, */ required: true },
         color:         { type: String, default: '#ff0000' },
+        pos:           { type: Array,  default: () => vec3.create() },
 
         vectorScale:   { type: Number, default: 0.2 },
         density:       { type: Number, default: 0.5 },
-        fieldSize:     { type: Number, default: 7.0 }, // TODO should this be distance in world coords, or the total count of vectors per side?
+        fieldSize:     { type: Number, default: 7.0 }, // TODO should this be distance in world coords, or the total count of vectors per side?  if in world coords, should I use size of one direction or both combined?
     },
     data() {
         return {
@@ -62,7 +63,8 @@ export default {
                         mat4.transpose(transposed, this.value); // gl-matrix is column-major, but I am row-major; transpose before calculating
                         vec3.transformMat4(out, baseVec, transposed);
                         /* console.log('adding vector', out, baseVec, this.value); */
-                        vectors.push(new FieldVector(out, baseVec));
+                        const pos = vec3.create();
+                        vectors.push(new FieldVector(out, vec3.add(pos, this.pos, baseVec)));
                     }
                 }
             }

@@ -11,7 +11,7 @@
         <!-- </template> -->
         <vgl-arrow-helper v-for="(v, idx) in renderVectors"
             :key="`vector-${idx}`"
-            :position="'0 0 0'"
+            :position="`${v.pos[0]} ${v.pos[1]} ${v.pos[2]}`"
             :dir="`${v.value[0]} ${v.value[1]} ${v.value[2]}`"
             :color="v.color"
             :length="`${vec3.length(v.value)}`"
@@ -23,6 +23,7 @@
             display-type="vector-field"
             :value="m.value"
             :color="m.color"
+            :pos="m.pos"
             :vector-scale="settings.matrix.vectorScale"
             :density="settings.matrix.fieldDensity"
             :fieldSize="settings.matrix.fieldSize"
@@ -58,16 +59,18 @@ import Viewport from './Viewport';
 import { EventBus } from '../EventBus';
 
 class VectorView {
-    constructor(value, color) {
+    constructor(value, color, pos) {
         this.value = value;
         this.color = color;
+        this.pos = pos;
     }
 };
 
 class MatrixView { // TODO combine, move somewhere common?
-    constructor(value, color) {
+    constructor(value, color, pos) {
         this.value = value;
         this.color = color;
+        this.pos = pos;
     }
 };
 
@@ -87,6 +90,7 @@ export default {
         };
     },
     computed: {
+        // TODO may be faster to check this on insert
         renderVectors() {
             return this.vectors.filter(v => {
                 return v && vec3.length(v.value);
@@ -114,9 +118,9 @@ export default {
                 const node = editorJson.nodes[key];
                 /* console.log('adding node', node, 'to be rendered'); */
                 if (node.name === 'Vector') {
-                    this.vectors.push(new VectorView(node.data.value, node.data.color)); // TODO need to figure out best practices for handling data in engine
+                    this.vectors.push(new VectorView(node.data.value, node.data.color, node.data.pos)); // TODO need to figure out best practices for handling data in engine
                 } else if (node.name === 'Matrix') {
-                    this.matrices.push(new MatrixView(node.data.value, node.data.color));
+                    this.matrices.push(new MatrixView(node.data.value, node.data.color, node.data.pos));
                 }
             }
             // console.log('QuadViewport rendering vectors:', this.vectors);

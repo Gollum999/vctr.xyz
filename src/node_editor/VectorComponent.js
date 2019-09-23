@@ -42,8 +42,11 @@ export class VectorComponent extends Rete.Component {
     }
 
     removeAdvancedRenderControls(node) {
+        node.data.pos = [0, 0, 0];
+
         const input = node.inputs.get('pos');
         if (input != null) {
+            input.connections.map(this.editor.removeConnection.bind(this.editor)); // node.removeInput removes the data connections, but not the view connections
             node.removeInput(input);
         }
 
@@ -61,19 +64,29 @@ export class VectorComponent extends Rete.Component {
         //   To check things like input state and component configuration, I either need to go through node.data or need to manually find the node
         //     through the editor by ID
         //   Also note that anything in data will be saved between sessions
-        // console.log('VectorComponent worker', node.name, node.data);
+        // console.log('VectorComponent worker', node.name, '(', node.id, ')', node.data);
+        // console.log('VECTOR', node, editorNode, inputs, editorNode.inputs);
 
         const editorNode = util.getEditorNode(this.editor, node);
 
-        const input = util.getInputValue('vector', inputs, node.data);
-        if (_.isNil(input)) {
-            // console.log('VectorComponent worker, input empty, setting readonly = false');
-            editorNode.controls.get('value').setReadOnly(false);
-        } else {
-            // console.log('VectorComponent worker setting value from input to ', input, typeof input);
-            node.data.value = input.slice(); // Make a copy to avoid sharing the same object between nodes
-            editorNode.controls.get('value').setValue(input);
+        if (util.hasInput(inputs, 'vector')) {
+            const inputValue = util.getInputValue('vector', inputs, node.data);
+            // console.log('VectorComponent worker setting "value" from input to ', inputValue, typeof inputValue);
+            node.data.value = inputValue.slice(); // Make a copy to avoid sharing the same object between nodes
+            editorNode.controls.get('value').setValue(inputValue);
             editorNode.controls.get('value').setReadOnly(true);
+        } else {
+            // console.log('VectorComponent worker, inputValue empty, setting "value" readonly = false');
+            editorNode.controls.get('value').setReadOnly(false);
+        }
+
+        if (util.hasInput(inputs, 'pos')) {
+            const inputPos = util.getInputValue('pos', inputs, node.data);
+            node.data.pos = inputPos.slice(); // Make a copy to avoid sharing the same object between nodes
+            editorNode.controls.get('pos').setValue(inputPos);
+            editorNode.controls.get('pos').setReadOnly(true);
+        } else {
+            editorNode.controls.get('pos').setReadOnly(false);
         }
 
         if (!_.isNil(node.data.value)) {
