@@ -61,14 +61,14 @@ export default {
 </style>
 
 <style>
-#app .scalar input {
+#app .scalar .v-text-field input {
     width: 3em;
     padding: 0;
 }
-#app .scalar .v-input {
+#app .scalar .v-text-field .v-input {
     padding: 0px 6px; /* This must include the .v-input__slot padding to avoid overlap */
 }
-#app .scalar .v-input__slot {
+#app .scalar .v-text-field .v-input__slot {
     padding: 0px 4px; /* This is the padding between the container bounds and the actual contained input */
     background-color: rgba(255, 255, 255, 0.05);
 }

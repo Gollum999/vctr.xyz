@@ -7,7 +7,7 @@ export class ColorControl extends Rete.Control {
         // console.log(`ColorControl constrtuctor, key: ${key}, row idx: ${rowIdx}`, this, globalVuetify, this._vue, this.vueContext);
         this.render = 'vue';
         this.component = ColorControlView;
-        this.props = { emitter, dataKey: key, rowIdx, globalVuetify};
+        this.props = { emitter, dataKey: key, rowIdx, globalVuetify };
     }
 
     setValue(val) {

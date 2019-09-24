@@ -18,7 +18,7 @@
             :head-length="0.5"
             :head-width="0.5"
         />
-        <Matrix v-for="(m, idx) in matrices"
+        <Matrix v-for="(m, idx) in renderMatrices"
             :key="`matrix-${idx}`"
             display-type="vector-field"
             :value="m.value"
@@ -93,7 +93,12 @@ export default {
         // TODO may be faster to check this on insert
         renderVectors() {
             return this.vectors.filter(v => {
-                return v && vec3.length(v.value);
+                return v && vec3.length(v.value) && v.color !== null;
+            });
+        },
+        renderMatrices() {
+            return this.matrices.filter(m => {
+                return m && m.color !== null;
             });
         },
     },
@@ -118,9 +123,9 @@ export default {
                 const node = editorJson.nodes[key];
                 /* console.log('adding node', node, 'to be rendered'); */
                 if (node.name === 'Vector') {
-                    this.vectors.push(new VectorView(node.data.value, node.data.color, node.data.pos)); // TODO need to figure out best practices for handling data in engine
+                    this.vectors.push(new VectorView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos)); // TODO need to figure out best practices for handling data in engine
                 } else if (node.name === 'Matrix') {
-                    this.matrices.push(new MatrixView(node.data.value, node.data.color, node.data.pos));
+                    this.matrices.push(new MatrixView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos));
                 }
             }
             // console.log('QuadViewport rendering vectors:', this.vectors);

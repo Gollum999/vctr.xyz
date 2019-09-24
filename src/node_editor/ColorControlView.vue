@@ -1,25 +1,28 @@
 <template>
 <div class="color-control-container">
-  <v-menu
-      class="color-picker"
-      v-model="colorPickerShowing"
-      :close-on-content-click="false"
-  >
-    <template v-slot:activator="{ on: showColorPicker }">
-      <div class="color-picker-button" :style="{'background-color': color, 'grid-row': rowIdx}" v-on="showColorPicker"></div>
-    </template>
+  <div class="color-control-container-inner" :style="{'grid-row': rowIdx}" >
+    <v-menu
+        class="color-picker"
+        v-model="colorPickerShowing"
+        :close-on-content-click="false"
+    >
+      <template v-slot:activator="{ on: showColorPicker }">
+        <div class="color-picker-button" :style="{'background-color': color}" v-on="showColorPicker"></div>
+      </template>
 
-    <v-card class="color-picker-popup">
+      <v-card class="color-picker-popup">
       <v-color-picker v-model="color" />
-    </v-card>
-  </v-menu>
+      </v-card>
+    </v-menu>
 
-  <!-- <div class="color-picker-button" :style="{'grid-row': rowIdx, 'background-color': color}"> -->
-  <!--   <div @mousedown.stop @touchstart.stop> -->
-  <!--     <color-picker :value="color" @input="colorUpdated" disableAlpha /> -->
-  <!--   </div> -->
-  <!-- </div> -->
+    <v-checkbox dark color="white" class="visible-checkbox" v-model="visible" on-icon="mdi-eye" off-icon="mdi-eye-off" hide-details :ripple="false" />
 
+    <!-- <div class="color-picker-button" :style="{'grid-row': rowIdx, 'background-color': color}"> -->
+    <!--   <div @mousedown.stop @touchstart.stop> -->
+    <!--     <color-picker :value="color" @input="colorUpdated" disableAlpha /> -->
+    <!--   </div> -->
+    <!-- </div> -->
+  </div>
 </div>
 </template>
 
@@ -38,6 +41,7 @@ export default {
 
     data() {
         return {
+            visible: true,
             color: '#000000',
             prevColor: null,
             colorPickerShowing: false,
@@ -61,12 +65,19 @@ export default {
                 this.emitter.trigger('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
             }
         },
+        visible(newVal, oldVal) {
+            if (this.dataKey) {
+                this.putData(this.dataKey, this.makeData(newVal, this.color));
+            }
+            this.emitter.trigger('addhistory', new FieldChangeAction(oldVal, newVal, (visible) => { this.visible = visible; }));
+            this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
+        },
         color: {
             deep: true,
             handler(newVal, oldVal) {
                 /* console.log('color watcher', this.dataKey, this.color, oldVal, newVal); */
                 if (this.dataKey) {
-                    this.putData(this.dataKey, newVal);
+                    this.putData(this.dataKey, this.makeData(this.visible, newVal));
                 }
                 this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
             },
@@ -78,9 +89,18 @@ export default {
         if (!this.dataKey) {
             throw new Error('dataKey was null??');
         }
-        this.color = this.getData(this.dataKey) || '#000000';
+        Object.assign(this, this.getData(this.dataKey) || { visible: true, color: '#000000' });
         /* console.log('ColorControlView mounted', this.dataKey, this.color); */
-        this.putData(this.dataKey, this.color);
+        this.putData(this.dataKey, this.makeData(this.visible, this.color));
+    },
+
+    methods: {
+        makeData(visible, color) {
+            return {
+                visible,
+                color,
+            };
+        },
     },
 };
 </script>
@@ -89,17 +109,25 @@ export default {
 .color-control-container {
     display: contents;
 }
-.color-label {
-    /* TODO use socket label style */
-    grid-column: inputs;
+.color-control-container-inner {
+    grid-column: controls;
+    display: flex;
+    align-items: center;
 }
 .color-picker-button {
-    grid-column: controls;
+    /* grid-column: controls; */
+    display: inline-block;
     width: 1.4em;
     height: 1.4em;
     /* background-color: yellow; */
     border: 1px solid rgba(128, 128, 128, 0.4);
     margin: 0.5em;
+}
+.visible-checkbox {
+    /* grid-column: controls; */
+    display: inline-block;
+    margin-top: 0;
+    padding-top: 0;
 }
 /* color-picker { */
 /*     transform: none; */

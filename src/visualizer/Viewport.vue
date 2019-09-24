@@ -14,7 +14,7 @@
          {{idx}} {{s}} ({{s.color}} {{s.value}})
          </div> -->
     <!-- TODO use node id for key here?  or hash?  any way to access :key from inside component so I don't have to duplicate? -->
-    <Scalar v-for="(s, idx) in scalars"
+    <Scalar v-for="(s, idx) in renderScalars"
             :key="`scalar-${view}-${idx}`"
             :scalarKey="`scalar-${view}-${idx}`"
             :layer="VIEW_VALUES[view].layer"
@@ -117,6 +117,11 @@ export default {
             /* console.log(`Setting orbitPos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`); */
             return `${result.radius} ${result.phi} ${result.theta}`; // TODO can I avoid this string step?
         },
+        renderScalars() {
+            return this.scalars.filter(s => {
+                return s && s.value !== 0 && s.color !== null;
+            });
+        },
     },
     filters: {
         capitalize(value) {
@@ -184,7 +189,7 @@ export default {
         }
 
         // TODO need to re-render when expanding, or somehow maintain state
-        EventBus.$on('node_engine_processed', this.renderScalars);
+        EventBus.$on('node_engine_processed', this.updateScalars);
 
         this.updateCanvasSize();
         // TODO need to detect other resizes, e.g. from window
@@ -192,14 +197,14 @@ export default {
         /* this.$on('expand-viewport', this.updateCanvasSize); // This needs to happen for all viewports when any expanded or collapsed */
     },
     methods: {
-        renderScalars(editorJson) {
+        updateScalars(editorJson) {
             /* console.log('Viewport re-drawing scalars'); */
             this.scalars = [];
             // TODO may be a more ideomatic way to write this (filter?)
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
                 if (node.name === 'Scalar') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
-                    this.scalars.push(new ScalarView(node.data.value, node.data.color, node.data.pos));
+                    this.scalars.push(new ScalarView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos));
                     /* console.log('pushed scalar', this.scalars, node.data); */
                 }
             }
