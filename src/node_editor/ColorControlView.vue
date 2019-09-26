@@ -1,35 +1,23 @@
 <template>
 <div class="color-control-container">
   <div class="color-control-container-inner" :style="{'grid-row': rowIdx}" >
-    <v-menu
-        class="color-picker"
-        v-model="colorPickerShowing"
-        :close-on-content-click="false"
-    >
-      <template v-slot:activator="{ on: showColorPicker }">
-        <div class="color-picker-button" :style="{'background-color': color}" v-on="showColorPicker"></div>
-      </template>
+    <color-picker-button class="color-picker" v-model="color" :disabled="!visible" @color-picker-toggled="colorPickerToggled" />
 
-      <v-card class="color-picker-popup">
-      <v-color-picker v-model="color" />
-      </v-card>
-    </v-menu>
-
-    <v-checkbox dark color="white" class="visible-checkbox" v-model="visible" on-icon="mdi-eye" off-icon="mdi-eye-off" hide-details :ripple="false" />
-
-    <!-- <div class="color-picker-button" :style="{'grid-row': rowIdx, 'background-color': color}"> -->
-    <!--   <div @mousedown.stop @touchstart.stop> -->
-    <!--     <color-picker :value="color" @input="colorUpdated" disableAlpha /> -->
-    <!--   </div> -->
-    <!-- </div> -->
+    <v-checkbox dark color="white" class="visible-checkbox" v-model="visible" on-icon="mdi-eye" off-icon="mdi-eye-off"
+                hide-details :ripple="false" />
   </div>
 </div>
 </template>
 
 <script>
 import { FieldChangeAction } from '../util';
+import ColorPickerButton from '../ColorPickerButton';
 
 export default {
+    components: {
+        'color-picker-button': ColorPickerButton,
+    },
+
     props: {
         getData:       { type: Function, required: true }, // injected by Rete
         putData:       { type: Function, required: true }, // injected by Rete
@@ -44,7 +32,6 @@ export default {
             visible: true,
             color: '#000000',
             prevColor: null,
-            colorPickerShowing: false,
         };
     },
 
@@ -89,7 +76,10 @@ export default {
         if (!this.dataKey) {
             throw new Error('dataKey was null??');
         }
-        Object.assign(this, this.getData(this.dataKey) || { visible: true, color: '#000000' });
+        const data = this.getData(this.dataKey) || { visible: true, color: '#000000' };
+        this.color = data.color; // TODO breaking this out to make sure I have reactivity; is there a better way?
+        this.visible = data.visible;
+
         /* console.log('ColorControlView mounted', this.dataKey, this.color); */
         this.putData(this.dataKey, this.makeData(this.visible, this.color));
     },
@@ -100,6 +90,15 @@ export default {
                 visible,
                 color,
             };
+        },
+        colorPickerToggled(showing) {
+            if (showing) {
+                /* console.log('colorPicker opened', this.color, this.prevColor); */
+                this.prevColor = Object.assign({}, this.color);
+            } else {
+                /* console.log('colorPicker closed', this.color, this.prevColor); */
+                this.emitter.trigger('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
+            }
         },
     },
 };
@@ -114,32 +113,18 @@ export default {
     display: flex;
     align-items: center;
 }
-.color-picker-button {
-    /* grid-column: controls; */
-    display: inline-block;
-    width: 1.4em;
-    height: 1.4em;
-    /* background-color: yellow; */
-    border: 1px solid rgba(128, 128, 128, 0.4);
-    margin: 0.5em;
-}
 .visible-checkbox {
     /* grid-column: controls; */
     display: inline-block;
     margin-top: 0;
     padding-top: 0;
 }
-/* color-picker { */
-/*     transform: none; */
-/* } */
-.color-picker-trigger {
-    height: 100%;
-    width: 100%;
-}
 </style>
 
 <style>
-body .color-picker-popup {
-    max-height: initial;
+.color-picker-button {
+    width: 1.4em;
+    height: 1.4em;
+    margin: 0.5em;
 }
 </style>
