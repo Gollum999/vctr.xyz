@@ -204,7 +204,7 @@ export default {
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
                 if (node.name === 'Scalar') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
-                    this.scalars.push(new ScalarView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos));
+                    this.scalars.push(new ScalarView(node.data.value[0], node.data.color.visible ? node.data.color.color : null, node.data.pos));
                     /* console.log('pushed scalar', this.scalars, node.data); */
                 }
             }

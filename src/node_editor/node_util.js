@@ -82,6 +82,12 @@ export class GraphTraveler {
     }
 };
 
+export const ValueType = {
+    SCALAR: 'scalar',
+    VECTOR: 'vector',
+    MATRIX: 'matrix',
+};
+
 export default {
     getEditorNode,
 

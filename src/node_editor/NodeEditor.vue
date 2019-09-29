@@ -129,7 +129,8 @@ export default {
                 // TODO need a factory or something for these
                 node = await this.components['scalar'].createNode({
                     'color': { color: color, visible: true },
-                    'value': 1,
+                    'value': [1],
+                    'pos': [0, 0, 0],
                 });
                 break;
             }
@@ -138,6 +139,7 @@ export default {
                 node = await this.components['vector'].createNode({
                     'color': { color: color, visible: true },
                     'value': [1, 1, 1],
+                    'pos': [0, 0, 0],
                 });
                 break;
             }
@@ -151,6 +153,7 @@ export default {
                         0, 0, 1, 0,
                         0, 0, 0, 1,
                     ],
+                    'pos': [0, 0, 0],
                 });
                 break;
             }
@@ -312,14 +315,14 @@ export default {
         async createDemoNodes() {
             const [scalarLhs, scalarRhs, scalarAdd, scalarOut, vecLhs, vecRhs, vecAdd, vecOut] = await Promise.all([
                 // TODO color stuff is still pretty gross
-                this.components['scalar'].createNode({ 'value': 5, 'color': { color: '#ff7f00', visible: true } }),
-                this.components['scalar'].createNode({ 'value': 4, 'color': { color: '#ff7f00', visible: true } }),
+                this.components['scalar'].createNode({ 'value': [5], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
+                this.components['scalar'].createNode({ 'value': [4], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
                 this.components['operation-add'].createNode(),
-                this.components['scalar'].createNode({ 'value': 0, 'color': { color: this.settings.defaultScalarColor, visible: true } }),
-                this.components['vector'].createNode({ 'value': [3, 2, 1], 'color': { color: '#00ffff', visible: true } }),
-                this.components['vector'].createNode({ 'value': [2, 2, 2], 'color': { color: '#00ffff', visible: true } }),
+                this.components['scalar'].createNode({ 'value': [0], 'pos': [0, 0, 0], 'color': { color: this.settings.defaultScalarColor, visible: true } }),
+                this.components['vector'].createNode({ 'value': [3, 2, 1], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
+                this.components['vector'].createNode({ 'value': [2, 2, 2], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
                 this.components['operation-add'].createNode(),
-                this.components['vector'].createNode({ 'color': { color: this.settings.defaultVectorColor, visible: true } }),
+                this.components['vector'].createNode({ 'pos': [0, 0, 0], 'color': { color: this.settings.defaultVectorColor, visible: true } }),
             ]);
             scalarLhs.position = [20, 80];
             scalarRhs.position = [20, 190];

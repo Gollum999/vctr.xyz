@@ -297,7 +297,7 @@ class AddOperation extends BaseOperation {
     static calculate(lhs, rhs) {
         // console.log('AddOperation', lhs, rhs);
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
-            return lhs.value + rhs.value;
+            return [lhs.value[0] + rhs.value[0]];
         } else if (lhs.type === 'vector' && rhs.type === 'vector') {
             const out = vec3.create();
             return vec3.add(out, lhs.value, rhs.value);
@@ -326,7 +326,7 @@ class SubtractOperation extends BaseOperation {
     static calculate(lhs, rhs) {
         // console.log(lhs, rhs);
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
-            return lhs.value - rhs.value;
+            return [lhs.value[0] - rhs.value[0]];
         } else if (lhs.type === 'vector' && rhs.type === 'vector') {
             const out = vec3.create();
             return vec3.subtract(out, lhs.value, rhs.value);
@@ -354,16 +354,16 @@ class MultiplyOperation extends BaseOperation {
     static calculate(lhs, rhs) {
         // TODO how to clean this up and/or assert that all paths are covered?
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
-            return lhs.value * rhs.value;
+            return [lhs.value[0] * rhs.value[0]];
         } else if (lhs.type === 'scalar' && rhs.type === 'vector') {
             const out = vec3.create();
-            return vec3.scale(out, rhs.value, lhs.value);
+            return vec3.scale(out, rhs.value, lhs.value[0]);
         } else if (lhs.type === 'scalar' && rhs.type === 'matrix') {
             const out = mat4.create();
-            return mat4.multiplyScalar(out, rhs.value, lhs.value);
+            return mat4.multiplyScalar(out, rhs.value, lhs.value[0]);
         } else if (lhs.type === 'vector' && rhs.type === 'scalar') {
             const out = vec3.create();
-            return vec3.scale(out, lhs.value, rhs.value);
+            return vec3.scale(out, lhs.value, rhs.value[0]);
         } else if (lhs.type === 'matrix' && rhs.type === 'vector') {
             const out = vec3.create();
             const lhsT = mat4.create();
@@ -372,7 +372,7 @@ class MultiplyOperation extends BaseOperation {
             return result;
         } else if (lhs.type === 'matrix' && rhs.type === 'scalar') {
             const out = mat4.create();
-            return mat4.multiplyScalar(out, lhs.value, rhs.value);
+            return mat4.multiplyScalar(out, lhs.value, rhs.value[0]);
         } else if (lhs.type === 'matrix' && rhs.type === 'matrix') {
             const out = mat4.create();
             const lhsT = mat4.create();
@@ -407,13 +407,13 @@ class DivideOperation extends BaseOperation {
         // TODO handle division by 0 here
         if (rhs.type === 'scalar') {
             if (lhs.type === 'scalar') {
-                return lhs.value / rhs.value;
+                return [lhs.value[0] / rhs.value[0]];
             } else if (lhs.type === 'vector') {
                 const out = vec3.create();
-                return vec3.scale(out, lhs.value, 1.0 / rhs.value);
+                return vec3.scale(out, lhs.value, 1.0 / rhs.value[0]);
             } else if (lhs.type === 'matrix') {
                 const out = mat4.create();
-                return mat4.multiplyScalar(out, lhs.value, 1.0 / rhs.value);
+                return mat4.multiplyScalar(out, lhs.value, 1.0 / rhs.value[0]);
             }
         }
         throw new Error('DivideOperation unsupported input types', lhs.type, rhs.type);
@@ -436,7 +436,7 @@ class DotOperation extends BaseOperation {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
             throw new Error('DotOperation unsupported input types', lhs.type, rhs.type);
         }
-        return vec3.dot(lhs.value, rhs.value);
+        return [vec3.dot(lhs.value, rhs.value)];
     }
 }
 

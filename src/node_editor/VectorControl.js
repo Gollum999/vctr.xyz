@@ -1,13 +1,14 @@
 import Rete from 'rete';
-import VectorControlView from './VectorControlView.vue';
+import ValueControlView from './ValueControlView.vue';
+import { ValueType } from './node_util';
 
 export class VectorControl extends Rete.Control {
     constructor(emitter, key, rowIdx, globalVuetify) {
         // console.log('VectorControl constructor');
         super(key);
         this.render = 'vue';
-        this.component = VectorControlView;
-        this.props = { emitter, dataKey: key, rowIdx, globalVuetify };
+        this.component = ValueControlView;
+        this.props = { emitter, dataKey: key, globalVuetify, rowIdx, valueType: ValueType.VECTOR };
     }
 
     setValue(val) {

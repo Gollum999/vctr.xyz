@@ -80,13 +80,16 @@ export class VectorComponent extends Rete.Component {
             editorNode.controls.get('value').setReadOnly(false);
         }
 
-        if (util.hasInput(inputs, 'pos')) {
-            const inputPos = util.getInputValue('pos', inputs, node.data);
-            node.data.pos = inputPos.slice(); // Make a copy to avoid sharing the same object between nodes
-            editorNode.controls.get('pos').setValue(inputPos);
-            editorNode.controls.get('pos').setReadOnly(true);
-        } else {
-            editorNode.controls.get('pos').setReadOnly(false);
+        const posControl = editorNode.controls.get('pos');
+        if (!_.isNil(posControl)) {
+            if (util.hasInput(inputs, 'pos')) {
+                const inputPos = util.getInputValue('pos', inputs, node.data);
+                node.data.pos = inputPos.slice(); // Make a copy to avoid sharing the same object between nodes
+                posControl.setValue(inputPos);
+                posControl.setReadOnly(true);
+            } else {
+                posControl.setReadOnly(false);
+            }
         }
 
         if (!_.isNil(node.data.value)) {

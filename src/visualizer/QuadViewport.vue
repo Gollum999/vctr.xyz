@@ -129,7 +129,7 @@ export default {
                 }
             }
             // console.log('QuadViewport rendering vectors:', this.vectors);
-            console.log('QuadViewport rendering matrices:', this.matrices);
+            // console.log('QuadViewport rendering matrices:', this.matrices);
         });
     },
     methods: {

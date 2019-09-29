@@ -73,7 +73,7 @@ export default {
         },
     },
     mounted() {
-        console.log('Matrix mounted:', this.displayType, this.value, this.color, this.vectorScale, this.density, this.fieldSize);
+        /* console.log('Matrix mounted:', this.displayType, this.value, this.color, this.vectorScale, this.density, this.fieldSize); */
     },
 };
 </script>
