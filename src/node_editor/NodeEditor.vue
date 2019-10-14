@@ -342,12 +342,12 @@ export default {
             this.editor.addNode(vecAdd);
             this.editor.addNode(vecOut);
 
-            this.editor.connect(scalarLhs.outputs.get('scalar'), scalarAdd.inputs.get('lhs'));
-            this.editor.connect(scalarRhs.outputs.get('scalar'), scalarAdd.inputs.get('rhs'));
-            this.editor.connect(scalarAdd.outputs.get('result'), scalarOut.inputs.get('scalar'));
-            this.editor.connect(vecLhs.outputs.get('vector'), vecAdd.inputs.get('lhs'));
-            this.editor.connect(vecRhs.outputs.get('vector'), vecAdd.inputs.get('rhs'));
-            this.editor.connect(vecAdd.outputs.get('result'), vecOut.inputs.get('vector'));
+            this.editor.connect(scalarLhs.outputs.get('value'), scalarAdd.inputs.get('lhs'));
+            this.editor.connect(scalarRhs.outputs.get('value'), scalarAdd.inputs.get('rhs'));
+            this.editor.connect(scalarAdd.outputs.get('result'), scalarOut.inputs.get('value'));
+            this.editor.connect(vecLhs.outputs.get('value'), vecAdd.inputs.get('lhs'));
+            this.editor.connect(vecRhs.outputs.get('value'), vecAdd.inputs.get('rhs'));
+            this.editor.connect(vecAdd.outputs.get('result'), vecOut.inputs.get('value'));
         },
 
         saveState() {

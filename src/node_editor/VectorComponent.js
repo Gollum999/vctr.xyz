@@ -21,7 +21,7 @@ export class VectorComponent extends Rete.Component {
         // console.log('VectorComponent builder: this: ', this, 'globalVuetify:', this.globalVuetify);
         const nodeSettings = settings.loadSettings('nodeEditorSettings');
 
-        node.addInput(new Rete.Input('vector', 'Value', sockets.vector));
+        node.addInput(new Rete.Input('value', 'Value', sockets.vector));
         node.addInput(new Rete.Input('color_label', 'Color', null));
 
         node.addControl(new VectorLabelControl(this.editor, 'label', -999));
@@ -31,7 +31,7 @@ export class VectorComponent extends Rete.Component {
             this.addAdvancedRenderControls(node);
         }
 
-        node.addOutput(new Rete.Output('vector', 'Value', sockets.vector));
+        node.addOutput(new Rete.Output('value', 'Value', sockets.vector));
 
         return node;
     }
@@ -69,8 +69,8 @@ export class VectorComponent extends Rete.Component {
 
         const editorNode = util.getEditorNode(this.editor, node);
 
-        if (util.hasInput(inputs, 'vector')) {
-            const inputValue = util.getInputValue('vector', inputs, node.data);
+        if (util.hasInput(inputs, 'value')) {
+            const inputValue = util.getInputValue('value', inputs, node.data);
             // console.log('VectorComponent worker setting "value" from input to ', inputValue, typeof inputValue);
             node.data.value = inputValue.slice(); // Make a copy to avoid sharing the same object between nodes
             editorNode.controls.get('value').setValue(inputValue);
@@ -94,7 +94,7 @@ export class VectorComponent extends Rete.Component {
 
         if (!_.isNil(node.data.value)) {
             // console.log('VectorComponent worker setting output to ', node.data.value, typeof node.data.value);
-            outputs['vector'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
+            outputs['value'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
         }
     }
 };

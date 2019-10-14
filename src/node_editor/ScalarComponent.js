@@ -18,7 +18,7 @@ export class ScalarComponent extends Rete.Component {
     builder(node) {
         const nodeSettings = settings.loadSettings('nodeEditorSettings');
 
-        node.addInput(new Rete.Input('scalar', 'Value', sockets.scalar));
+        node.addInput(new Rete.Input('value', 'Value', sockets.scalar));
         node.addInput(new Rete.Input('color_label', 'Color', null));
 
         node.addControl(new ScalarControl(this.editor, 'value', this.globalVuetify));
@@ -27,7 +27,7 @@ export class ScalarComponent extends Rete.Component {
             this.addAdvancedRenderControls(node);
         }
 
-        node.addOutput(new Rete.Output('scalar', 'Value', sockets.scalar));
+        node.addOutput(new Rete.Output('value', 'Value', sockets.scalar));
 
         return node;
     }
@@ -55,8 +55,8 @@ export class ScalarComponent extends Rete.Component {
     worker(node, inputs, outputs) {
         const editorNode = this.editor.nodes.find(n => n.id === node.id);
 
-        if (util.hasInput(inputs, 'scalar')) {
-            const inputValue = util.getInputValue('scalar', inputs, node.data);
+        if (util.hasInput(inputs, 'value')) {
+            const inputValue = util.getInputValue('value', inputs, node.data);
             node.data.value = inputValue;
             editorNode.controls.get('value').setValue(inputValue);
             editorNode.controls.get('value').setReadOnly(true);
@@ -77,7 +77,7 @@ export class ScalarComponent extends Rete.Component {
         }
 
         if (!_.isNil(node.data.value)) {
-            outputs['scalar'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
+            outputs['value'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
         }
     }
 }

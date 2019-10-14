@@ -21,7 +21,7 @@ export class MatrixComponent extends Rete.Component {
     builder(node) {
         const nodeSettings = settings.loadSettings('nodeEditorSettings');
 
-        node.addInput(new Rete.Input('matrix', 'Value', sockets.matrix));
+        node.addInput(new Rete.Input('value', 'Value', sockets.matrix));
         node.addInput(new Rete.Input('color_label', 'Color', null));
 
         node.addControl(new MatrixLabelControl(this.editor, 'label', -999));
@@ -31,7 +31,7 @@ export class MatrixComponent extends Rete.Component {
             this.addAdvancedRenderControls(node);
         }
 
-        node.addOutput(new Rete.Output('matrix', 'Value', sockets.matrix));
+        node.addOutput(new Rete.Output('value', 'Value', sockets.matrix));
 
         return node;
     }
@@ -69,8 +69,8 @@ export class MatrixComponent extends Rete.Component {
 
         const editorNode = this.editor.nodes.find(n => n.id === node.id);
 
-        if (util.hasInput(inputs, 'matrix')) {
-            const inputValue = util.getInputValue('matrix', inputs, node.data);
+        if (util.hasInput(inputs, 'value')) {
+            const inputValue = util.getInputValue('value', inputs, node.data);
             node.data.value = inputValue.slice(); // Make a copy to avoid sharing the same object between nodes
             editorNode.controls.get('value').setValue(inputValue);
             editorNode.controls.get('value').setReadOnly(true);
@@ -91,7 +91,7 @@ export class MatrixComponent extends Rete.Component {
         }
 
         if (!_.isNil(node.data.value)) {
-            outputs['matrix'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
+            outputs['value'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
         }
     }
 };
