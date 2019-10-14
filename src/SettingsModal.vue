@@ -17,8 +17,8 @@
       <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <v-tab-item>
         <!-- TODO use switch instead of checkbox? -->
-        <v-switch color="primary" v-model="settings.viewportSettings.showAxis" label="Show axis" hide-details></v-switch>
-        <v-switch color="primary" v-model="settings.viewportSettings.showGrid" label="Show grid" hide-details></v-switch>
+        <v-switch color="primary" v-model="settings.viewportSettings.showAxis" label="Show axis" hide-details />
+        <v-switch color="primary" v-model="settings.viewportSettings.showGrid" label="Show grid" hide-details />
 
         <v-subheader>Matrix Rendering</v-subheader>
         <!-- Keep a separate model for these so we get high precision for "live" updates, but only trigger watchers from specific events -->

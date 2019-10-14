@@ -92,7 +92,7 @@ export default {
     getEditorNode,
 
     hasInput(inputs, name) {
-        return inputs[name] !== undefined && inputs[name].length;
+        return inputs[name] !== undefined && inputs[name].length && inputs[name][0] !== undefined;
     },
 
     getInputValue(name, inputs, data) {
