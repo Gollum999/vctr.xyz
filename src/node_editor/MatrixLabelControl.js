@@ -1,11 +1,11 @@
 import Rete from 'rete';
-import MatrixLabelControlView from './MatrixLabelControlView.vue';
+import AxesLabelControlView from './AxesLabelControlView.vue';
 
 export class MatrixLabelControl extends Rete.Control {
     constructor(emitter, key, rowIdx) {
         super(key);
         this.render = 'vue';
-        this.component = MatrixLabelControlView;
-        this.props = { emitter, dataKey: key, rowIdx };
+        this.component = AxesLabelControlView;
+        this.props = { emitter, dataKey: key, rowIdx, axes: ['X', 'Y', 'Z', 'W'] };
     }
 };

@@ -1,11 +1,11 @@
 import Rete from 'rete';
-import VectorLabelControlView from './VectorLabelControlView.vue';
+import AxesLabelControlView from './AxesLabelControlView.vue';
 
 export class VectorLabelControl extends Rete.Control {
     constructor(emitter, key, rowIdx) {
         super(key);
         this.render = 'vue';
-        this.component = VectorLabelControlView;
-        this.props = { emitter, dataKey: key, rowIdx };
+        this.component = AxesLabelControlView;
+        this.props = { emitter, dataKey: key, rowIdx, axes: ['X', 'Y', 'Z'] };
     }
 };
