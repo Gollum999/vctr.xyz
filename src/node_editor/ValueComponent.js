@@ -3,8 +3,7 @@ import NodeRenderer from './NodeRenderer';
 import Rete from 'rete';
 import sockets from './sockets';
 import { ValueControl } from './ValueControl';
-import { VectorLabelControl } from './VectorLabelControl';
-import { MatrixLabelControl } from './MatrixLabelControl';
+import { AxesLabelControl } from './AxesLabelControl';
 import { ColorControl } from './ColorControl';
 import settings from '../settings';
 import util from '../util';
@@ -27,10 +26,8 @@ export class ValueComponent extends Rete.Component {
         node.addInput(new Rete.Input('value', 'Value', sockets.vector));
         node.addInput(new Rete.Input('color_label', 'Color', null));
 
-        if (this.valueType === ValueType.VECTOR) {
-            node.addControl(new VectorLabelControl(this.editor, 'label', -999));
-        } else if (this.valueType === ValueType.MATRIX) {
-            node.addControl(new MatrixLabelControl(this.editor, 'label', -999));
+        if (this.valueType === ValueType.VECTOR || this.valueType === ValueType.MATRIX) {
+            node.addControl(new AxesLabelControl(this.valueType, this.editor, 'label', -999));
         }
         node.addControl(new ValueControl(this.valueType, this.editor, 'value', 1, this.globalVuetify));
         node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
