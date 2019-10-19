@@ -86,6 +86,14 @@ export default {
         return this.hslToRgb(h, s, l);
     },
 
+    capitalize(str) {
+        if (!str) {
+            return '';
+        }
+        str = str.toString();
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    },
+
     // Is x a subset of y?
     isSubset(x, y) {
         return Array.from(x).every(val => y.has(val));

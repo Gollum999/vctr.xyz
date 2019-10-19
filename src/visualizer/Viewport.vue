@@ -48,6 +48,7 @@ import CameraControls from 'camera-controls';
 import Scalar from './Scalar';
 import settings from '../settings';
 import { EventBus } from '../EventBus';
+import util from '../util';
 
 CameraControls.install({ THREE: THREE });
 
@@ -124,13 +125,7 @@ export default {
         },
     },
     filters: {
-        capitalize(value) {
-            if (!value) {
-                return '';
-            }
-            value = value.toString();
-            return value.charAt(0).toUpperCase() + value.slice(1);
-        },
+        capitalize: util.capitalize,
     },
     mounted() {
         // console.log(`Viewport mounted ${this.view} ${this.sceneName}`, this, this.updateCanvasSize);
