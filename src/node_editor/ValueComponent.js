@@ -2,9 +2,8 @@ import _ from 'lodash';
 import NodeRenderer from './NodeRenderer';
 import Rete from 'rete';
 import sockets from './sockets';
-import { VectorControl } from './VectorControl';
+import { ValueControl } from './ValueControl';
 import { VectorLabelControl } from './VectorLabelControl';
-import { MatrixControl } from './MatrixControl';
 import { MatrixLabelControl } from './MatrixLabelControl';
 import { ColorControl } from './ColorControl';
 import settings from '../settings';
@@ -30,11 +29,10 @@ export class ValueComponent extends Rete.Component {
 
         if (this.valueType === ValueType.VECTOR) {
             node.addControl(new VectorLabelControl(this.editor, 'label', -999));
-            node.addControl(new VectorControl(this.editor, 'value', 1, this.globalVuetify));
         } else if (this.valueType === ValueType.MATRIX) {
             node.addControl(new MatrixLabelControl(this.editor, 'label', -999));
-            node.addControl(new MatrixControl(this.editor, 'value', 1, this.globalVuetify));
         }
+        node.addControl(new ValueControl(this.valueType, this.editor, 'value', 1, this.globalVuetify));
         node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
         if (nodeSettings.showAdvancedRenderSettings) {
             this.addAdvancedRenderControls(node);
@@ -47,7 +45,7 @@ export class ValueComponent extends Rete.Component {
 
     addAdvancedRenderControls(node) {
         node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
-        node.addControl(new VectorControl(this.editor, 'pos', 3, this.globalVuetify));
+        node.addControl(new ValueControl(ValueType.VECTOR, this.editor, 'pos', 3, this.globalVuetify));
     }
 
     removeAdvancedRenderControls(node) {
