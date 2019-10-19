@@ -77,7 +77,7 @@ import allComponents from './components';
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 import util from '../util';
-import { GraphTraveler } from './node_util';
+import { GraphTraveler, ValueType } from './node_util';
 import Rect from './Rect';
 
 export default {
@@ -104,9 +104,9 @@ export default {
             contextMenuPos: { x: 0, y: 0 },
 
             components: {
-                'scalar':             new allComponents.ScalarComponent(this.$vuetify),
-                'vector':             new allComponents.VectorComponent(this.$vuetify),
-                'matrix':             new allComponents.MatrixComponent(this.$vuetify),
+                'scalar':             new allComponents.ValueComponent(this.$vuetify, ValueType.SCALAR),
+                'vector':             new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
+                'matrix':             new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
 
                 'operation-add':      new allComponents.BasicOperationComponent('ADD'),
                 'operation-subtract': new allComponents.BasicOperationComponent('SUBTRACT'),

@@ -5,6 +5,7 @@ import Rete from 'rete';
 
 import allComponents from '@/node_editor/components';
 import sockets from '@/node_editor/sockets';
+import { ValueType } from '@/node_editor/node_util';
 
 const module = require('@/node_editor/BasicOperationComponent.js');
 const s                          = module.__get__('s');
@@ -226,9 +227,9 @@ describe('BasicOperationComponent', () => {
         engine = new Rete.Engine('BasicOperationComponent_spec_js@1.0.0'); // TODO do I need an engine for this test?
 
         components = {
-            'scalar':             new allComponents.ScalarComponent(),
-            'vector':             new allComponents.VectorComponent(),
-            'matrix':             new allComponents.MatrixComponent(),
+            'scalar':             new allComponents.ValueComponent(this.$vuetify, ValueType.SCALAR),
+            'vector':             new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
+            'matrix':             new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
             'operation-add':      new allComponents.BasicOperationComponent('ADD'),
             'operation-subtract': new allComponents.BasicOperationComponent('SUBTRACT'),
             'operation-multiply': new allComponents.BasicOperationComponent('MULTIPLY'),
