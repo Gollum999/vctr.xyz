@@ -23,7 +23,13 @@ export class ValueComponent extends Rete.Component {
         // console.log('ValueComponent builder: this: ', this, 'valueType:', this.valueType, 'globalVuetify:', this.globalVuetify);
         const nodeSettings = settings.loadSettings('nodeEditorSettings');
 
-        node.addInput(new Rete.Input('value', 'Value', sockets.vector));
+        const socket = {
+            [ValueType.SCALAR]: sockets.scalar,
+            [ValueType.VECTOR]: sockets.vector,
+            [ValueType.MATRIX]: sockets.matrix,
+        }[this.valueType];
+
+        node.addInput(new Rete.Input('value', 'Value', socket));
         node.addInput(new Rete.Input('color_label', 'Color', null));
 
         if (this.valueType === ValueType.VECTOR || this.valueType === ValueType.MATRIX) {
@@ -35,7 +41,7 @@ export class ValueComponent extends Rete.Component {
             this.addAdvancedRenderControls(node);
         }
 
-        node.addOutput(new Rete.Output('value', 'Value', sockets.vector));
+        node.addOutput(new Rete.Output('value', 'Value', socket));
 
         return node;
     }

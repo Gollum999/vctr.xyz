@@ -3,7 +3,7 @@ import ValueControlView from './ValueControlView.vue';
 
 export class ValueControl extends Rete.Control {
     constructor(valueType, emitter, key, rowIdx, globalVuetify) {
-        // console.log('ValueControl constructor');
+        // console.log('ValueControl constructor', key, valueType);
         super(key);
         this.render = 'vue';
         this.component = ValueControlView;
