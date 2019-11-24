@@ -1,23 +1,3 @@
-import { Action } from 'rete-history-plugin';
-
-export class FieldChangeAction extends Action {
-    constructor(oldValue, newValue, setter) {
-        super();
-        console.log('FieldChangeAction constructor, old: ', oldValue, 'new:', newValue);
-        this.oldValue = oldValue;
-        this.newValue = newValue;
-        this.setter = setter;
-    }
-    undo() {
-        console.log('FieldChangeAction undo()', this.oldValue);
-        this.setter(this.oldValue);
-    }
-    redo() {
-        console.log('FieldChangeAction redo()', this.newValue);
-        this.setter(this.newValue);
-    }
-}
-
 export default {
     clamp(num, min, max) {
         return Math.min(Math.max(num, min), max);

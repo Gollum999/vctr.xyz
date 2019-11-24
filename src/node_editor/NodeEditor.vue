@@ -6,6 +6,8 @@
     <!-- TODO this container swallows clicks -->
     <div class="buttons-container">
       <div class="buttons-group buttons-add-nodes">
+        <v-btn x-small type="button" title="test1" @click="test1">test1</v-btn>
+        <v-btn x-small type="button" title="test2" @click="test2">test2</v-btn>
         <v-btn fab x-small type="button" title="Add scalar" @click="addNode('scalar')">
           <v-icon>$vuetify.icons.scalar</v-icon>
         </v-btn>
@@ -77,6 +79,7 @@ import allComponents from './components';
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 import util from '../util';
+import actions from '../history_actions';
 import { GraphTraveler, ValueType } from './node_util';
 import Rect from './Rect';
 
@@ -85,7 +88,7 @@ export default {
     data() {
         return {
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
-            settings: settings.defaultSettings['nodeEditorSettings'],
+            settings: settings.nodeEditorSettings,
 
             lastNodePosition: null,
             newNodesShouldBeCentered: true,
@@ -95,6 +98,7 @@ export default {
             engine: null,
 
             currentlyHandlingHistoryAction: false,
+            showingAdvancedRenderControls: true,
 
             // TODO switch to use Rete Area Plugin?
             minZoom: 0.1,
@@ -118,14 +122,82 @@ export default {
         };
     },
 
+    watch: {
+        'settings.values.showAdvancedRenderSettings': function (newVal, oldVal) {
+            console.log('adding or removing advanced render controls', newVal);
+            const actionStack = [];
+            const graphTraveler = new GraphTraveler(this.engine, this.editor);
+            graphTraveler.applyToAllEditorNodes(node => {
+                if (node.inputs.has('pos')) { // TODO make this more generic
+                    if (newVal) {
+                        const action = new actions.AddAdvancedRenderControlsAction(this.editor, node);
+                        action.do();
+                        actionStack.push(action);
+                    } else {
+                        // Reset origin
+                        // TODO probably should be bundled in with RemoveAdvancedRenderControlsAction, but it's convenient to
+                        //      use FieldChangeAction (which I could still do inside of RemoveAdvancedRenderControlsAction)
+                        const resetOriginAction = new actions.FieldChangeAction(node.data['pos'], [0, 0, 0], val => {
+                            node.data['pos'] = val;
+                        });
+                        resetOriginAction.do();
+                        actionStack.push(resetOriginAction);
+
+                        const action = new actions.RemoveAdvancedRenderControlsAction(this.editor, node);
+                        action.do();
+                        actionStack.push(action);
+                    }
+                }
+            });
+
+            const updateSettingAction = new actions.FieldChangeAction(oldVal, newVal, val => {
+                // console.log('saving settings from NodeEditor field change', val);
+                this.settings.update('showAdvancedRenderSettings', val);
+                this.$nextTick(() => { // Fix connection paths - do next tick to give newly added connections time to be added to the DOM
+                    for (const connectionView of this.editor.view.connections.values()) {
+                        connectionView.update();
+                    }
+                });
+            });
+            updateSettingAction.do();
+            actionStack.push(updateSettingAction);
+
+            EventBus.$emit('addhistory', new actions.MultiAction(actionStack));
+        },
+    },
+
     methods: {
+        test1() {
+            // this.editor.trigger('resetconnection'); // TODO testing
+            // console.log('test1 setting showAdvancedRenderSettings to ', !this.settings.values.showAdvancedRenderSettings);
+            // this.settings.update('showAdvancedRenderSettings', !this.settings.values.showAdvancedRenderSettings);
+            // const node = this.editor.nodes.find(node => node.name.startsWith('Vector'));
+            // if (!node) { throw new Error('could not find vector node to test with'); }
+            // const nodeView = this.editor.view.nodes.get(node);
+            // console.log('node', node);
+            // console.log('nodeView', nodeView);
+            // this.showingAdvancedRenderControls = !this.showingAdvancedRenderControls;
+            // console.log('now showing: ', this.showingAdvancedRenderControls);
+            // /* Vue.set(node, 'hideAdvancedRenderControls', !this.showingAdvancedRenderControls); */
+            // node.vueContext.showAdvancedRenderControls = this.showingAdvancedRenderControls;
+            // /* console.log('forcing update', node, node.vueContext); */
+            // /* node.vueContext.$forceUpdate(); */
+        },
+        test2() {
+            // const node1 = this.editor.nodes.find(node => node.id === 5);
+            // const node2 = this.editor.nodes.find(node => node.id === 6);
+            // const output = node1.outputs.get('value');
+            // const input = node2.inputs.get('pos');
+            // this.editor.connect(output, input);
+        },
+
         async addNode(nodeType) {
             console.log(`Add node (type ${nodeType})`);
 
             var node = null;
             switch (nodeType) {
             case 'scalar': {
-                const color = this.settings.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.defaultScalarColor;
+                const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultScalarColor;
                 // TODO need a factory or something for these
                 node = await this.components['scalar'].createNode({
                     'color': { color: color, visible: true },
@@ -135,7 +207,7 @@ export default {
                 break;
             }
             case 'vector': {
-                const color = this.settings.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.defaultVectorColor;
+                const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultVectorColor;
                 node = await this.components['vector'].createNode({
                     'color': { color: color, visible: true },
                     'value': [1, 1, 1],
@@ -144,7 +216,7 @@ export default {
                 break;
             }
             case 'matrix': {
-                const color = this.settings.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.defaultMatrixColor;
+                const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultMatrixColor;
                 node = await this.components['matrix'].createNode({
                     'color': { color: color, visible: true },
                     'value': [
@@ -318,11 +390,11 @@ export default {
                 this.components['scalar'].createNode({ 'value': [5], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
                 this.components['scalar'].createNode({ 'value': [4], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
                 this.components['operation-add'].createNode(),
-                this.components['scalar'].createNode({ 'value': [0], 'pos': [0, 0, 0], 'color': { color: this.settings.defaultScalarColor, visible: true } }),
+                this.components['scalar'].createNode({ 'value': [0], 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultScalarColor, visible: true } }),
                 this.components['vector'].createNode({ 'value': [3, 2, 1], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
                 this.components['vector'].createNode({ 'value': [2, 2, 2], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
                 this.components['operation-add'].createNode(),
-                this.components['vector'].createNode({ 'pos': [0, 0, 0], 'color': { color: this.settings.defaultVectorColor, visible: true } }),
+                this.components['vector'].createNode({ 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultVectorColor, visible: true } }),
             ]);
             scalarLhs.position = [20, 80];
             scalarRhs.position = [20, 190];
@@ -379,36 +451,10 @@ export default {
             this.$emit('process', this.editor.toJSON());
             EventBus.$emit('node_engine_processed', this.editor.toJSON());
         },
-
-        showOrHideAdvancedRenderSettings(show) {
-            console.log('NodeEditor showAdvancedRenderSettings toggled', show);
-            const graphTraveler = new GraphTraveler(this.engine, this.editor);
-            graphTraveler.applyToAllEditorNodes(node => {
-                // TODO name is maybe not the best key
-                const component = this.components[node.name.toLowerCase()];
-                if (component === undefined) {
-                    return;
-                }
-                if (show && typeof component.addAdvancedRenderControls === 'function') {
-                    component.addAdvancedRenderControls(node);
-                } else if (!show && typeof component.removeAdvancedRenderControls === 'function') {
-                    component.removeAdvancedRenderControls(node);
-                }
-                node.update();
-            });
-        },
     },
 
     mounted() {
-        this.settings = settings.loadSettings('nodeEditorSettings');
-        EventBus.$on('settings-updated', () => {
-            const oldShowAdvancedRenderSettings = this.settings.showAdvancedRenderSettings;
-            this.settings = settings.loadSettings('nodeEditorSettings');
-            if (this.settings.showAdvancedRenderSettings !== oldShowAdvancedRenderSettings) {
-                this.showOrHideAdvancedRenderSettings(this.settings.showAdvancedRenderSettings);
-            }
-        });
-        // console.log('NodeEditor loaded settings', this.settings);
+        console.log('NodeEditor mounted', this.editor, this.engine);
 
         this.container = document.getElementById('rete');
         this.editor = new Rete.NodeEditor(this.version, this.container);
@@ -425,11 +471,12 @@ export default {
         EventBus.$on('split-resized', () => {
             this.editor.view.resize();
         });
+        // TODO should at least name this event something different to avoid confusion
         EventBus.$on('addhistory', action => {
             // Bit of a hack; prevent changes that happen as a result of undo/redo from themselves being added to the history stack
             // (which would erase any potential redo-able actions)
             // The History plugin already does something like this to prevent infinite recursion, but that only works within the same
-            // stack frame, whereas this works for the whole Vue tick
+            // stack frame, whereas this works for the whole Vue tick (important when a watcher is the one adding the history)
             if (!this.currentlyHandlingHistoryAction) {
                 this.editor.trigger('addhistory', action);
             }

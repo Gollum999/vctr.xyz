@@ -1,8 +1,8 @@
 <template>
   <div ref="viewport" class="viewport">
+    <!-- v-if="settings.values.showGrid" -->
     <vgl-grid-helper
         :ref="`grid-${view}`"
-        v-if="settings.showGrid"
         :rotation="VIEW_VALUES[view].grid_rotation"
         :size="VIEW_VALUES[view].grid_size"
         :divisions="VIEW_VALUES[view].grid_divisions"
@@ -51,6 +51,8 @@ import { EventBus } from '../EventBus';
 import util from '../util';
 
 CameraControls.install({ THREE: THREE });
+
+const HIDDEN_LAYER = 31;
 
 class ScalarView {
     constructor(value, color, pos) {
@@ -106,7 +108,7 @@ export default {
                 x: 0,
                 y: 0,
             },
-            settings: settings.defaultSettings['viewportSettings'],
+            settings: settings.viewportSettings,
             controls: null,
             clock: new THREE.Clock(),
             scalars: [],
@@ -127,28 +129,26 @@ export default {
     filters: {
         capitalize: util.capitalize,
     },
+    watch: {
+        'settings.values.showAxis': function (newVal, oldVal) { this.render(); }, // TODO ortho viewports don't immediately re-render
+        'settings.values.showGrid': function (newVal, oldVal) {
+            // Putting the vgl-grid-helper in a v-if causes its layers to be reset each time, so this is easier
+            if (newVal) {
+                this.$refs[`grid-${this.view}`].inst.layers.set(this.VIEW_VALUES[this.view].layer);
+            } else {
+                this.$refs[`grid-${this.view}`].inst.layers.set(HIDDEN_LAYER);
+            }
+            this.render();
+        },
+    },
     mounted() {
         // console.log(`Viewport mounted ${this.view} ${this.sceneName}`, this, this.updateCanvasSize);
 
-        const loadSettings = () => {
-            this.settings = settings.loadSettings('viewportSettings');
-            console.log('Viewport settings loaded:', this.settings);
-
-            this.$nextTick(() => {
-                // TODO This feels like a hack; figure out best practices with v-if plus stateful components
-                // TODO maybe I can just hide the grids or set the color to transparent
-                // TODO It may make more sense to just duplicate the scene and everything in it for each viewport
-                if (!_.isNil(this.$refs[`grid-${this.view}`])) {
-                    this.$refs[`grid-${this.view}`].inst.layers.set(this.VIEW_VALUES[this.view].layer);
-                }
-                this.$forceUpdate(); // TODO bit of a hack; if showAxis is toggled, the ortho views don't re-render immediately
-            });
-        };
-        loadSettings();
-        EventBus.$on('settings-updated', loadSettings);
-
-        this.$refs.camera.inst.layers.set(0);
+        this.$refs.camera.inst.layers.set(0); // All views share the default layer 0
         this.$refs.camera.inst.layers.enable(this.VIEW_VALUES[this.view].layer);
+        this.$refs.camera.inst.layers.disable(HIDDEN_LAYER); // Reserve layer 31 for hiding things
+
+        this.$refs[`grid-${this.view}`].inst.layers.set(this.VIEW_VALUES[this.view].layer);
 
         // TODO maybe move camera + controls to component
         this.controls = new CameraControls(this.$refs.camera.inst, this.$refs.renderer.inst.domElement);

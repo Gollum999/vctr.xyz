@@ -8,7 +8,7 @@
       </v-btn>
     </template>
 
-    <SettingsModal @settings-modal-closed="showSettingsDialog = false"/>
+    <SettingsModal ref="settings-modal" @settings-modal-closed="showSettingsDialog = false"/>
   </v-dialog>
 
   <Split direction="vertical" :gutterSize="8" @onDragStart="onDragStart" @onDrag="onDrag" @onDragEnd="onDragEnd">

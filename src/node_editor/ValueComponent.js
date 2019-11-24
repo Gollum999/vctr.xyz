@@ -5,7 +5,6 @@ import sockets from './sockets';
 import { ValueControl } from './ValueControl';
 import { AxesLabelControl } from './AxesLabelControl';
 import { ColorControl } from './ColorControl';
-import settings from '../settings';
 import util from '../util';
 import nodeUtil, { ValueType } from './node_util';
 
@@ -21,7 +20,6 @@ export class ValueComponent extends Rete.Component {
 
     builder(node) {
         // console.log('ValueComponent builder: this: ', this, 'valueType:', this.valueType, 'globalVuetify:', this.globalVuetify);
-        const nodeSettings = settings.loadSettings('nodeEditorSettings');
 
         const socket = {
             [ValueType.SCALAR]: sockets.scalar,
@@ -31,39 +29,19 @@ export class ValueComponent extends Rete.Component {
 
         node.addInput(new Rete.Input('value', 'Value', socket));
         node.addInput(new Rete.Input('color_label', 'Color', null));
+        // If this key changes, NodeRenderer must also change // TODO remove this assumption
+        node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
 
         if (this.valueType === ValueType.VECTOR || this.valueType === ValueType.MATRIX) {
             node.addControl(new AxesLabelControl(this.valueType, this.editor, 'label', -999));
         }
         node.addControl(new ValueControl(this.valueType, this.editor, 'value', 1, this.globalVuetify));
         node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
-        if (nodeSettings.showAdvancedRenderSettings) {
-            this.addAdvancedRenderControls(node);
-        }
+        node.addControl(new ValueControl(ValueType.VECTOR, this.editor, 'pos', 3, this.globalVuetify));
 
         node.addOutput(new Rete.Output('value', 'Value', socket));
 
         return node;
-    }
-
-    addAdvancedRenderControls(node) {
-        node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
-        node.addControl(new ValueControl(ValueType.VECTOR, this.editor, 'pos', 3, this.globalVuetify));
-    }
-
-    removeAdvancedRenderControls(node) {
-        node.data.pos = [0, 0, 0];
-
-        const input = node.inputs.get('pos');
-        if (input != null) {
-            input.connections.map(this.editor.removeConnection.bind(this.editor)); // node.removeInput removes the data connections, but not the view connections
-            node.removeInput(input);
-        }
-
-        const control = node.controls.get('pos');
-        if (control != null) {
-            node.removeControl(control);
-        }
     }
 
     worker(node, inputs, outputs) {

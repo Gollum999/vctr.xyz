@@ -17,25 +17,25 @@
       <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <v-tab-item>
         <!-- TODO use switch instead of checkbox? -->
-        <v-switch color="primary" v-model="settings.viewportSettings.showAxis" label="Show axis" hide-details />
-        <v-switch color="primary" v-model="settings.viewportSettings.showGrid" label="Show grid" hide-details />
+        <v-switch color="primary" v-model="viewportSettings.values.showAxis" label="Show axis" hide-details />
+        <v-switch color="primary" v-model="viewportSettings.values.showGrid" label="Show grid" hide-details />
 
         <v-subheader>Matrix Rendering</v-subheader>
         <!-- Keep a separate model for these so we get high precision for "live" updates, but only trigger watchers from specific events -->
         <v-slider step="0.1" min="0.1" max="1" label="Vector Scale" v-model.number="vectorScale"
-                  @change="updateSetting('settings.viewportSettings.matrix.vectorScale', $event)">
+                  @change="updateSetting('viewportSettings.values.matrix.vectorScale', $event)">
           <template v-slot:append>
             {{vectorScale | formatMatrixSliderValue}}
           </template>
         </v-slider>
         <v-slider step="0.1" min="1" :max="fieldSizeMax" label="Field Size" v-model.number="fieldSize"
-                  @change="updateSetting('settings.viewportSettings.matrix.fieldSize', $event)">
+                  @change="updateSetting('viewportSettings.values.matrix.fieldSize', $event)">
           <template v-slot:append>
             {{fieldSize | formatMatrixSliderValue}}
           </template>
         </v-slider>
         <v-slider step="0.1" min="0.1" :max="fieldDensityMax" label="Field Density" v-model.number="fieldDensity"
-                  @change="updateSetting('settings.viewportSettings.matrix.fieldDensity', $event)">
+                  @change="updateSetting('viewportSettings.values.matrix.fieldDensity', $event)">
           <template v-slot:append>
             {{fieldDensity | formatMatrixSliderValue}}
           </template>
@@ -52,21 +52,21 @@
       </v-tab-item>
 
       <v-tab-item>
-        <v-switch color="primary" v-model="settings.nodeEditorSettings.useRandomColors" label="Use random colors" hide-details></v-switch>
-        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" disableAlpha
-                              v-model="settings.nodeEditorSettings.defaultScalarColor">
+        <v-switch color="primary" v-model="nodeEditorSettings.values.useRandomColors" label="Use random colors" hide-details></v-switch>
+        <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
+                              v-model="nodeEditorSettings.values.defaultScalarColor">
           Default scalar color
         </color-picker-setting>
-        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" disableAlpha
-                              v-model="settings.nodeEditorSettings.defaultVectorColor">
+        <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
+                              v-model="nodeEditorSettings.values.defaultVectorColor">
           Default vector color
         </color-picker-setting>
-        <color-picker-setting :disabled="settings.nodeEditorSettings.useRandomColors" disableAlpha
-                              v-model="settings.nodeEditorSettings.defaultMatrixColor">
+        <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
+                              v-model="nodeEditorSettings.values.defaultMatrixColor">
           Default matrix color
         </color-picker-setting>
         <!-- TODO add confirm dialog when toggling this off, since doing so will remove some controls -->
-        <v-switch color="primary" v-model="settings.nodeEditorSettings.showAdvancedRenderSettings" label="Show advanced render settings" hide-details />
+        <v-switch color="primary" v-model="nodeEditorSettings.values.showAdvancedRenderSettings" label="Show advanced render settings" hide-details />
       </v-tab-item>
 
     </v-tabs>
@@ -75,13 +75,30 @@
 </template>
 
 <script>
-import _ from 'lodash';
 import settingsUtil from './settings';
 import { EventBus } from './EventBus';
 import ColorPickerSetting from './ColorPickerSetting';
-import { FieldChangeAction } from './util';
+import { FieldChangeAction } from './history_actions';
+import util from './util';
 
 const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too much
+const ALL_SETTINGS_KEYS = new Set([ // TODO Can I get this dynamically?
+    'viewportSettings.values.showAxis',
+    'viewportSettings.values.showGrid',
+    'viewportSettings.values.matrix.colorStyle',
+    'viewportSettings.values.matrix.vectorScale',
+    'viewportSettings.values.matrix.fieldSize',
+    'viewportSettings.values.matrix.fieldDensity',
+    'nodeEditorSettings.values.useRandomColors',
+    'nodeEditorSettings.values.defaultScalarColor',
+    'nodeEditorSettings.values.defaultVectorColor',
+    'nodeEditorSettings.values.defaultMatrixColor',
+    'nodeEditorSettings.values.showAdvancedRenderSettings',
+]);
+const IGNORE_SETTINGS_KEYS = new Set([
+    'nodeEditorSettings.values.showAdvancedRenderSettings', // NodeEditor will handle the undo/redo logic
+]);
+const HANDLE_HISTORY_SETTINGS_KEYS = util.difference(ALL_SETTINGS_KEYS, IGNORE_SETTINGS_KEYS);
 
 export default {
     name: 'SettingsModal',
@@ -89,13 +106,14 @@ export default {
         'color-picker-setting': ColorPickerSetting,
     },
     data() {
-        const settings = settingsUtil.loadSettings();
+        // console.log('SettingsModal data() settingsUtil', settingsUtil);
         return {
-            settings,
+            nodeEditorSettings: settingsUtil.nodeEditorSettings,
+            viewportSettings: settingsUtil.viewportSettings,
 
-            vectorScale: settings.viewportSettings.matrix.vectorScale,
-            fieldSize: settings.viewportSettings.matrix.fieldSize,
-            fieldDensity: settings.viewportSettings.matrix.fieldDensity,
+            vectorScale: settingsUtil.viewportSettings.values.matrix.vectorScale,
+            fieldSize: settingsUtil.viewportSettings.values.matrix.fieldSize,
+            fieldDensity: settingsUtil.viewportSettings.values.matrix.fieldDensity,
         };
     },
     filters: {
@@ -104,26 +122,15 @@ export default {
         },
     },
     watch: {
-        ...Object.fromEntries([
-            'settings.viewportSettings.showAxis',
-            'settings.viewportSettings.showGrid',
-            'settings.viewportSettings.matrix.colorStyle',
-            'settings.viewportSettings.matrix.vectorScale',
-            'settings.viewportSettings.matrix.fieldSize',
-            'settings.viewportSettings.matrix.fieldDensity',
-            'settings.nodeEditorSettings.useRandomColors',
-            'settings.nodeEditorSettings.defaultScalarColor',
-            'settings.nodeEditorSettings.defaultVectorColor',
-            'settings.nodeEditorSettings.defaultMatrixColor',
-            'settings.nodeEditorSettings.showAdvancedRenderSettings',
-        ].map(function (key) {
+        ...Object.fromEntries([...HANDLE_HISTORY_SETTINGS_KEYS].map(function (key) {
             const handler = function (newVal, oldVal) {
-                // Bit of a hack -- using Rete's 'History' plugin even for non-Rete undo/redo
-                EventBus.$emit('addhistory', new FieldChangeAction(oldVal, newVal, val => {
-                    _.set(this, key, val);
-                }));
-
-                this.save(newVal);
+                // console.log('SettingsModal watcher for', key, newVal, oldVal);
+                // Bit of a hack -- using Rete's 'History' plugin for ALL undo/redo
+                const action = new FieldChangeAction(oldVal, newVal, val => {
+                    this.updateSetting(key, newVal);
+                });
+                action.do();
+                EventBus.$emit('addhistory', action);
             };
             return [key, handler];
         })),
@@ -131,23 +138,39 @@ export default {
     computed: {
         // 2 * fieldSize * fieldDensity <= MAX_VECTORS_PER_SIDE
         fieldSizeMax() {
-            return (MAX_VECTORS_PER_SIDE / (this.settings.viewportSettings.matrix.fieldDensity * 2)).toFixed(1);
+            return (MAX_VECTORS_PER_SIDE / (this.viewportSettings.values.matrix.fieldDensity * 2)).toFixed(1);
         },
         fieldDensityMax() {
-            return (MAX_VECTORS_PER_SIDE / (this.settings.viewportSettings.matrix.fieldSize * 2)).toFixed(1);
+            return (MAX_VECTORS_PER_SIDE / (this.viewportSettings.values.matrix.fieldSize * 2)).toFixed(1);
         },
     },
+    mounted() {
+        console.log('SettingsModal mounted');
+        console.log('  nodeEditorSettings: ', this.nodeEditorSettings);
+        console.log('  viewportSettings: ', this.viewportSettings);
+    },
     methods: {
-        save(newValue) {
-            console.log('SettingsModal saving settings', this.settings);
-            settingsUtil.saveSettings(this.settings['viewportSettings'], this.settings['nodeEditorSettings']);
-            EventBus.$emit('settings-updated');
-        },
         close() {
             this.$emit('settings-modal-closed');
         },
+        updateNodeEditorSetting(key, value) {
+            console.log('SettingsModal updating nodeEditorSetting', key, value);
+            this.nodeEditorSettings.update(key, value);
+        },
+        updateViewportSetting(key, value) {
+            console.log('SettingsModal updating viewportSetting', key, value);
+            this.viewportSettings.update(key, value);
+        },
         updateSetting(key, value) {
-            _.set(this, key, value);
+            // TODO clean this up
+            const trimmed = key.split('.').slice(2).join('.');
+            if (key.startsWith('viewportSettings')) {
+                this.updateViewportSetting(trimmed, value);
+            } else if (key.startsWith('nodeEditorSettings')) {
+                this.updateNodeEditorSetting(trimmed, value);
+            } else {
+                throw new Error(`Invalid settings key ${key}`);
+            }
         },
     },
 };

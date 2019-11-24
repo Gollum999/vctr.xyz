@@ -3,20 +3,24 @@
 // TODO why is dark theme not applying?
 v-card.node(dark hover :class="[selected(), node.name] | kebab")
   // TODO editable titles
-  .title {{node.name}}
-  // .title {{node.name}} ({{node.id}})
+  // .title {{node.name}}
+  .title {{node.name}} ({{node.id}})
 
   .node-body
     // Inputs
     // 0 indexed
     // TODO there was some warning here about duplicate key 'vec', fixed by adding idx to key but I'm not entirely sure how that worked or whether that is correct
-    .input(v-for='(input, idx) in inputs()' :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
+    // .input(v-for='(input, idx) in filteredInputs' :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
+    // TODO mixing v-if with v-for because inputs() is not reactive
+    .input(v-for='(input, idx) in inputs()' v-if='input.key !== advancedRenderControlsKey || showAdvancedRenderControls'
+           :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
       Socket(v-if="input.socket !== null" v-socket:input="input" type="input" :socket="input.socket")
       .input-title(v-show='!input.showControl()') {{input.name}}
       .input-control(v-show='input.showControl()' v-control="input.control")
 
     // Controls
-    .control(v-for='(control, idx) in controls()' v-control="control")
+    .control(v-for='(control, idx) in controls()' v-if='control.key !== advancedRenderControlsKey || showAdvancedRenderControls'
+             :key="`control.key-${idx}`" v-control="control")
 
     // Outputs
     .output(v-for='(output, idx) in outputs()' :key="output.key" :style="{'grid-row': idx + 1}")
@@ -28,11 +32,26 @@ v-card.node(dark hover :class="[selected(), node.name] | kebab")
 import mixin from '@/../node_modules/rete-vue-render-plugin/src/mixin';
 import Socket from '@/../node_modules/rete-vue-render-plugin/src/Socket.vue';
 // import '@/../node_modules/@material/card/mdc-card.scss';
+import settings from '../settings';
 
 export default {
     mixins: [mixin],
+    data() {
+        return {
+            advancedRenderControlsKey: 'pos', // TODO Remove this assumption
+            settings: settings.nodeEditorSettings,
+        };
+    },
     components: {
         Socket,
+    },
+    computed: {
+        filteredInputs() {
+            return this.inputs().filter(input => input.key !== this.advancedRenderControlsKey || this.settings.values.showAdvancedRenderSettings);
+        },
+        filteredControls() {
+            return this.controls().filter(control => control.key !== this.advancedRenderControlsKey || this.settings.values.showAdvancedRenderSettings);
+        },
     },
 };
 </script>

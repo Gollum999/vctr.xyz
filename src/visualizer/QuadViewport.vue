@@ -24,13 +24,13 @@
             :value="m.value"
             :color="m.color"
             :pos="m.pos"
-            :vector-scale="settings.matrix.vectorScale"
-            :density="settings.matrix.fieldDensity"
-            :fieldSize="settings.matrix.fieldSize"
+            :vector-scale="settings.values.matrix.vectorScale"
+            :density="settings.values.matrix.fieldDensity"
+            :fieldSize="settings.values.matrix.fieldSize"
         />
         <vgl-ambient-light color="#ffeecc" />
         <vgl-directional-light position="0 1 1" />
-        <vgl-axes-helper v-if="settings.showAxis" size="5" />
+        <vgl-axes-helper v-if="settings.values.showAxis" size="5" />
 
         <div :class="['viewport-container', isHidden('top') ? 'hidden' : '', isExpanded('top') ? 'fill' : '']">
           <Viewport ref="viewport_top" view="top" sceneName="main_scene" :scene="$refs.scene" :expanded="isExpanded('top')" @expand-viewport="expandViewport" />
@@ -82,7 +82,7 @@ export default {
     },
     data() {
         return {
-            settings: null,
+            settings: settings.viewportSettings,
             vectors: [],
             matrices: [],
             vec3: vec3, // For use in render
@@ -101,14 +101,6 @@ export default {
                 return m && m.color !== null;
             });
         },
-    },
-    created() {
-        const loadSettings = () => {
-            this.settings = settings.loadSettings('viewportSettings');
-            console.log('Viewport settings loaded:', this.settings);
-        };
-        loadSettings();
-        EventBus.$on('settings-updated', loadSettings);
     },
     mounted() {
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)

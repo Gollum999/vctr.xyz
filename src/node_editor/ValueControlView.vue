@@ -18,7 +18,7 @@
 
 <script>
 import _ from 'lodash';
-import { FieldChangeAction } from '../util';
+import { FieldChangeAction } from '../history_actions';
 import { ValueType } from './node_util';
 
 const DEFAULT_SCALAR_WRAPPER = Object.freeze([{val: 1}]);
