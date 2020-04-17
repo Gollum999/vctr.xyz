@@ -12,6 +12,7 @@
 <script>
 import { FieldChangeAction } from '../util';
 import ColorPickerButton from '../ColorPickerButton';
+import { EventBus } from '../EventBus';
 
 export default {
     components: {
@@ -48,15 +49,16 @@ export default {
                 /* console.log('colorPicker opened', this.color, this.prevColor); */
                 this.prevColor = Object.assign({}, this.color);
             } else {
-                /* console.log('colorPicker closed', this.color, this.prevColor); */
-                this.emitter.trigger('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
+                // console.log('colorPicker closed, emitting history', this.color, this.prevColor);
+                EventBus.$emit('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
             }
         },
         visible(newVal, oldVal) {
             if (this.dataKey) {
                 this.putData(this.dataKey, this.makeData(newVal, this.color));
             }
-            this.emitter.trigger('addhistory', new FieldChangeAction(oldVal, newVal, (visible) => { this.visible = visible; }));
+            // console.log('colorPicker visible changed, emitting history', newVal);
+            EventBus.$emit('addhistory', new FieldChangeAction(oldVal, newVal, (visible) => { this.visible = visible; }));
             this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
         },
         color: {
@@ -96,8 +98,8 @@ export default {
                 /* console.log('colorPicker opened', this.color, this.prevColor); */
                 this.prevColor = Object.assign({}, this.color);
             } else {
-                /* console.log('colorPicker closed', this.color, this.prevColor); */
-                this.emitter.trigger('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
+                // console.log('colorPicker toggled, emitting history', showing, this.color, this.prevColor);
+                EventBus.$emit('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
             }
         },
     },
