@@ -108,4 +108,32 @@ export default {
     intersection(x, y) {
         return new Set([...x].filter(val => y.has(val)));
     },
+
+    union(setA, setB) {
+        let _union = new Set(setA);
+        for (let elem of setB) {
+            _union.add(elem);
+        }
+        return _union;
+    },
+
+    xor(setA, setB) {
+        let _difference = new Set(setA);
+        for (let elem of setB) {
+            if (_difference.has(elem)) {
+                _difference.delete(elem);
+            } else {
+                _difference.add(elem);
+            }
+        }
+        return _difference;
+    },
+
+    difference(setA, setB) {
+        let _difference = new Set(setA);
+        for (let elem of setB) {
+            _difference.delete(elem);
+        }
+        return _difference;
+    },
 };
