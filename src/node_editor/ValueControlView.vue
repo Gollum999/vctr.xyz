@@ -110,11 +110,12 @@ export default {
             /* console.log('ValueControlView onInput new values:', newValues); */
             /* console.log('ValueControlView onInput', newValue, idx, this.values, newValues); */
             // console.log('ValueControlView emitting history', newValue, idx);
-            this.emitter.trigger('addhistory', new FieldChangeAction(this.values, newValues, val => {
+            const action = new FieldChangeAction(this.values, newValues, val => {
                 this.values = val;
                 this.emitter.trigger('process');
-            }));
-            this.values = newValues;
+            });
+            action.do();
+            this.emitter.trigger('addhistory', action);
 
             console.log('ValueControlView', this.valueType, 'triggering engine process from onInput');
             this.emitter.trigger('process');

@@ -18,65 +18,86 @@ export class FieldChangeAction extends Action {
     }
 }
 
-// Add/RemoveConnectionAction are copied from rete-history-plugin
+// Add/RemoveConnectionAction are copied (and slightly modified) from rete-history-plugin
 function reassignConnection(connection) {
     const { input, output } = connection;
 
     return output.connections.find(c => c.input === input);
 }
 
-export class AddConnectionAction extends Action {
+class ConnectionActionHelper {
     constructor(editor, connection) {
-        // console.log('AddConnectionAction constructor', editor, connection);
-        super();
+        // console.log('ConnectionActionHelper constructor', editor, connection);
         this.editor = editor;
         this.connection = connection;
     }
-    undo() {
-        // console.log('AddConnectionAction undo, removing', this.editor, this.connection);
+    add() {
+        // console.log('ConnectionActionHelper redo, connecting', this.editor, this.connection);
+        this.editor.connect(this.connection.output, this.connection.input);
+        // console.log('ConnectionActionHelper redo, reassigning connection', this.connection);
+        this.connection = reassignConnection(this.connection);
+    }
+    remove() {
+        // console.log('ConnectionActionHelper undo, removing', this.editor, this.connection);
+        // TODO: 'connectioncreated'/'connectionremoved' events automatically add themselves to the history...
+        //       May need to fork the entire history plugin myself to work around this and avoid duplicate events
         this.editor.removeConnection(this.connection);
     }
+}
+
+export class AddConnectionAction extends Action {
+    constructor(editor, connection) {
+        super();
+        this.helper = new ConnectionActionHelper(editor, connection);
+    }
+    do() {
+        this.helper.add();
+    }
+    undo() {
+        this.helper.remove();
+    }
     redo() {
-        // console.log('AddConnectionAction redo, connecting', this.editor, this.connection);
-        this.editor.connect(this.connection.output, this.connection.input);
-        // console.log('AddConnectionAction redo, reassigning connection', this.connection);
-        this.connection = reassignConnection(this.connection);
+        this.helper.add();
     }
 }
 
 export class RemoveConnectionAction extends Action {
     constructor(editor, connection) {
-        // console.log('RemoveConnectionAction constructor', editor, connection);
         super();
-        this.editor = editor;
-        this.connection = connection;
-        // console.log('RemoveConnectionAction constructor, connection input', connection.input, connection.input.node);
+        this.helper = new ConnectionActionHelper(editor, connection);
+    }
+    do() {
+        this.helper.remove();
     }
     undo() {
-        // console.log('RemoveConnectionAction undo, connecting', this.editor, this.connection, this.connection.input, this.connection.output, this.connection.input.node, this.connection.output.node);
-        this.editor.connect(this.connection.output, this.connection.input);
-        // console.log('RemoveConnectionAction undo, reassigning connection', this.connection);
-        this.connection = reassignConnection(this.connection);
+        this.helper.add();
     }
     redo() {
-        // console.log('RemoveConnectionAction redo, removing', this.editor, this.connection);
-        this.editor.removeConnection(this.connection);
+        this.helper.remove();
     }
 }
 
-export class RemoveAdvancedRenderControlsAction extends Action {
+class AdvancedRenderControlsActionHelper {
     constructor(editor, node) {
-        super();
-        console.log('RemoveAdvancedRenderControlsAction constructor', node.id);
+        console.log('AdvancedRenderControlsActionHelper constructor', node.id);
         this.editor = editor;
         this.node = node;
         this.connectionActions = [];
     }
-    do() {
-        console.log('RemoveAdvancedRenderControlsAction do, removing from node:', this.node.id, this.node);
+    add() {
+        console.log('AdvancedRenderControlsActionHelper add to node:', this.node.id, this.node, this.node.controls, this.node.inputs, this.node.outputs);
+        // Restore all of the old connections
+        for (const action of this.connectionActions) {
+            // console.log('AdvancedRenderControlsActionHelper undoing connection action', action);
+            action.undo();
+        }
+        this.connectionActions = [];
+    }
+    remove() {
+        console.log('AdvancedRenderControlsActionHelper remove from node:', this.node.id, this.node);
 
         // Remove all connections
-        const input = this.node.inputs.get('pos');
+        const input = this.node.inputs.get('pos'); // TODO make this more generic
         if (input == null) {
             throw new Error(`Could not find 'pos' input for node ${this.node.id}`);
         }
@@ -84,39 +105,42 @@ export class RemoveAdvancedRenderControlsAction extends Action {
             throw new Error(`Could not find connections for 'pos' for node ${this.node.id}`);
         }
         input.connections.map(conn => {
-            this.connectionActions.push(new RemoveConnectionAction(this.editor, conn));
-            this.editor.removeConnection(conn);
+            const removeConnectionAction = new RemoveConnectionAction(this.editor, conn);
+            removeConnectionAction.do();
+            this.connectionActions.push(removeConnectionAction);
         });
-
-        // Hide controls
-        this.node.vueContext.showAdvancedRenderControls = false;
-    }
-    undo() {
-        console.log('RemoveAdvancedRenderControlsAction undo, adding back to node:', this.node.id, this.node, this.node.controls, this.node.inputs, this.node.outputs);
-        // Show controls
-        this.node.vueContext.showAdvancedRenderControls = true;
-
-        // Restore all of the old connections
-        for (const action of this.connectionActions) {
-            action.undo();
-        }
-        this.connectionActions = [];
-    }
-    redo() {
-        this.do();
     }
 }
 
-// TODO probably cleaner to just make a common helper rather than abusing inheritance
-export class AddAdvancedRenderControlsAction extends RemoveAdvancedRenderControlsAction {
+export class AddAdvancedRenderControlsAction extends Action {
+    constructor(editor, node) {
+        super();
+        this.helper = new AdvancedRenderControlsActionHelper(editor, node);
+    }
     do() {
-        super.undo();
+        this.helper.add();
     }
     undo() {
-        super.redo();
+        this.helper.remove();
     }
     redo() {
-        super.undo();
+        this.helper.add();
+    }
+}
+
+export class RemoveAdvancedRenderControlsAction extends Action {
+    constructor(editor, node) {
+        super();
+        this.helper = new AdvancedRenderControlsActionHelper(editor, node);
+    }
+    do() {
+        this.helper.remove();
+    }
+    undo() {
+        this.helper.add();
+    }
+    redo() {
+        this.helper.remove();
     }
 }
 
@@ -125,6 +149,12 @@ export class MultiAction extends Action {
         super();
         // console.log('MultiAction constructor, actions:', actions);
         this.actions = actions;
+    }
+    do() {
+        // console.log('MultiAction do', this.actions);
+        for (const action of this.actions) {
+            action.do();
+        }
     }
     undo() {
         for (let i = this.actions.length - 1; i >= 0; --i) {

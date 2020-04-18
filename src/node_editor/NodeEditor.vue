@@ -130,9 +130,8 @@ export default {
             graphTraveler.applyToAllEditorNodes(node => {
                 if (node.inputs.has('pos')) { // TODO make this more generic
                     if (newVal) {
-                        const action = new actions.AddAdvancedRenderControlsAction(this.editor, node);
-                        action.do();
-                        actionStack.push(action);
+                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, node);
+                        actionStack.push(renderControlsAction);
                     } else {
                         // Reset origin
                         // TODO probably should be bundled in with RemoveAdvancedRenderControlsAction, but it's convenient to
@@ -140,12 +139,11 @@ export default {
                         const resetOriginAction = new actions.FieldChangeAction(node.data['pos'], [0, 0, 0], val => {
                             node.data['pos'] = val;
                         });
-                        resetOriginAction.do();
                         actionStack.push(resetOriginAction);
 
-                        const action = new actions.RemoveAdvancedRenderControlsAction(this.editor, node);
-                        action.do();
-                        actionStack.push(action);
+                        // console.log('Pushing RemoveAdvancedRenderControlsAction', this.editor, node);
+                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, node);
+                        actionStack.push(renderControlsAction);
                     }
                 }
             });
@@ -159,10 +157,11 @@ export default {
                     }
                 });
             });
-            updateSettingAction.do();
             actionStack.push(updateSettingAction);
 
-            EventBus.$emit('addhistory', new actions.MultiAction(actionStack));
+            const multiAction = new actions.MultiAction(actionStack);
+            multiAction.do();
+            EventBus.$emit('addhistory', multiAction);
         },
     },
 
