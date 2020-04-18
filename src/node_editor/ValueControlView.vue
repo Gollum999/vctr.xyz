@@ -109,7 +109,11 @@ export default {
             newValues[idx].val = parseFloat(newValue);
             /* console.log('ValueControlView onInput new values:', newValues); */
             /* console.log('ValueControlView onInput', newValue, idx, this.values, newValues); */
-            this.emitter.trigger('addhistory', new FieldChangeAction(this.values, newValues, val => { this.values = val; }));
+            // console.log('ValueControlView emitting history', newValue, idx);
+            this.emitter.trigger('addhistory', new FieldChangeAction(this.values, newValues, val => {
+                this.values = val;
+                this.emitter.trigger('process');
+            }));
             this.values = newValues;
 
             console.log('ValueControlView', this.valueType, 'triggering engine process from onInput');
