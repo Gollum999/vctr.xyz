@@ -11,16 +11,14 @@ v-card.node(dark hover :class="[selected(), node.name] | kebab")
     // 0 indexed
     // TODO there was some warning here about duplicate key 'vec', fixed by adding idx to key but I'm not entirely sure how that worked or whether that is correct
     // .input(v-for='(input, idx) in filteredInputs' :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
-    // TODO mixing v-if with v-for because inputs() is not reactive
-    .input(v-for='(input, idx) in inputs()' v-if='input.key !== advancedRenderControlsKey || showAdvancedRenderControls'
-           :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
+    // TODO I was originally mixing v-if with v-for because inputs() is not reactive, then I changed it... should I have?
+    .input(v-for='(input, idx) in filteredInputs' :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
       Socket(v-if="input.socket !== null" v-socket:input="input" type="input" :socket="input.socket")
       .input-title(v-show='!input.showControl()') {{input.name}}
       .input-control(v-show='input.showControl()' v-control="input.control")
 
     // Controls
-    .control(v-for='(control, idx) in controls()' v-if='control.key !== advancedRenderControlsKey || showAdvancedRenderControls'
-             :key="`control.key-${idx}`" v-control="control")
+    .control(v-for='(control, idx) in filteredControls' :key="`control.key-${idx}`" v-control="control")
 
     // Outputs
     .output(v-for='(output, idx) in outputs()' :key="output.key" :style="{'grid-row': idx + 1}")
