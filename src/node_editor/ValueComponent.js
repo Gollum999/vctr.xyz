@@ -53,9 +53,9 @@ export class ValueComponent extends Rete.Component {
         //     through the editor by ID
         //   Also note that anything in data will be saved between sessions
         // console.log('ValueComponent worker', node.name, '(', node.id, ')', node.data);
-        // console.log('VECTOR', node, editorNode, inputs, editorNode.inputs);
 
         const editorNode = nodeUtil.getEditorNode(this.editor, node);
+        // console.log('VECTOR', node, editorNode, inputs, editorNode.inputs);
 
         if (nodeUtil.hasInput(inputs, 'value')) {
             const inputValue = nodeUtil.getInputValue('value', inputs, node.data);
@@ -69,7 +69,7 @@ export class ValueComponent extends Rete.Component {
         }
 
         const posControl = editorNode.controls.get('pos');
-        if (!_.isNil(posControl)) {
+        if (!_.isNil(posControl.vueContext)) { // Bit of a hack, could hold a reference to the global settings
             if (nodeUtil.hasInput(inputs, 'pos')) {
                 const inputPos = nodeUtil.getInputValue('pos', inputs, node.data);
                 node.data.pos = inputPos.slice(); // Make a copy to avoid sharing the same object between nodes
