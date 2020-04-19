@@ -6,8 +6,8 @@
     <!-- TODO this container swallows clicks -->
     <div class="buttons-container">
       <div class="buttons-group buttons-add-nodes">
-        <v-btn x-small type="button" title="test1" @click="test1">test1</v-btn>
-        <v-btn x-small type="button" title="test2" @click="test2">test2</v-btn>
+        <!-- <v-btn x-small type="button" title="test1" @click="test1">test1</v-btn> -->
+        <!-- <v-btn x-small type="button" title="test2" @click="test2">test2</v-btn> -->
         <v-btn fab x-small type="button" title="Add scalar" @click="addNode('scalar')">
           <v-icon>$vuetify.icons.scalar</v-icon>
         </v-btn>
