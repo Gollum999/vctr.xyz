@@ -447,7 +447,6 @@ export default {
             // TODO should I save during more events?
             this.saveState();
 
-            this.$emit('process', this.editor.toJSON());
             EventBus.$emit('node_engine_processed', this.editor.toJSON());
         },
     },
