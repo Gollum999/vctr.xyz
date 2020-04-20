@@ -549,9 +549,11 @@ export default {
   min-height: 100px
   overflow-y: hidden
   .buttons-container
+    pointer-events: none
     .buttons-group:first-child
       margin-left: 8px
     button.v-btn
+      pointer-events: auto
       // &:first-of-type
       //   margin-left: 8px
       margin-right: 8px
@@ -566,6 +568,7 @@ export default {
     right: 5px
     .buttons-spacer
       flex-grow: 1
+      pointer-events: none
 .rete
   display: block
   height: 100%
