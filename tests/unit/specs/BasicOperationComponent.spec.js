@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { vec3, mat4 } from 'gl-matrix';
 import Rete from 'rete';
+import Vuetify from 'vuetify';
 // import VueRenderPlugin from 'rete-vue-render-plugin';
 
 import allComponents from '@/node_editor/components';
@@ -69,7 +70,7 @@ function testAddSubtractOperationExceptions(op, msg) {
 describe('AddOperation', () => {
     const Op = AddOperation;
     it('should work with certain input types', () => {
-        expect( Op.calculate({type: 'scalar', value: 1},         {type: 'scalar', value: 2})         ).toEqual(3);
+        expect( Op.calculate({type: 'scalar', value: [1]},       {type: 'scalar', value: [2]})       ).toEqual([3]);
         expect( Op.calculate({type: 'vector', value: [1, 2, 3]}, {type: 'vector', value: [4, 5, 6]}) ).toEqual(vec3.fromValues(5, 7, 9));
         expect( Op.calculate({type: 'matrix', value: m1},        {type: 'matrix', value: m2})        ).toEqual(mat4.fromValues(
              3, 1,  0, -1,
@@ -87,7 +88,7 @@ describe('AddOperation', () => {
 describe('SubtractOperation', () => {
     const Op = SubtractOperation;
     it('should work with certain input types', () => {
-        expect( Op.calculate({type: 'scalar', value: 1},         {type: 'scalar', value: 2})         ).toEqual(-1);
+        expect( Op.calculate({type: 'scalar', value: [1]},       {type: 'scalar', value: [2]})       ).toEqual([-1]);
         expect( Op.calculate({type: 'vector', value: [1, 2, 3]}, {type: 'vector', value: [4, 5, 6]}) ).toEqual(vec3.fromValues(-3, -3, -3));
         expect( Op.calculate({type: 'matrix', value: m1},        {type: 'matrix', value: m2})        ).toEqual(mat4.fromValues(
             -1, -1,  0,  1,
@@ -105,17 +106,17 @@ describe('SubtractOperation', () => {
 describe('MultiplyOperation', () => {
     const Op = MultiplyOperation;
     it('should work with certain input types', () => {
-        expect( Op.calculate({type: 'scalar', value: 2},         {type: 'scalar', value: 4})         ).toEqual(8);
-        expect( Op.calculate({type: 'scalar', value: 2},         {type: 'vector', value: [2, 2, 3]}) ).toEqual(vec3.fromValues(4, 4, 6));
-        expect( Op.calculate({type: 'scalar', value: 2},         {type: 'matrix', value: m2})        ).toEqual(mat4.fromValues(
+        expect( Op.calculate({type: 'scalar', value: [2]},       {type: 'scalar', value: [4]})       ).toEqual([8]);
+        expect( Op.calculate({type: 'scalar', value: [2]},       {type: 'vector', value: [2, 2, 3]}) ).toEqual(vec3.fromValues(4, 4, 6));
+        expect( Op.calculate({type: 'scalar', value: [2]},       {type: 'matrix', value: m2})        ).toEqual(mat4.fromValues(
              4, 2,  0, -2,
              2, 4,  6,  8,
              0, 0,  0,  0,
             -2, 2, -2,  2,
         ));
-        expect( Op.calculate({type: 'vector', value: [1, 2, 3]}, {type: 'scalar', value: -3})        ).toEqual(vec3.fromValues(-3, -6, -9));
+        expect( Op.calculate({type: 'vector', value: [1, 2, 3]}, {type: 'scalar', value: [-3]})      ).toEqual(vec3.fromValues(-3, -6, -9));
         expect( Op.calculate({type: 'matrix', value: m1},        {type: 'vector', value: [1, 2, 3]}) ).toEqual(vec3.fromValues(1, 2, 3));
-        expect( Op.calculate({type: 'matrix', value: m2},        {type: 'scalar', value: -2})        ).toEqual(mat4.fromValues(
+        expect( Op.calculate({type: 'matrix', value: m2},        {type: 'scalar', value: [-2]})      ).toEqual(mat4.fromValues(
             -4, -2, -0,  2,
             -2, -4, -6, -8,
             -0, -0, -0, -0,
@@ -127,16 +128,16 @@ describe('MultiplyOperation', () => {
         const msg = 'MultiplyOperation unsupported input types';
         expect( () => { Op.calculate({type: 'vector', value: [1, 1, 1]}, {type: 'vector', value: [0, 1, 0]}); } ).toThrow(msg);
         expect( () => { Op.calculate({type: 'vector', value: [0, 0, 0]}, {type: 'matrix', value: m1});        } ).toThrow(msg);
-        expect( () => { Op.calculate({type: 'scalar', value: 2},         {type: 'invalid', value: null});     } ).toThrow(msg);
+        expect( () => { Op.calculate({type: 'scalar', value: [2]},       {type: 'invalid', value: null});     } ).toThrow(msg);
     });
 });
 
 describe('DivideOperation', () => {
     const Op = DivideOperation;
     it('should work with certain input types', () => {
-        expect( Op.calculate({type: 'scalar', value: 2},         {type: 'scalar', value: 4}) ).toEqual(0.5);
-        expect( Op.calculate({type: 'vector', value: [4, 2, 1]}, {type: 'scalar', value: 2}) ).toEqual(vec3.fromValues(2, 1, 0.5));
-        expect( Op.calculate({type: 'matrix', value: m2},        {type: 'scalar', value: 2}) ).toEqual(mat4.fromValues(
+        expect( Op.calculate({type: 'scalar', value: [2]},       {type: 'scalar', value: [4]}) ).toEqual([0.5]);
+        expect( Op.calculate({type: 'vector', value: [4, 2, 1]}, {type: 'scalar', value: [2]}) ).toEqual(vec3.fromValues(2, 1, 0.5));
+        expect( Op.calculate({type: 'matrix', value: m2},        {type: 'scalar', value: [2]}) ).toEqual(mat4.fromValues(
                1, 0.5,    0, -0.5,
              0.5,   1,  1.5,    2,
                0,   0,    0,    0,
@@ -145,23 +146,23 @@ describe('DivideOperation', () => {
     });
     it('should throw when given an unsupported combination of input types', () => {
         const msg = 'DivideOperation unsupported input types';
-        expect( () => { Op.calculate({type: 'scalar', value: 2},         {type: 'vector', value: [0, 0, 0]}); } ).toThrow(msg);
-        expect( () => { Op.calculate({type: 'scalar', value: 2},         {type: 'matrix', value: m1});        } ).toThrow(msg);
+        expect( () => { Op.calculate({type: 'scalar', value: [2]},       {type: 'vector', value: [0, 0, 0]}); } ).toThrow(msg);
+        expect( () => { Op.calculate({type: 'scalar', value: [2]},       {type: 'matrix', value: m1});        } ).toThrow(msg);
         expect( () => { Op.calculate({type: 'vector', value: [1, 1, 1]}, {type: 'vector', value: [2, 2, 2]}); } ).toThrow(msg);
         expect( () => { Op.calculate({type: 'vector', value: [1, 1, 1]}, {type: 'matrix', value: m1});        } ).toThrow(msg);
         expect( () => { Op.calculate({type: 'matrix', value: m1},        {type: 'vector', value: [0, 0, 0]}); } ).toThrow(msg);
         expect( () => { Op.calculate({type: 'matrix', value: m1},        {type: 'matrix', value: m2});        } ).toThrow(msg);
-        expect( () => { Op.calculate({type: 'invalid', value: null},     {type: 'scalar', value: 5});         } ).toThrow(msg);
+        expect( () => { Op.calculate({type: 'invalid', value: null},     {type: 'scalar', value: [5]});       } ).toThrow(msg);
     });
 });
 
 function testDotCrossOperationExceptions(op, msg) {
-    expect( () => { op.calculate({type: 'scalar', value: 2},         {type: 'scalar', value: 4});         } ).toThrow(msg);
-    expect( () => { op.calculate({type: 'scalar', value: 2},         {type: 'vector', value: [0, 0, 0]}); } ).toThrow(msg);
-    expect( () => { op.calculate({type: 'scalar', value: 2},         {type: 'matrix', value: m1});        } ).toThrow(msg);
-    expect( () => { op.calculate({type: 'vector', value: [1, 1, 1]}, {type: 'scalar', value: 2});         } ).toThrow(msg);
+    expect( () => { op.calculate({type: 'scalar', value: [2]},       {type: 'scalar', value: [4]});       } ).toThrow(msg);
+    expect( () => { op.calculate({type: 'scalar', value: [2]},       {type: 'vector', value: [0, 0, 0]}); } ).toThrow(msg);
+    expect( () => { op.calculate({type: 'scalar', value: [2]},       {type: 'matrix', value: m1});        } ).toThrow(msg);
+    expect( () => { op.calculate({type: 'vector', value: [1, 1, 1]}, {type: 'scalar', value: [2]});       } ).toThrow(msg);
     expect( () => { op.calculate({type: 'vector', value: [1, 1, 1]}, {type: 'matrix', value: m1});        } ).toThrow(msg);
-    expect( () => { op.calculate({type: 'matrix', value: m1},        {type: 'scalar', value: 5});         } ).toThrow(msg);
+    expect( () => { op.calculate({type: 'matrix', value: m1},        {type: 'scalar', value: [5]});       } ).toThrow(msg);
     expect( () => { op.calculate({type: 'matrix', value: m1},        {type: 'vector', value: [0, 0, 0]}); } ).toThrow(msg);
     expect( () => { op.calculate({type: 'matrix', value: m1},        {type: 'matrix', value: m2});        } ).toThrow(msg);
     expect( () => { op.calculate({type: 'vector', value: [1, 2, 3]}, {type: 'invalid', value: null});     } ).toThrow(msg);
@@ -170,7 +171,7 @@ function testDotCrossOperationExceptions(op, msg) {
 describe('DotOperation', () => {
     const Op = DotOperation;
     it('should work with certain input types', () => {
-        expect( Op.calculate({type: 'vector', value: [4, 2, 1]}, {type: 'vector', value: [3, -2, 3]}) ).toEqual(11);
+        expect( Op.calculate({type: 'vector', value: [4, 2, 1]}, {type: 'vector', value: [3, -2, 3]}) ).toEqual([11]);
     });
     it('should throw when given an unsupported combination of input types', () => {
         const msg = 'DotOperation unsupported input types';
@@ -226,10 +227,11 @@ describe('BasicOperationComponent', () => {
         // editor.use(VueRenderPlugin); // TODO this causes the JS heap to run out of memory somehow?
         engine = new Rete.Engine('BasicOperationComponent_spec_js@1.0.0'); // TODO do I need an engine for this test?
 
+        const vuetify = new Vuetify();
         components = {
-            'scalar':             new allComponents.ValueComponent(this.$vuetify, ValueType.SCALAR),
-            'vector':             new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
-            'matrix':             new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
+            'scalar':             new allComponents.ValueComponent(vuetify, ValueType.SCALAR),
+            'vector':             new allComponents.ValueComponent(vuetify, ValueType.VECTOR),
+            'matrix':             new allComponents.ValueComponent(vuetify, ValueType.MATRIX),
             'operation-add':      new allComponents.BasicOperationComponent('ADD'),
             'operation-subtract': new allComponents.BasicOperationComponent('SUBTRACT'),
             'operation-multiply': new allComponents.BasicOperationComponent('MULTIPLY'),
@@ -263,7 +265,7 @@ describe('BasicOperationComponent', () => {
     beforeEach(async () => {
         editor.clear();
 
-        editor.addNode(scalar   = await components['scalar'].createNode({'value': 5}));
+        editor.addNode(scalar   = await components['scalar'].createNode({'value': [5]}));
         editor.addNode(vector   = await components['vector'].createNode({'value': [1, 2, 3]}));
         editor.addNode(matrix   = await components['matrix'].createNode({'value': m1}));
         editor.addNode(add      = await components['operation-add'].createNode());
@@ -282,11 +284,11 @@ describe('BasicOperationComponent', () => {
 
     it('should have appropriate default socket types', () => {
         expect(scalar.outputs.size).toEqual(1);
-        expect(scalar.outputs.get('scalar').socket).toEqual(sockets.scalar);
+        expect(scalar.outputs.get('value').socket).toEqual(sockets.scalar);
         expect(vector.outputs.size).toEqual(1);
-        expect(vector.outputs.get('vector').socket).toEqual(sockets.vector);
+        expect(vector.outputs.get('value').socket).toEqual(sockets.vector);
         expect(matrix.outputs.size).toEqual(1);
-        expect(matrix.outputs.get('matrix').socket).toEqual(sockets.matrix);
+        expect(matrix.outputs.get('value').socket).toEqual(sockets.matrix);
 
         checkSocketTypes(add,      { lhs: sockets.anything, rhs: sockets.anything, output: sockets.anything });
         checkSocketTypes(subtract, { lhs: sockets.anything, rhs: sockets.anything, output: sockets.anything });
@@ -301,9 +303,9 @@ describe('BasicOperationComponent', () => {
             const lhs = add.inputs.get('lhs');
             const rhs = add.inputs.get('rhs');
             const out = add.inputs.get('result');
-            const outSocketScalar = scalar.outputs.get('scalar');
-            const outSocketVector = vector.outputs.get('vector');
-            const outSocketMatrix = matrix.outputs.get('matrix');
+            const outSocketScalar = scalar.outputs.get('value');
+            const outSocketVector = vector.outputs.get('value');
+            const outSocketMatrix = matrix.outputs.get('value');
 
             await processAndCheck(engine, editor, add, { lhs: sockets.anything, rhs: sockets.anything, output: sockets.anything });
 
@@ -329,9 +331,9 @@ describe('BasicOperationComponent', () => {
             const lhs = subtract.inputs.get('lhs');
             const rhs = subtract.inputs.get('rhs');
             const out = subtract.inputs.get('result');
-            const outSocketScalar = scalar.outputs.get('scalar');
-            const outSocketVector = vector.outputs.get('vector');
-            const outSocketMatrix = matrix.outputs.get('matrix');
+            const outSocketScalar = scalar.outputs.get('value');
+            const outSocketVector = vector.outputs.get('value');
+            const outSocketMatrix = matrix.outputs.get('value');
 
             await processAndCheck(engine, editor, subtract, { lhs: sockets.anything, rhs: sockets.anything, output: sockets.anything });
 
@@ -357,9 +359,9 @@ describe('BasicOperationComponent', () => {
             const lhs = multiply.inputs.get('lhs');
             const rhs = multiply.inputs.get('rhs');
             const out = multiply.inputs.get('result');
-            const outSocketScalar = scalar.outputs.get('scalar');
-            const outSocketVector = vector.outputs.get('vector');
-            const outSocketMatrix = matrix.outputs.get('matrix');
+            const outSocketScalar = scalar.outputs.get('value');
+            const outSocketVector = vector.outputs.get('value');
+            const outSocketMatrix = matrix.outputs.get('value');
 
             await processAndCheck(engine, editor, multiply, { lhs: sockets.anything, rhs: sockets.anything, output: sockets.anything });
 
@@ -373,27 +375,30 @@ describe('BasicOperationComponent', () => {
 
             // Vector connection LHS
             editor.connect(outSocketVector, lhs);
-            await processAndCheck(engine, editor, multiply, { lhs: sockets.vector, rhs: sockets.scalarOrMatrix, output: sockets.vector });
-            expect( () => editor.connect(outSocketVector, rhs) ).toThrow('Sockets not compatible');
-            editor.connect(outSocketScalar, rhs);
             await processAndCheck(engine, editor, multiply, { lhs: sockets.vector, rhs: sockets.scalar, output: sockets.vector });
-            await removeAllConnections(engine, editor, multiply);
-            editor.connect(outSocketVector, lhs);
-            editor.connect(outSocketMatrix, rhs);
-            await processAndCheck(engine, editor, multiply, { lhs: sockets.vector, rhs: sockets.matrix, output: sockets.vector });
+            expect( () => editor.connect(outSocketVector, rhs) ).toThrow('Sockets not compatible');
             await removeAllConnections(engine, editor, multiply);
 
             // Vector connection RHS
             editor.connect(outSocketVector, rhs);
+            await processAndCheck(engine, editor, multiply, { lhs: sockets.scalarOrMatrix, rhs: sockets.vector, output: sockets.vector });
+            editor.connect(outSocketScalar, lhs);
             await processAndCheck(engine, editor, multiply, { lhs: sockets.scalar, rhs: sockets.vector, output: sockets.vector });
+            await removeAllConnections(engine, editor, multiply);
+            editor.connect(outSocketVector, rhs);
+            editor.connect(outSocketMatrix, lhs);
+            await processAndCheck(engine, editor, multiply, { lhs: sockets.matrix, rhs: sockets.vector, output: sockets.vector });
             await removeAllConnections(engine, editor, multiply);
 
             // Matrix connection LHS
             editor.connect(outSocketMatrix, lhs);
-            await processAndCheck(engine, editor, multiply, { lhs: sockets.matrix, rhs: sockets.scalarOrMatrix, output: sockets.matrix });
-            expect( () => editor.connect(outSocketVector, rhs) ).toThrow('Sockets not compatible');
+            await processAndCheck(engine, editor, multiply, { lhs: sockets.matrix, rhs: sockets.anything, output: sockets.vectorOrMatrix });
             editor.connect(outSocketScalar, rhs);
             await processAndCheck(engine, editor, multiply, { lhs: sockets.matrix, rhs: sockets.scalar, output: sockets.matrix });
+            await removeAllConnections(engine, editor, multiply);
+            editor.connect(outSocketMatrix, lhs);
+            editor.connect(outSocketVector, rhs);
+            await processAndCheck(engine, editor, multiply, { lhs: sockets.matrix, rhs: sockets.vector, output: sockets.vector });
             await removeAllConnections(engine, editor, multiply);
             editor.connect(outSocketMatrix, lhs);
             editor.connect(outSocketMatrix, rhs);
@@ -402,13 +407,10 @@ describe('BasicOperationComponent', () => {
 
             // Matrix connection RHS
             editor.connect(outSocketMatrix, rhs);
-            await processAndCheck(engine, editor, multiply, { lhs: sockets.anything, rhs: sockets.matrix, output: sockets.vectorOrMatrix });
+            await processAndCheck(engine, editor, multiply, { lhs: sockets.scalarOrMatrix, rhs: sockets.matrix, output: sockets.matrix });
+            expect( () => editor.connect(outSocketVector, lhs) ).toThrow('Sockets not compatible');
             editor.connect(outSocketScalar, lhs);
             await processAndCheck(engine, editor, multiply, { lhs: sockets.scalar, rhs: sockets.matrix, output: sockets.matrix });
-            await removeAllConnections(engine, editor, multiply);
-            editor.connect(outSocketMatrix, rhs);
-            editor.connect(outSocketVector, lhs);
-            await processAndCheck(engine, editor, multiply, { lhs: sockets.vector, rhs: sockets.matrix, output: sockets.vector });
             await removeAllConnections(engine, editor, multiply);
             editor.connect(outSocketMatrix, rhs);
             editor.connect(outSocketMatrix, lhs);
@@ -421,9 +423,9 @@ describe('BasicOperationComponent', () => {
             const lhs = divide.inputs.get('lhs');
             const rhs = divide.inputs.get('rhs');
             const out = divide.inputs.get('result');
-            const outSocketScalar = scalar.outputs.get('scalar');
-            const outSocketVector = vector.outputs.get('vector');
-            const outSocketMatrix = matrix.outputs.get('matrix');
+            const outSocketScalar = scalar.outputs.get('value');
+            const outSocketVector = vector.outputs.get('value');
+            const outSocketMatrix = matrix.outputs.get('value');
 
             await processAndCheck(engine, editor, divide, { lhs: sockets.anything, rhs: sockets.scalar, output: sockets.anything });
 
@@ -460,10 +462,10 @@ describe('BasicOperationComponent', () => {
         await processAndCheck(engine, editor, subtract, { lhs: sockets.anything, rhs: sockets.anything, output: sockets.anything });
         await processAndCheck(engine, editor, divide,   { lhs: sockets.anything, rhs: sockets.scalar,   output: sockets.anything });
 
-        // Add      (scalar) -> (scalar, scalar) Multiply: fine, output = scalar
-        // Multiply (scalar) -> (scalar, scalar) Subtract: fine, output = scalar
-        // Subtract (scalar) -> (scalar, scalar) Divide:   fine, output = scalar
-        editor.connect(scalar.outputs.get('scalar'), add.inputs.get('lhs'));
+        // Add      (scalar, scalar) -> (scalar) Multiply: ok, output = scalar
+        // Multiply (scalar, scalar) -> (scalar) Subtract: ok, output = scalar
+        // Subtract (scalar, scalar) -> (scalar) Divide:   ok, output = scalar
+        editor.connect(scalar.outputs.get('value'), add.inputs.get('lhs'));
         await processAndCheck(engine, editor, add,      { lhs: sockets.scalar, rhs: sockets.scalar, output: sockets.scalar });
         await processAndCheck(engine, editor, multiply, { lhs: sockets.scalar, rhs: sockets.scalar, output: sockets.scalar });
         await processAndCheck(engine, editor, subtract, { lhs: sockets.scalar, rhs: sockets.scalar, output: sockets.scalar });
@@ -474,25 +476,25 @@ describe('BasicOperationComponent', () => {
         checkConnectionCounts(divide,   { lhs: 1, rhs: 1, output: 0 });
         await removeAllConnections(engine, editor, scalar);
 
-        // Add      (vector) -> (vector, vector) Multiply: invalid, disconnect RHS, output = vector
-        // Multiply (vector) -> (vector, vector) Subtract: fine, output = vector
-        // Subtract (vector) -> (vector, vector) Divide:   invalid, disconnect RHS, output = vector
-        editor.connect(vector.outputs.get('vector'), add.inputs.get('lhs'));
-        await processAndCheck(engine, editor, add,      { lhs: sockets.vector, rhs: sockets.vector,         output: sockets.vector });
-        await processAndCheck(engine, editor, multiply, { lhs: sockets.vector, rhs: sockets.scalarOrMatrix, output: sockets.vector });
-        await processAndCheck(engine, editor, subtract, { lhs: sockets.vector, rhs: sockets.vector,         output: sockets.vector });
-        await processAndCheck(engine, editor, divide,   { lhs: sockets.vector, rhs: sockets.scalar,         output: sockets.vector });
+        // Add      (vector, vector) -> (vector) Multiply: invalid, disconnect RHS, output = vector
+        // Multiply (vector, vector) -> (vector) Subtract: ok,                      output = vector
+        // Subtract (vector, vector) -> (vector) Divide:   invalid, disconnect RHS, output = vector
+        editor.connect(vector.outputs.get('value'), add.inputs.get('lhs'));
+        await processAndCheck(engine, editor, add,      { lhs: sockets.vector, rhs: sockets.vector, output: sockets.vector });
+        await processAndCheck(engine, editor, multiply, { lhs: sockets.vector, rhs: sockets.scalar, output: sockets.vector });
+        await processAndCheck(engine, editor, subtract, { lhs: sockets.vector, rhs: sockets.vector, output: sockets.vector });
+        await processAndCheck(engine, editor, divide,   { lhs: sockets.vector, rhs: sockets.scalar, output: sockets.vector });
         checkConnectionCounts(add,      { lhs: 1, rhs: 0, output: 1 });
-        checkConnectionCounts(multiply, { lhs: 1, rhs: 0, output: 2 }); // RHS connection is removed LHS 'vector' requires RHS 'scalar or matrix'
+        checkConnectionCounts(multiply, { lhs: 1, rhs: 0, output: 2 }); // RHS connection is removed LHS 'vector' requires RHS 'scalar'
         checkConnectionCounts(subtract, { lhs: 1, rhs: 1, output: 1 });
         checkConnectionCounts(divide,   { lhs: 1, rhs: 0, output: 0 }); // RHS connection is removed LHS 'vector' requires RHS 'scalar'
         await removeAllConnections(engine, editor, vector);
         editor.connect(add.outputs.get('result'), multiply.inputs.get('rhs')); // Reconnect tho add -> multiply connection that was just removed
 
-        // Add      (matrix) -> (matrix, matrix) Multiply: fine, output = matrix
-        // Multiply (matrix) -> (matrix, matrix) Subtract: fine, output = matrix
-        // Subtract (matrix) -> (matrix, matrix) Divide:   invalid, disconnect RHS, output = matrix
-        editor.connect(matrix.outputs.get('matrix'), add.inputs.get('rhs'));
+        // Add      (matrix, matrix) -> (matrix) Multiply: ok,                      output = matrix
+        // Multiply (matrix, matrix) -> (matrix) Subtract: ok,                      output = matrix
+        // Subtract (matrix, matrix) -> (matrix) Divide:   invalid, disconnect RHS, output = matrix
+        editor.connect(matrix.outputs.get('value'), add.inputs.get('rhs'));
         await processAndCheck(engine, editor, add,      { lhs: sockets.matrix, rhs: sockets.matrix, output: sockets.matrix });
         await processAndCheck(engine, editor, multiply, { lhs: sockets.matrix, rhs: sockets.matrix, output: sockets.matrix });
         await processAndCheck(engine, editor, subtract, { lhs: sockets.matrix, rhs: sockets.matrix, output: sockets.matrix });
