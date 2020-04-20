@@ -62,6 +62,10 @@ export default {
                         const transposed = mat4.create();
                         mat4.transpose(transposed, this.value); // gl-matrix is column-major, but I am row-major; transpose before calculating
                         vec3.transformMat4(out, baseVec, transposed);
+                        if (vec3.length(out) <= 1e-6) {
+                            // 0-length vectors cause console warnings because the matrix can't be inverted for rendering
+                            continue;
+                        }
                         /* console.log('adding vector', out, baseVec, this.value); */
                         const pos = vec3.create();
                         vectors.push(new FieldVector(out, vec3.add(pos, this.pos, baseVec)));
