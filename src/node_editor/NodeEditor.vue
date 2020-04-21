@@ -127,22 +127,22 @@ export default {
             console.log('adding or removing advanced render controls', newVal);
             const actionStack = [];
             const graphTraveler = new GraphTraveler(this.engine, this.editor);
-            graphTraveler.applyToAllEditorNodes(node => {
-                if (node.inputs.has('pos')) { // TODO make this more generic
+            graphTraveler.applyToAllNodes((engineNode, editorNode) => {
+                if (engineNode.inputs.has('pos')) { // TODO make this more generic
                     if (newVal) {
-                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, node);
+                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, engineNode);
                         actionStack.push(renderControlsAction);
                     } else {
                         // Reset origin
                         // TODO probably should be bundled in with RemoveAdvancedRenderControlsAction, but it's convenient to
                         //      use FieldChangeAction (which I could still do inside of RemoveAdvancedRenderControlsAction)
-                        const resetOriginAction = new actions.FieldChangeAction(node.data['pos'], [0, 0, 0], val => {
-                            node.data['pos'] = val;
+                        const resetOriginAction = new actions.FieldChangeAction(engineNode.data['pos'], [0, 0, 0], val => {
+                            engineNode.data['pos'] = val;
                         });
                         actionStack.push(resetOriginAction);
 
-                        // console.log('Pushing RemoveAdvancedRenderControlsAction', this.editor, node);
-                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, node);
+                        // console.log('Pushing RemoveAdvancedRenderControlsAction', this.editor, engineNode);
+                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, engineNode);
                         actionStack.push(renderControlsAction);
                     }
                 }

@@ -8,26 +8,14 @@ export class GraphTraveler {
         this.editor = editor;
     }
 
-    applyToAllEngineNodes(fn) {
-        this._applyToAllNodes(fn, false);
-    }
-
-    applyToAllEditorNodes(fn) {
-        this._applyToAllNodes(fn, true);
-    }
-
-    _applyToAllNodes(fn, applyToEditorNodes) {
+    applyToAllNodes(fn) {
         if (this.engine.data == null) {
             return;
         }
 
         for (const node of this._topologicalSort(Object.values(this.engine.data.nodes))) {
-            if (applyToEditorNodes) {
-                const editorNode = getEditorNode(this.editor, node);
-                fn(editorNode);
-            } else {
-                fn(node);
-            }
+            const editorNode = getEditorNode(this.editor, node);
+            fn(node, editorNode);
         }
     }
 
