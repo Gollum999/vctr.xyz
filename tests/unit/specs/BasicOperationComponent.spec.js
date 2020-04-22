@@ -201,6 +201,7 @@ function checkSocketTypes(node, {lhs, rhs, output}) {
 }
 
 async function processAndCheck(engine, editor, node, {lhs, rhs, output}) {
+    module.updateAllSockets(engine, editor);
     await engine.process(editor.toJSON());
     checkSocketTypes(node, {lhs, rhs, output});
 }
@@ -213,6 +214,7 @@ function checkConnectionCounts(node, {lhs, rhs, output}) {
 
 async function removeAllConnections(engine, editor, node) {
     node.getConnections().forEach(c => editor.removeConnection(c));
+    module.updateAllSockets(engine, editor);
     await engine.process(editor.toJSON());
 }
 
@@ -232,12 +234,12 @@ describe('BasicOperationComponent', () => {
             'scalar':             new allComponents.ValueComponent(vuetify, ValueType.SCALAR),
             'vector':             new allComponents.ValueComponent(vuetify, ValueType.VECTOR),
             'matrix':             new allComponents.ValueComponent(vuetify, ValueType.MATRIX),
-            'operation-add':      new allComponents.BasicOperationComponent('ADD'),
-            'operation-subtract': new allComponents.BasicOperationComponent('SUBTRACT'),
-            'operation-multiply': new allComponents.BasicOperationComponent('MULTIPLY'),
-            'operation-divide':   new allComponents.BasicOperationComponent('DIVIDE'),
-            'operation-dot':      new allComponents.BasicOperationComponent('DOT'),
-            'operation-cross':    new allComponents.BasicOperationComponent('CROSS'),
+            'operation-add':      new allComponents.BasicOperationComponent('Add'),
+            'operation-subtract': new allComponents.BasicOperationComponent('Subtract'),
+            'operation-multiply': new allComponents.BasicOperationComponent('Multiply'),
+            'operation-divide':   new allComponents.BasicOperationComponent('Divide'),
+            'operation-dot':      new allComponents.BasicOperationComponent('Dot Product'),
+            'operation-cross':    new allComponents.BasicOperationComponent('Cross Product'),
         };
         Object.keys(components).map(key => {
             editor.register(components[key]);
@@ -264,6 +266,7 @@ describe('BasicOperationComponent', () => {
     let scalar, vector, matrix, add, subtract, multiply, divide, dot, cross;
     beforeEach(async () => {
         editor.clear();
+        await engine.process(editor.toJSON()); // Make sure the engine is updated too, otherwise node IDs can get out of sync
 
         editor.addNode(scalar   = await components['scalar'].createNode({'value': [5]}));
         editor.addNode(vector   = await components['vector'].createNode({'value': [1, 2, 3]}));

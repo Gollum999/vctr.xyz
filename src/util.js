@@ -84,6 +84,7 @@ export default {
         return Array.from(x).some(val => y.has(val));
     },
 
+    // TODO lodash already supports a lot of these
     // What are the common elements between x and y?
     intersection(x, y) {
         return new Set([...x].filter(val => y.has(val)));

@@ -5,7 +5,7 @@ import Rete from 'rete';
 import NodeRenderer from './NodeRenderer.vue';
 import sockets from './sockets';
 import util from '../util';
-import nodeUtil from './node_util';
+import nodeUtil, { GraphTraveler } from './node_util';
 
 const invalid = 'INVALID'; // Sentinel indicating that the specified combination should never happen (raise an error if it does)
 const ignore = 'IGNORE'; // Sentinel indicating that no changes need to be made
@@ -156,9 +156,65 @@ function _removeIoConnectionsIfIncompatible(editor, io, isInput) {
         if (!util.intersects(socketTypes, typesFromInput)) {
             // console.log(`TEST ${isInput ? 'input' : 'output'} connection incompatible, REMOVING`);
             // console.log(socketTypes, typesFromInput, connection);
+            // TODO this puts itself into the undo history *after* the connection that triggered this, so undoing will fail since socket
+            //      type has changed.  Need to hijack the default 'connectioncreated' event or something
             editor.removeConnection(connection); // TODO dangerous to call this while iterating over connections?
         }
     }
+}
+
+export function updateAllSockets(engine, editor) {
+    const graphTraveler = new GraphTraveler(engine, editor);
+    graphTraveler.applyToAllNodes((engineNode, editorNode) => {
+        const operation = Operation[engineNode.name];
+        if (_.isNil(operation)) {
+            return;
+        }
+
+        // console.log(`BasicOperationComponent updateAllSockets (${editorNode.name})`);
+        // console.log(this.editor);
+        // console.log(engineNode);
+        // console.log(inputs);
+        // console.log(outputs);
+        // console.log(editorNode);
+        // console.log(editorNode.inputs);
+        // console.log(editorNode.outputs);
+
+        const inputArray = Array.from(editorNode.inputs);
+        // console.log(inputArray);
+
+        // const hasDynamicInputSockets = !_.isNil(operation.lhsToRhsTypeMap) || !_.isNil(operation.rhsToLhsTypeMap);
+        // const hasDynamicOutputSocket = !_.isNil(operation.inputToOutputTypeMap);
+
+        // TODO can probably be more efficient here
+        const anyConnectionEmpty = (inputArray.some(([name, input]) => {
+            // console.log(`TEST ${editorNode.name} connection empty, flagging for update`);
+            return _.isEmpty(input.connections);
+        }));
+
+        const anySocketTypeMismatch = (inputArray.some(([name, input]) => {
+            console.assert(input.connections.length <= 1); // Enforced by editor
+            if (_.isEmpty(input.connections)) {
+                return false;
+            }
+            const connection = input.connections[0];
+            // TODO doesn't account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
+            // TODO checking by socket name is overlay aggressive; could instead check for type subset
+            return connection.input.socket.name !== connection.output.socket.name;
+        }));
+
+        // const needsUpdate = hasDynamicInputSockets && (anyConnectionEmpty || anySocketTypeMismatch); // TODO dynamic also could just mean that the socket can go from 'anything' to input type
+        const needsUpdateFromInputs = anyConnectionEmpty || anySocketTypeMismatch;
+        // console.log('TEST', editorNode.name, 'needs input update?', needsUpdateFromInputs);
+        if (needsUpdateFromInputs) {
+        // if (true) {
+            // First, update each input socket based on its connection and based on what types the current operation allows
+            operation.updateInputSocketTypes(editor, editorNode);
+        }
+
+        // Then update output socket type based on input socket types
+        operation.updateOutputSocketTypes(editor, editorNode);
+    });
 }
 
 class BaseOperation {
@@ -458,13 +514,14 @@ class CrossOperation extends BaseOperation {
     }
 }
 
-const Operation = Object.freeze({
-    ADD:      AddOperation,
-    SUBTRACT: SubtractOperation,
-    MULTIPLY: MultiplyOperation,
-    DIVIDE:   DivideOperation,
-    DOT:      DotOperation,
-    CROSS:    CrossOperation,
+// TODO Hack, clean this up; all these operations no longer need to be Rete Components for the most part
+export const Operation = Object.freeze({
+    'Add':           AddOperation,
+    'Subtract':      SubtractOperation,
+    'Multiply':      MultiplyOperation,
+    'Divide':        DivideOperation,
+    'Dot Product':   DotOperation,
+    'Cross Product': CrossOperation,
 });
 
 export class BasicOperationComponent extends Rete.Component {
@@ -485,51 +542,7 @@ export class BasicOperationComponent extends Rete.Component {
 
     worker(engineNode, inputs, outputs) {
         const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
-
-        // console.log(`TEST BasicOperationComponent worker (${editorNode.name})`);
-        // console.log(this.editor);
-        // console.log(engineNode);
-        // console.log(inputs);
-        // console.log(outputs);
-        // console.log(editorNode);
-        // console.log(editorNode.inputs);
-        // console.log(editorNode.outputs);
-
         const operation = Operation[this.opName];
-        const inputArray = Array.from(editorNode.inputs);
-        // console.log(inputArray);
-
-        // const hasDynamicInputSockets = !_.isNil(operation.lhsToRhsTypeMap) || !_.isNil(operation.rhsToLhsTypeMap);
-        // const hasDynamicOutputSocket = !_.isNil(operation.inputToOutputTypeMap);
-
-        // TODO can probably be more efficient here
-        const anyConnectionEmpty = (inputArray.some(([name, input]) => {
-            // console.log(`TEST ${editorNode.name} connection empty, flagging for update`);
-            return _.isEmpty(input.connections);
-        }));
-
-        const anySocketTypeMismatch = (inputArray.some(([name, input]) => {
-            console.assert(input.connections.length <= 1); // Enforced by editor
-            if (_.isEmpty(input.connections)) {
-                return false;
-            }
-            const connection = input.connections[0];
-            // TODO doesn't account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
-            // TODO checking by socket name is overlay aggressive; could instead check for type subset
-            return connection.input.socket.name !== connection.output.socket.name;
-        }));
-
-        // const needsUpdate = hasDynamicInputSockets && (anyConnectionEmpty || anySocketTypeMismatch); // TODO dynamic also could just mean that the socket can go from 'anything' to input type
-        const needsUpdateFromInputs = anyConnectionEmpty || anySocketTypeMismatch;
-        // console.log('TEST', editorNode.name, 'needs input update?', needsUpdateFromInputs);
-        if (needsUpdateFromInputs) {
-        // if (true) {
-            // First, update each input socket based on its connection and based on what types the current operation allows
-            operation.updateInputSocketTypes(this.editor, editorNode);
-        }
-
-        // Then update output socket type based on input socket types
-        operation.updateOutputSocketTypes(this.editor, editorNode);
 
         const lhsValue = nodeUtil.getInputValue('lhs', inputs, engineNode.data);
         const rhsValue = nodeUtil.getInputValue('rhs', inputs, engineNode.data);
@@ -540,8 +553,8 @@ export class BasicOperationComponent extends Rete.Component {
         const lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket);
         const rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
         // console.log('TEST type AFTER updateSocketTypesForOperationCompatibility: LHS', lhsTypes, 'RHS', rhsTypes);
-        console.assert(lhsTypes.size === 1, lhsTypes);
-        console.assert(rhsTypes.size === 1, rhsTypes);
+        console.assert(lhsTypes.size === 1, [...lhsTypes]);
+        console.assert(rhsTypes.size === 1, [...rhsTypes]);
 
         // console.log(lhsValue, rhsValue);
         let result = operation.calculate({type: Array.from(lhsTypes)[0], value: lhsValue}, {type: Array.from(rhsTypes)[0], value: rhsValue});

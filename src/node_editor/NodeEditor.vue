@@ -70,6 +70,7 @@
 </template>
 
 <script>
+// import _ from 'lodash';
 import Rete from 'rete';
 import ConnectionPlugin from 'rete-connection-plugin';
 import HistoryPlugin from 'rete-history-plugin';
@@ -79,6 +80,7 @@ import allComponents from './components';
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 import util from '../util';
+import { updateAllSockets } from './BasicOperationComponent';
 import actions from '../history_actions';
 import { GraphTraveler, ValueType } from './node_util';
 import Rect from './Rect';
@@ -112,12 +114,12 @@ export default {
                 'vector':             new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
                 'matrix':             new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
 
-                'operation-add':      new allComponents.BasicOperationComponent('ADD'),
-                'operation-subtract': new allComponents.BasicOperationComponent('SUBTRACT'),
-                'operation-multiply': new allComponents.BasicOperationComponent('MULTIPLY'),
-                'operation-divide':   new allComponents.BasicOperationComponent('DIVIDE'),
-                'operation-dot':      new allComponents.BasicOperationComponent('DOT'),
-                'operation-cross':    new allComponents.BasicOperationComponent('CROSS'),
+                'operation-add':      new allComponents.BasicOperationComponent('Add'),
+                'operation-subtract': new allComponents.BasicOperationComponent('Subtract'),
+                'operation-multiply': new allComponents.BasicOperationComponent('Multiply'),
+                'operation-divide':   new allComponents.BasicOperationComponent('Divide'),
+                'operation-dot':      new allComponents.BasicOperationComponent('Dot Product'),
+                'operation-cross':    new allComponents.BasicOperationComponent('Cross Product'),
             },
         };
     },
@@ -449,6 +451,11 @@ export default {
 
             EventBus.$emit('node_engine_processed', this.editor.toJSON());
         },
+
+        async handleConnectionChanged() {
+            console.log('NodeEditor handleConnectionChanged');
+            updateAllSockets(this.engine, this.editor);
+        },
     },
 
     mounted() {
@@ -491,10 +498,14 @@ export default {
             // Don't set up undo/redo callbacks until after finished loading to prevent user from undoing load
             this.editor.use(HistoryPlugin, { keyboard: true });
 
+            this.editor.on('connectioncreated connectionremoved', this.handleConnectionChanged);
+
             // Don't trigger any of these events until after the initial load is done
             // TODO still not perfect, doesn't prevent multiple changes from user getting queued up; is there something like Java's 'synchronized' keyword?
             this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved', this.handleEngineProcess);
-            this.editor.trigger('process'); // Process at least once to make sure the viewports are updated // TODO figure out where this really belongs; the order of events here is not very clear
+            await this.handleEngineProcess(); // Process at least once to make sure the viewports are updated // TODO figure out where this really belongs; the order of events here is not very clear
+
+            await this.handleConnectionChanged(); // Run once to set up socket types
         })();
 
         this.editor.on('nodecreated', node => {
