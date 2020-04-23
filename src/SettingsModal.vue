@@ -127,7 +127,7 @@ export default {
                 // console.log('SettingsModal watcher for', key, newVal, oldVal);
                 // Bit of a hack -- using Rete's 'History' plugin for ALL undo/redo
                 const action = new FieldChangeAction(oldVal, newVal, val => {
-                    this.updateSetting(key, newVal);
+                    this.updateSetting(key, val);
                 });
                 action.do();
                 EventBus.$emit('addhistory', action);
