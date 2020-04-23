@@ -363,7 +363,12 @@ export default {
         clearAllNodes() {
             console.log('clearAllNodes');
             if (window.confirm('Are you sure you want to clear all nodes?')) {
-                this.editor.clear();
+                const clearAllNodesAction = new actions.MultiAction([
+                    new actions.RemoveAllConnectionsAction(this.editor),
+                    new actions.RemoveAllNodesAction(this.editor),
+                ]);
+                clearAllNodesAction.do();
+                EventBus.$emit('addhistory', clearAllNodesAction);
             }
         },
 

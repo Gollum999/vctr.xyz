@@ -7,15 +7,9 @@ export class FieldChangeAction extends Action {
         this.newValue = newValue;
         this.setter = setter;
     }
-    do() {
-        this.redo();
-    }
-    undo() {
-        this.setter(this.oldValue);
-    }
-    redo() {
-        this.setter(this.newValue);
-    }
+    do() { this.setter(this.newValue); }
+    undo() { this.setter(this.oldValue); }
+    redo() { this.setter(this.newValue); }
 }
 
 // Add/RemoveConnectionAction are copied (and slightly modified) from rete-history-plugin
@@ -50,15 +44,9 @@ export class AddConnectionAction extends Action {
         super();
         this.helper = new ConnectionActionHelper(editor, connection);
     }
-    do() {
-        this.helper.add();
-    }
-    undo() {
-        this.helper.remove();
-    }
-    redo() {
-        this.helper.add();
-    }
+    do() { this.helper.add(); }
+    undo() { this.helper.remove(); }
+    redo() { this.helper.add(); }
 }
 
 export class RemoveConnectionAction extends Action {
@@ -66,15 +54,54 @@ export class RemoveConnectionAction extends Action {
         super();
         this.helper = new ConnectionActionHelper(editor, connection);
     }
-    do() {
-        this.helper.remove();
+    do() { this.helper.remove(); }
+    undo() { this.helper.add(); }
+    redo() { this.helper.remove(); }
+}
+
+// Likewise, these are copied and modified from rete-history-plugin
+class NodeAction extends Action {
+    constructor(editor, node) {
+        super();
+        this.editor = editor;
+        this.node = node;
     }
-    undo() {
-        this.helper.add();
+}
+
+export class AddNodeAction extends NodeAction {
+    do() { this.editor.addNode(this.node); }
+    undo() { this.editor.removeNode(this.node); }
+    redo() { this.editor.addNode(this.node); }
+}
+
+export class RemoveNodeAction extends NodeAction {
+    do() { this.editor.removeNode(this.node); }
+    undo() { this.editor.addNode(this.node); }
+    redo() { this.editor.removeNode(this.node); }
+}
+
+export class RemoveAllNodesAction extends Action {
+    constructor(editor) {
+        super();
+        this.action = new MultiAction([
+            ...editor.nodes.map(node => new RemoveNodeAction(editor, node)),
+        ]);
     }
-    redo() {
-        this.helper.remove();
+    do() { this.action.do(); }
+    undo() { this.action.undo(); }
+    redo() { this.action.redo(); }
+}
+
+export class RemoveAllConnectionsAction extends Action {
+    constructor(editor) {
+        super();
+        this.action = new MultiAction([
+            ...Array.from(editor.view.connections.keys()).map(cxn => new RemoveConnectionAction(editor, cxn)),
+        ]);
     }
+    do() { this.action.do(); }
+    undo() { this.action.undo(); }
+    redo() { this.action.redo(); }
 }
 
 class AdvancedRenderControlsActionHelper {
@@ -117,15 +144,9 @@ export class AddAdvancedRenderControlsAction extends Action {
         super();
         this.helper = new AdvancedRenderControlsActionHelper(editor, node);
     }
-    do() {
-        this.helper.add();
-    }
-    undo() {
-        this.helper.remove();
-    }
-    redo() {
-        this.helper.add();
-    }
+    do() { this.helper.add(); }
+    undo() { this.helper.remove(); }
+    redo() { this.helper.add(); }
 }
 
 export class RemoveAdvancedRenderControlsAction extends Action {
@@ -133,15 +154,9 @@ export class RemoveAdvancedRenderControlsAction extends Action {
         super();
         this.helper = new AdvancedRenderControlsActionHelper(editor, node);
     }
-    do() {
-        this.helper.remove();
-    }
-    undo() {
-        this.helper.add();
-    }
-    redo() {
-        this.helper.remove();
-    }
+    do() { this.helper.remove(); }
+    undo() { this.helper.add(); }
+    redo() { this.helper.remove(); }
 }
 
 export class MultiAction extends Action {
@@ -171,8 +186,12 @@ export class MultiAction extends Action {
 
 export default {
     FieldChangeAction,
+    AddNodeAction,
+    RemoveNodeAction,
+    RemoveAllNodesAction,
     AddConnectionAction,
     RemoveConnectionAction,
+    RemoveAllConnectionsAction,
     AddAdvancedRenderControlsAction,
     RemoveAdvancedRenderControlsAction,
     MultiAction,
