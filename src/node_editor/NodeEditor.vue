@@ -457,7 +457,7 @@ export default {
             EventBus.$emit('node_engine_processed', this.editor.toJSON());
         },
 
-        async handleConnectionChanged() {
+        handleConnectionChanged() {
             console.log('NodeEditor handleConnectionChanged');
             updateAllSockets(this.engine, this.editor);
         },
@@ -503,14 +503,14 @@ export default {
             // Don't set up undo/redo callbacks until after finished loading to prevent user from undoing load
             this.editor.use(HistoryPlugin, { keyboard: true });
 
-            this.editor.on('connectioncreated connectionremoved', this.handleConnectionChanged);
-
             // Don't trigger any of these events until after the initial load is done
             // TODO still not perfect, doesn't prevent multiple changes from user getting queued up; is there something like Java's 'synchronized' keyword?
             this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved', this.handleEngineProcess);
             await this.handleEngineProcess(); // Process at least once to make sure the viewports are updated // TODO figure out where this really belongs; the order of events here is not very clear
 
-            await this.handleConnectionChanged(); // Run once to set up socket types
+            // Engine updates should come first because it effects the node data that we iterate over
+            this.editor.on('connectioncreated connectionremoved', this.handleConnectionChanged);
+            this.handleConnectionChanged(); // Run once to set up socket types
         })();
 
         this.editor.on('nodecreated', node => {

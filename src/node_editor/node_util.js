@@ -10,6 +10,7 @@ export class GraphTraveler {
 
     applyToAllNodes(fn) {
         if (this.engine.data == null) {
+            console.warn('[GraphTraveler.applyToAllNodes] Engine data was null', this.engine);
             return;
         }
 

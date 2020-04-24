@@ -201,8 +201,8 @@ function checkSocketTypes(node, {lhs, rhs, output}) {
 }
 
 async function processAndCheck(engine, editor, node, {lhs, rhs, output}) {
-    module.updateAllSockets(engine, editor);
     await engine.process(editor.toJSON());
+    module.updateAllSockets(engine, editor);
     checkSocketTypes(node, {lhs, rhs, output});
 }
 
@@ -214,8 +214,8 @@ function checkConnectionCounts(node, {lhs, rhs, output}) {
 
 async function removeAllConnections(engine, editor, node) {
     node.getConnections().forEach(c => editor.removeConnection(c));
-    module.updateAllSockets(engine, editor);
     await engine.process(editor.toJSON());
+    module.updateAllSockets(engine, editor);
 }
 
 describe('BasicOperationComponent', () => {

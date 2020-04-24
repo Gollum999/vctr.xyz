@@ -163,6 +163,7 @@ function _removeIoConnectionsIfIncompatible(editor, io, isInput) {
     }
 }
 
+// Engine updates have to happen *before* this because they set up the data we iterate over
 export function updateAllSockets(engine, editor) {
     const graphTraveler = new GraphTraveler(engine, editor);
     graphTraveler.applyToAllNodes((engineNode, editorNode) => {
@@ -541,7 +542,6 @@ export class BasicOperationComponent extends Rete.Component {
     }
 
     worker(engineNode, inputs, outputs) {
-        const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
         const operation = Operation[this.opName];
 
         const lhsValue = nodeUtil.getInputValue('lhs', inputs, engineNode.data);
@@ -550,14 +550,19 @@ export class BasicOperationComponent extends Rete.Component {
             return;
         }
 
-        const lhsTypes = getSocketTypes(editorNode.inputs.get('lhs').socket);
-        const rhsTypes = getSocketTypes(editorNode.inputs.get('rhs').socket);
-        // console.log('TEST type AFTER updateSocketTypesForOperationCompatibility: LHS', lhsTypes, 'RHS', rhsTypes);
-        console.assert(lhsTypes.size === 1, [...lhsTypes]);
-        console.assert(rhsTypes.size === 1, [...rhsTypes]);
+        // Bit of a hack; probably more correct to put something in node.data, or maybe  look at the type of the node on the other
+        // side of the input connection
+        function determineType(val) {
+            switch (val.length) {
+            case 1:  return 'scalar';
+            case 3:  return 'vector';
+            case 16: return 'matrix';
+            default: throw new Error(`Could not determine input type from value "${val}"`);
+            }
+        }
 
         // console.log(lhsValue, rhsValue);
-        let result = operation.calculate({type: Array.from(lhsTypes)[0], value: lhsValue}, {type: Array.from(rhsTypes)[0], value: rhsValue});
+        let result = operation.calculate({type: determineType(lhsValue), value: lhsValue}, {type: determineType(rhsValue), value: rhsValue});
         if (result instanceof Float32Array) {
             // Float32Array serializes as an object instead of a regular array; force types to be consistent
             // TODO how will this look for matrices?  should this be the receiving node's responsibility?
