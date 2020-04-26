@@ -76,9 +76,7 @@
 
 <script>
 import settingsUtil from './settings';
-import { EventBus } from './EventBus';
 import ColorPickerSetting from './ColorPickerSetting';
-import { FieldChangeAction } from './history_actions';
 import util from './util';
 
 const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too much
@@ -124,13 +122,8 @@ export default {
     watch: {
         ...Object.fromEntries([...HANDLE_HISTORY_SETTINGS_KEYS].map(function (key) {
             const handler = function (newVal, oldVal) {
-                // console.log('SettingsModal watcher for', key, newVal, oldVal);
-                // Bit of a hack -- using Rete's 'History' plugin for ALL undo/redo
-                const action = new FieldChangeAction(oldVal, newVal, val => {
-                    this.updateSetting(key, val);
-                });
-                action.do();
-                EventBus.$emit('addhistory', action);
+                this.nodeEditorSettings.save();
+                this.viewportSettings.save();
             };
             return [key, handler];
         })),
