@@ -65,8 +65,6 @@
                               v-model="nodeEditorSettings.values.defaultMatrixColor">
           Default matrix color
         </color-picker-setting>
-        <!-- TODO add confirm dialog when toggling this off, since doing so will remove some controls -->
-        <v-switch color="primary" v-model="nodeEditorSettings.values.showAdvancedRenderSettings" label="Show advanced render settings" hide-details />
       </v-tab-item>
 
     </v-tabs>
@@ -91,10 +89,8 @@ const ALL_SETTINGS_KEYS = new Set([ // TODO Can I get this dynamically?
     'nodeEditorSettings.values.defaultScalarColor',
     'nodeEditorSettings.values.defaultVectorColor',
     'nodeEditorSettings.values.defaultMatrixColor',
-    'nodeEditorSettings.values.showAdvancedRenderSettings',
 ]);
 const IGNORE_SETTINGS_KEYS = new Set([
-    'nodeEditorSettings.values.showAdvancedRenderSettings', // NodeEditor will handle the undo/redo logic
 ]);
 const HANDLE_HISTORY_SETTINGS_KEYS = util.difference(ALL_SETTINGS_KEYS, IGNORE_SETTINGS_KEYS);
 
