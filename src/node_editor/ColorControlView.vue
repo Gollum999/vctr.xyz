@@ -96,7 +96,7 @@ export default {
         colorPickerToggled(showing) {
             if (showing) {
                 /* console.log('colorPicker opened', this.color, this.prevColor); */
-                this.prevColor = Object.assign({}, this.color);
+                this.prevColor = this.color;
             } else {
                 // console.log('colorPicker toggled, emitting history', showing, this.color, this.prevColor);
                 EventBus.$emit('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
