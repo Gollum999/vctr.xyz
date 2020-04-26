@@ -130,7 +130,7 @@ export default {
             const actionStack = [];
             const graphTraveler = new GraphTraveler(this.engine, this.editor);
             graphTraveler.applyToAllNodes((engineNode, editorNode) => {
-                if (engineNode.inputs.has('pos')) { // TODO make this more generic
+                if (engineNode.inputs['pos'] != null) { // TODO make this more generic
                     if (newVal) {
                         const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, engineNode);
                         actionStack.push(renderControlsAction);
