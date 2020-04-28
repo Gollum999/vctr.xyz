@@ -80,7 +80,7 @@ import allComponents from './components';
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 import util from '../util';
-import { updateAllSockets } from './BasicOperationComponent';
+import { updateAllSockets } from './BinaryOperationComponent';
 import actions from '../history_actions';
 import { GraphTraveler, ValueType } from './node_util';
 import Rect from './Rect';
@@ -114,12 +114,12 @@ export default {
                 'vector':             new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
                 'matrix':             new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
 
-                'operation-add':      new allComponents.BasicOperationComponent('Add'),
-                'operation-subtract': new allComponents.BasicOperationComponent('Subtract'),
-                'operation-multiply': new allComponents.BasicOperationComponent('Multiply'),
-                'operation-divide':   new allComponents.BasicOperationComponent('Divide'),
-                'operation-dot':      new allComponents.BasicOperationComponent('Dot Product'),
-                'operation-cross':    new allComponents.BasicOperationComponent('Cross Product'),
+                'operation-add':      new allComponents.BinaryOperationComponent('Add'),
+                'operation-subtract': new allComponents.BinaryOperationComponent('Subtract'),
+                'operation-multiply': new allComponents.BinaryOperationComponent('Multiply'),
+                'operation-divide':   new allComponents.BinaryOperationComponent('Divide'),
+                'operation-dot':      new allComponents.BinaryOperationComponent('Dot Product'),
+                'operation-cross':    new allComponents.BinaryOperationComponent('Cross Product'),
             },
         };
     },

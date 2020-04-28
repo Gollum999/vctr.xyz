@@ -1,7 +1,7 @@
 import { ValueComponent } from './ValueComponent';
-import { BasicOperationComponent } from './BasicOperationComponent';
+import { BinaryOperationComponent } from './BinaryOperationComponent';
 
 export default {
     ValueComponent,
-    BasicOperationComponent,
+    BinaryOperationComponent,
 };

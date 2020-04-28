@@ -172,7 +172,7 @@ export function updateAllSockets(engine, editor) {
             return;
         }
 
-        // console.log(`BasicOperationComponent updateAllSockets (${editorNode.name})`);
+        // console.log(`BinaryOperationComponent updateAllSockets (${editorNode.name})`);
         // console.log(this.editor);
         // console.log(engineNode);
         // console.log(inputs);
@@ -525,7 +525,7 @@ export const Operation = Object.freeze({
     'Cross Product': CrossOperation,
 });
 
-export class BasicOperationComponent extends Rete.Component {
+export class BinaryOperationComponent extends Rete.Component {
     constructor(opName) {
         // Note that the Rete engine does some node lookups by name, so each node type must have a unique name.
         // This is especially important in here where I give the component some state; if the name is shared anywhere it will look up
