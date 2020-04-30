@@ -481,16 +481,6 @@ export default {
         EventBus.$on('split-resized', () => {
             this.editor.view.resize();
         });
-        // TODO should at least name this event something different to avoid confusion
-        EventBus.$on('addhistory', action => {
-            // Bit of a hack; prevent changes that happen as a result of undo/redo from themselves being added to the history stack
-            // (which would erase any potential redo-able actions)
-            // The History plugin already does something like this to prevent infinite recursion, but that only works within the same
-            // stack frame, whereas this works for the whole Vue tick (important when a watcher is the one adding the history)
-            if (!this.currentlyHandlingHistoryAction) {
-                this.editor.trigger('addhistory', action);
-            }
-        });
 
         Object.keys(this.components).map(key => {
             this.editor.register(this.components[key]);
@@ -502,6 +492,17 @@ export default {
 
             // Don't set up undo/redo callbacks until after finished loading to prevent user from undoing load
             this.editor.use(HistoryPlugin, { keyboard: true });
+
+            // TODO should at least name this event something different to avoid confusion
+            EventBus.$on('addhistory', action => {
+                // Bit of a hack; prevent changes that happen as a result of undo/redo from themselves being added to the history stack
+                // (which would erase any potential redo-able actions)
+                // The History plugin already does something like this to prevent infinite recursion, but that only works within the same
+                // stack frame, whereas this works for the whole Vue tick (important when a watcher is the one adding the history)
+                if (!this.currentlyHandlingHistoryAction) {
+                    this.editor.trigger('addhistory', action);
+                }
+            });
 
             // Don't trigger any of these events until after the initial load is done
             // TODO still not perfect, doesn't prevent multiple changes from user getting queued up; is there something like Java's 'synchronized' keyword?
