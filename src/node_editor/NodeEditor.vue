@@ -21,7 +21,20 @@
         <v-menu>
           <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
           <template v-slot:activator="{ on: showMenu }">
-            <v-btn fab x-small type="button" title="Add basic operation" v-on="showMenu">
+            <v-btn fab x-small type="button" title="Add unary operation" v-on="showMenu">
+              <v-icon>$vuetify.icons.operation</v-icon>
+            </v-btn>
+          </template>
+
+          <v-list dense>
+            <v-list-item @click="addNode('operation-length')">Length</v-list-item>
+            <v-list-item @click="addNode('operation-invert')">Invert</v-list-item>
+          </v-list>
+        </v-menu>
+        <v-menu>
+          <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
+          <template v-slot:activator="{ on: showMenu }">
+            <v-btn fab x-small type="button" title="Add binary operation" v-on="showMenu">
               <v-icon>$vuetify.icons.operation</v-icon>
             </v-btn>
           </template>
@@ -70,7 +83,7 @@
 </template>
 
 <script>
-// import _ from 'lodash';
+import _ from 'lodash';
 import Rete from 'rete';
 import ConnectionPlugin from 'rete-connection-plugin';
 import HistoryPlugin from 'rete-history-plugin';
@@ -80,10 +93,64 @@ import allComponents from './components';
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 import util from '../util';
-import { updateAllSockets } from './BinaryOperationComponent';
 import actions from '../history_actions';
 import { GraphTraveler, ValueType } from './node_util';
 import Rect from './Rect';
+import { UnaryOperation } from './UnaryOperationComponent';
+import { BinaryOperation } from './BinaryOperationComponent';
+
+// Engine updates have to happen *before* this because they set up the data we iterate over
+function updateAllSockets(engine, editor) {
+    const graphTraveler = new GraphTraveler(engine, editor);
+    graphTraveler.applyToAllNodes((engineNode, editorNode) => {
+        // console.log('updateAllSockets', editorNode, engineNode);
+        // console.log(inputs);
+        // console.log(outputs);
+        // console.log(editorNode.inputs);
+        // console.log(editorNode.outputs);
+        const operation = UnaryOperation[engineNode.name] || BinaryOperation[engineNode.name];
+        if (!_.isNil(operation)) {
+            _updateOperationSockets(editor, engineNode, editorNode, operation);
+        }
+    });
+}
+
+function _updateOperationSockets(editor, engineNode, editorNode, operation) {
+    const inputArray = Array.from(editorNode.inputs);
+    // console.log(inputArray);
+
+    // const hasDynamicInputSockets = !_.isNil(operation.lhsToRhsTypeMap) || !_.isNil(operation.rhsToLhsTypeMap);
+    // const hasDynamicOutputSocket = !_.isNil(operation.inputToOutputTypeMap);
+
+    // TODO can probably be more efficient here
+    const anyConnectionEmpty = (inputArray.some(([name, input]) => {
+        // console.log(`TEST ${editorNode.name} connection empty, flagging for update`);
+        return _.isEmpty(input.connections);
+    }));
+
+    const anySocketTypeMismatch = (inputArray.some(([name, input]) => {
+        console.assert(input.connections.length <= 1); // Enforced by editor
+        if (_.isEmpty(input.connections)) {
+            return false;
+        }
+        const connection = input.connections[0];
+        // TODO doesn't account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
+        // TODO checking by socket name is overlay aggressive; could instead check for type subset
+        return connection.input.socket.name !== connection.output.socket.name;
+    }));
+
+    // const needsUpdate = hasDynamicInputSockets && (anyConnectionEmpty || anySocketTypeMismatch); // TODO dynamic also could just mean that the socket can go from 'anything' to input type
+    const needsUpdateFromInputs = anyConnectionEmpty || anySocketTypeMismatch;
+    // console.log('TEST', editorNode.name, 'needs input update?', needsUpdateFromInputs);
+    if (needsUpdateFromInputs) {
+    // if (true) {
+        // First, update each input socket based on its connection and based on what types the current operation allows
+        operation.updateInputSocketTypes(editor, editorNode);
+    }
+
+    // Then update output socket type based on input socket types
+    operation.updateOutputSocketTypes(editor, editorNode);
+}
 
 export default {
     name: 'NodeEditor',
@@ -113,6 +180,9 @@ export default {
                 'scalar':             new allComponents.ValueComponent(this.$vuetify, ValueType.SCALAR),
                 'vector':             new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
                 'matrix':             new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
+
+                'operation-length':   new allComponents.UnaryOperationComponent('Length'),
+                'operation-invert':   new allComponents.UnaryOperationComponent('Invert'),
 
                 'operation-add':      new allComponents.BinaryOperationComponent('Add'),
                 'operation-subtract': new allComponents.BinaryOperationComponent('Subtract'),
@@ -230,6 +300,8 @@ export default {
                 });
                 break;
             }
+            case 'operation-length':
+            case 'operation-invert':
             case 'operation-add':
             case 'operation-subtract':
             case 'operation-multiply':
