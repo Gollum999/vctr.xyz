@@ -201,7 +201,7 @@ export default {
                 const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultScalarColor;
                 // TODO need a factory or something for these
                 node = await this.components['scalar'].createNode({
-                    'color': { color: color, visible: true },
+                    'color': { color: color, visible: false },
                     'value': [1],
                     'pos': [0, 0, 0],
                 });
@@ -219,7 +219,7 @@ export default {
             case 'matrix': {
                 const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultMatrixColor;
                 node = await this.components['matrix'].createNode({
-                    'color': { color: color, visible: true },
+                    'color': { color: color, visible: false },
                     'value': [
                         1, 0, 0, 0,
                         0, 1, 0, 0,
