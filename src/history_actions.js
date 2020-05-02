@@ -26,13 +26,13 @@ class ConnectionActionHelper {
         this.connection = connection;
     }
     add() {
-        // console.log('ConnectionActionHelper redo, connecting', this.editor, this.connection);
+        // console.log('ConnectionActionHelper connecting', this.editor, this.connection);
         this.editor.connect(this.connection.output, this.connection.input);
-        // console.log('ConnectionActionHelper redo, reassigning connection', this.connection);
+        // console.log('ConnectionActionHelper reassigning connection', this.connection);
         this.connection = reassignConnection(this.connection);
     }
     remove() {
-        // console.log('ConnectionActionHelper undo, removing', this.editor, this.connection);
+        // console.log('ConnectionActionHelper removing', this.editor, this.connection);
         // TODO: 'connectioncreated'/'connectionremoved' events automatically add themselves to the history...
         //       May need to fork the entire history plugin myself to work around this and avoid duplicate events
         this.editor.removeConnection(this.connection);
@@ -57,6 +57,34 @@ export class RemoveConnectionAction extends Action {
     do() { this.helper.remove(); }
     undo() { this.helper.add(); }
     redo() { this.helper.remove(); }
+}
+
+export class RemoveAllNodeInputConnectionsAction extends Action {
+    constructor(editor, node) {
+        super();
+        this.action = new MultiAction([
+            ...Array.from(node.inputs.values()).map(io => {
+                return io.connections.map(cxn => new RemoveConnectionAction(editor, cxn));
+            }).flat(),
+        ]);
+    }
+    do() { this.action.do(); }
+    undo() { this.action.undo(); }
+    redo() { this.action.redo(); }
+}
+
+export class RemoveAllNodeOutputConnectionsAction extends Action {
+    constructor(editor, node) {
+        super();
+        this.action = new MultiAction([
+            ...Array.from(node.outputs.values()).map(io => {
+                return io.connections.map(cxn => new RemoveConnectionAction(editor, cxn));
+            }).flat(),
+        ]);
+    }
+    do() { this.action.do(); }
+    undo() { this.action.undo(); }
+    redo() { this.action.redo(); }
 }
 
 // Likewise, these are copied and modified from rete-history-plugin
@@ -191,6 +219,8 @@ export default {
     RemoveAllNodesAction,
     AddConnectionAction,
     RemoveConnectionAction,
+    RemoveAllNodeInputConnectionsAction,
+    RemoveAllNodeOutputConnectionsAction,
     RemoveAllConnectionsAction,
     AddAdvancedRenderControlsAction,
     RemoveAdvancedRenderControlsAction,

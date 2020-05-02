@@ -6,6 +6,9 @@ import sockets from './sockets';
 import util, { s } from './operation_util';
 import NodeRenderer from './NodeRenderer.vue';
 import nodeUtil from './node_util';
+import { WarningControl, CalculationError } from './WarningControl.js';
+import { RemoveAllNodeOutputConnectionsAction } from '../history_actions.js';
+import { EventBus } from '../EventBus';
 
 class BaseOperation {
     static title = null;
@@ -19,9 +22,12 @@ class BaseOperation {
         return `A ${this.symbol} B`;
     }
 
-    static setupSockets(node) {
+    static setupSockets(editor, node) {
         node.addInput(new Rete.Input('lhs', 'A', sockets[util.socketTypeListToSocketName(this.defaultLhsSockets)]));
         node.addInput(new Rete.Input('rhs', 'B', sockets[util.socketTypeListToSocketName(this.defaultRhsSockets)]));
+
+        node.addControl(new WarningControl(editor, 'warning', 1));
+
         node.addOutput(new Rete.Output('result', this.getOutputName(), sockets[util.socketTypeListToSocketName(this.defaultOutputSockets)]));
     }
 
@@ -247,8 +253,10 @@ class DivideOperation extends BaseOperation {
     };
 
     static calculate(lhs, rhs) {
-        // TODO handle division by 0 here
         if (rhs.type === 'scalar') {
+            if (rhs.value[0] === 0) {
+                throw new CalculationError('Division by zero');
+            }
             if (lhs.type === 'scalar') {
                 return [lhs.value[0] / rhs.value[0]];
             } else if (lhs.type === 'vector') {
@@ -326,7 +334,7 @@ export class BinaryOperationComponent extends Rete.Component {
     }
 
     builder(node) {
-        BinaryOperation[this.opName].setupSockets(node);
+        BinaryOperation[this.opName].setupSockets(this.editor, node);
         return node;
     }
 
@@ -351,7 +359,22 @@ export class BinaryOperationComponent extends Rete.Component {
         }
 
         // console.log(lhsValue, rhsValue);
-        let result = operation.calculate({type: determineType(lhsValue), value: lhsValue}, {type: determineType(rhsValue), value: rhsValue});
+        const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
+        let result;
+        try {
+            result = operation.calculate({type: determineType(lhsValue), value: lhsValue}, {type: determineType(rhsValue), value: rhsValue});
+            editorNode.controls.get('warning').setWarning('');
+        } catch (e) {
+            if (e instanceof CalculationError) {
+                editorNode.controls.get('warning').setWarning(e.message);
+                // TODO merge with the action that caused this, so both things can be undone in one step
+                const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
+                action.do();
+                EventBus.$emit('addhistory', action);
+            } else {
+                throw e;
+            }
+        }
         if (result instanceof Float32Array) {
             // Float32Array serializes as an object instead of a regular array; force types to be consistent
             // TODO how will this look for matrices?  should this be the receiving node's responsibility?

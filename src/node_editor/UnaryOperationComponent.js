@@ -6,6 +6,9 @@ import sockets from './sockets';
 import util, { s } from './operation_util';
 import NodeRenderer from './NodeRenderer.vue';
 import nodeUtil from './node_util';
+import { WarningControl, CalculationError } from './WarningControl.js';
+import { RemoveAllNodeOutputConnectionsAction } from '../history_actions.js';
+import { EventBus } from '../EventBus';
 
 class BaseOperation {
     static title = null;
@@ -21,8 +24,9 @@ class BaseOperation {
         throw new Error('Not implemented');
     }
 
-    static setupSockets(node) {
+    static setupSockets(editor, node) {
         node.addInput(new Rete.Input('input', this.getInputName(), sockets[util.socketTypeListToSocketName(this.defaultInputSockets)]));
+        node.addControl(new WarningControl(editor, 'warning', 1));
         // TODO change socket names for consistency?
         node.addOutput(new Rete.Output('output', this.getOutputName(), sockets[util.socketTypeListToSocketName(this.defaultOutputSockets)]));
     }
@@ -127,8 +131,12 @@ class InvertOperation extends BaseOperation {
 
     static calculate(input) {
         if (input.type === 'matrix') {
-            let out = mat4.create();
-            return mat4.invert(out, input.value);
+            const out = mat4.create();
+            const result = mat4.invert(out, input.value);
+            if (result === null) {
+                throw new CalculationError('Determinant is 0; matrix cannot be inverted');
+            }
+            return result;
         }
         throw new Error(`${this.title} unsupported input type`, input.type);
     }
@@ -152,7 +160,7 @@ export class UnaryOperationComponent extends Rete.Component {
     }
 
     builder(node) {
-        UnaryOperation[this.opName].setupSockets(node);
+        UnaryOperation[this.opName].setupSockets(this.editor, node);
         return node;
     }
 
@@ -160,7 +168,7 @@ export class UnaryOperationComponent extends Rete.Component {
         const operation = UnaryOperation[this.opName];
 
         const inputValue = nodeUtil.getInputValue('input', inputs, engineNode.data);
-        console.log('UnaryOperationComponent worker', operation, inputValue);
+        // console.log('UnaryOperationComponent worker', operation, inputValue);
         if (_.isNil(inputValue)) {
             return;
         }
@@ -177,13 +185,28 @@ export class UnaryOperationComponent extends Rete.Component {
         }
 
         // console.log(inputValue);
-        let result = operation.calculate({type: determineType(inputValue), value: inputValue});
+        const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
+        let result;
+        try {
+            result = operation.calculate({type: determineType(inputValue), value: inputValue});
+            editorNode.controls.get('warning').setWarning('');
+        } catch (e) {
+            if (e instanceof CalculationError) {
+                editorNode.controls.get('warning').setWarning(e.message);
+                // TODO merge with the action that caused this, so both things can be undone in one step
+                const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
+                action.do();
+                EventBus.$emit('addhistory', action);
+            } else {
+                throw e;
+            }
+        }
         if (result instanceof Float32Array) {
             // Float32Array serializes as an object instead of a regular array; force types to be consistent
             // TODO how will this look for matrices?  should this be the receiving node's responsibility?
             result = Array.from(result);
         }
-        console.log('UnaryOperationComponent result:', result);
+        // console.log('UnaryOperationComponent result:', result);
         outputs['output'] = result;
     }
 };
