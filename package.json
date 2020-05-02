@@ -17,6 +17,7 @@
     "@mdi/font": "^3.6.95",
     "camera-controls": "^1.11.1",
     "core-js": "^2.6.5",
+    "extendable-error-class": "^0.1.2",
     "gl-matrix": "^3.0.0",
     "material-design-icons": "^3.0.1",
     "rete": "^1.2.2",
