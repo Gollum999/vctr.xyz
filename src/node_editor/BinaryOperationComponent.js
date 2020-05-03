@@ -363,9 +363,11 @@ export class BinaryOperationComponent extends Rete.Component {
         let result;
         try {
             result = operation.calculate({type: determineType(lhsValue), value: lhsValue}, {type: determineType(rhsValue), value: rhsValue});
+            editorNode.data['disabled'] = false;
             editorNode.controls.get('warning').setWarning('');
         } catch (e) {
             if (e instanceof CalculationError) {
+                editorNode.data['disabled'] = true;
                 editorNode.controls.get('warning').setWarning(e.message);
                 // TODO merge with the action that caused this, so both things can be undone in one step
                 const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);

@@ -606,6 +606,12 @@ export default {
             this.newNodesShouldBeCentered = true;
         });
 
+        this.editor.on('connectionpick', io => {
+            const isOutput = io instanceof Rete.Output;
+            const disabled = io.node.data['disabled'] || false;
+            return !(isOutput && disabled);
+        });
+
         this.engine.on('error', ({message, data}) => {
             const msg = `Error in Rete engine: ${message}`;
             alert(msg);

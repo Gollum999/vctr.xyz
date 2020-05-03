@@ -21,7 +21,7 @@ v-card.node(dark hover :class="[selected(), node.name] | kebab")
     .control(v-for='(control, idx) in filteredControls' :key="`control.key-${idx}`" v-control="control")
 
     // Outputs
-    .output(v-for='(output, idx) in outputs()' :key="output.key" :style="{'grid-row': idx + 1}")
+    .output(v-for='(output, idx) in outputs()' :key="output.key" :class="{disabled: isDisabled()}" :style="{'grid-row': idx + 1}")
       .output-title {{output.name}}
       Socket(v-socket:output="output" type="output" :socket="output.socket")
 </template>
@@ -39,6 +39,11 @@ export default {
             advancedRenderControlsKey: 'pos', // TODO Remove this assumption
             settings: settings.nodeEditorSettings,
         };
+    },
+    methods: {
+        isDisabled() {
+            return this.node.data['disabled'] || false;
+        },
     },
     components: {
         Socket,
@@ -129,6 +134,9 @@ $node-width: 100px
     flex-direction: column
     justify-content: center
     min-height: 30px
+    &.disabled
+      .socket
+        filter: brightness(50%)
   .input-title,.output-title
     line-height: $socket-size
   .input
