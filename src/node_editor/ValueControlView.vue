@@ -18,6 +18,7 @@
 
 <script>
 import _ from 'lodash';
+import history from '../history';
 import { FieldChangeAction } from '../history_actions';
 import { ValueType } from './node_util';
 
@@ -114,8 +115,7 @@ export default {
                 this.values = val;
                 this.emitter.trigger('process');
             });
-            action.do();
-            this.emitter.trigger('addhistory', action);
+            history.addAndDo(action);
 
             console.log('ValueControlView', this.valueType, 'triggering engine process from onInput');
             this.emitter.trigger('process');

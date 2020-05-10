@@ -7,8 +7,8 @@ import util, { s } from './operation_util';
 import NodeRenderer from './NodeRenderer.vue';
 import nodeUtil from './node_util';
 import { WarningControl, CalculationError } from './WarningControl.js';
+import history from '../history.js';
 import { RemoveAllNodeOutputConnectionsAction } from '../history_actions.js';
-import { EventBus } from '../EventBus';
 
 class BaseOperation {
     static title = null;
@@ -195,8 +195,7 @@ export class UnaryOperationComponent extends Rete.Component {
                 editorNode.controls.get('warning').setWarning(e.message);
                 // TODO merge with the action that caused this, so both things can be undone in one step
                 const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
-                action.do();
-                EventBus.$emit('addhistory', action);
+                history.addAndDo(action);
             } else {
                 throw e;
             }

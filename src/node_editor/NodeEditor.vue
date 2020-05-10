@@ -86,13 +86,13 @@
 import _ from 'lodash';
 import Rete from 'rete';
 import ConnectionPlugin from 'rete-connection-plugin';
-import HistoryPlugin from 'rete-history-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 import util from '../util';
+import history from '../history';
 import actions from '../history_actions';
 import { GraphTraveler, ValueType } from './node_util';
 import Rect from './Rect';
@@ -201,8 +201,9 @@ export default {
             const graphTraveler = new GraphTraveler(this.engine, this.editor);
             graphTraveler.applyToAllNodes((engineNode, editorNode) => {
                 if (engineNode.inputs['pos'] != null) { // TODO make this more generic
+                    console.log('NodeEditor advanced render controls handler', engineNode, editorNode);
                     if (newVal) {
-                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, engineNode);
+                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, editorNode);
                         actionStack.push(renderControlsAction);
                     } else {
                         // Reset origin
@@ -214,7 +215,7 @@ export default {
                         actionStack.push(resetOriginAction);
 
                         // console.log('Pushing RemoveAdvancedRenderControlsAction', this.editor, engineNode);
-                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, engineNode);
+                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, editorNode);
                         actionStack.push(renderControlsAction);
                     }
                 }
@@ -231,9 +232,7 @@ export default {
             });
             actionStack.push(updateSettingAction);
 
-            const multiAction = new actions.MultiAction(actionStack);
-            multiAction.do();
-            EventBus.$emit('addhistory', multiAction);
+            history.addAndDo(new actions.MultiAction(actionStack));
         },
     },
 
@@ -260,6 +259,24 @@ export default {
             // const output = node1.outputs.get('value');
             // const input = node2.inputs.get('pos');
             // this.editor.connect(output, input);
+        },
+
+        setUpBasicHistoryActions() {
+            this.editor.on('nodecreated', node => history.add(new actions.AddNodeAction(this.editor, node)));
+            this.editor.on('noderemoved', node => history.add(new actions.RemoveNodeAction(this.editor, node)));
+            this.editor.on('nodetranslated', ({ node, prev }) => {
+                if (_.isEqual(node.position, prev)) {
+                    return;
+                }
+                if (history.last instanceof actions.DragNodeAction && history.last.node === node) {
+                    history.last.update(node);
+                } else {
+                    history.add(new actions.DragNodeAction(this.editor, node, prev));
+                }
+            });
+
+            this.editor.on('connectioncreated', c => history.add(new actions.AddConnectionAction(this.editor, c)));
+            this.editor.on('connectionremoved', c => history.add(new actions.RemoveConnectionAction(this.editor, c)));
         },
 
         async addNode(nodeType) {
@@ -372,13 +389,14 @@ export default {
         onUndo() {
             console.log('UNDO');
             try {
-                this.currentlyHandlingHistoryAction = true;
-                /* console.log('before trigger undo', this.editor.plugins); */
-                this.editor.trigger('undo'); // TODO sometimes a dragnodeaction is getting added when I click to change values
-                /* console.log('after trigger undo', result); */
-                this.$nextTick(() => {
-                    this.currentlyHandlingHistoryAction = false;
-                });
+                // this.currentlyHandlingHistoryAction = true;
+                // /* console.log('before trigger undo', this.editor.plugins); */
+                // this.editor.trigger('undo'); // TODO sometimes a dragnodeaction is getting added when I click to change values
+                // /* console.log('after trigger undo', result); */
+                // this.$nextTick(() => {
+                //     this.currentlyHandlingHistoryAction = false;
+                // });
+                history.undo();
             } catch (error) {
                 console.warn('caught error in undo event', error);
             }
@@ -386,11 +404,12 @@ export default {
 
         onRedo() {
             console.log('REDO');
-            this.currentlyHandlingHistoryAction = true;
-            this.editor.trigger('redo');
-            this.$nextTick(() => {
-                this.currentlyHandlingHistoryAction = false;
-            });
+            history.redo();
+            // this.currentlyHandlingHistoryAction = true;
+            // this.editor.trigger('redo');
+            // this.$nextTick(() => {
+            //     this.currentlyHandlingHistoryAction = false;
+            // });
         },
 
         recenterView() {
@@ -439,8 +458,7 @@ export default {
                     new actions.RemoveAllConnectionsAction(this.editor),
                     new actions.RemoveAllNodesAction(this.editor),
                 ]);
-                clearAllNodesAction.do();
-                EventBus.$emit('addhistory', clearAllNodesAction);
+                history.addAndDo(clearAllNodesAction);
             }
         },
 
@@ -518,6 +536,70 @@ export default {
             await this.loadNodes();
         },
 
+        postLoad() {
+            // Don't set up undo/redo callbacks until after finished loading to prevent user from undoing load
+            this.setUpBasicHistoryActions();
+
+            document.addEventListener('keydown', e => {
+                if (!e.ctrlKey) return;
+
+                switch (e.code) {
+                case 'KeyZ': history.undo(); break;
+                case 'KeyY': history.redo(); break;
+                default: break;
+                }
+            });
+
+            // // TODO should at least name this event something different to avoid confusion
+            // EventBus.$on('addhistory', action => {
+            //     // Bit of a hack; prevent changes that happen as a result of undo/redo from themselves being added to the history stack
+            //     // (which would erase any potential redo-able actions)
+            //     // The History plugin already does something like this to prevent infinite recursion, but that only works within the same
+            //     // stack frame, whereas this works for the whole Vue tick (important when a watcher is the one adding the history)
+            //     if (!this.currentlyHandlingHistoryAction) {
+            //         this.editor.trigger('addhistory', action);
+            //     }
+            // });
+
+            this.editor.on('nodecreated', node => {
+                // TODO why am I doing this to every node instead of only the one that was just created?
+                Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
+                    nodeView.addEventListener('contextmenu', event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        this.contextMenuPos = { x: event.clientX, y: event.clientY };
+                        this.showContextMenu = true;
+                    });
+                });
+            });
+
+            this.editor.on('zoom', ({transform, zoom, source}) => {
+                return (this.minZoom <= zoom && zoom <= this.maxZoom);
+            });
+
+            this.editor.on('translated zoomed', () => {
+                this.newNodesShouldBeCentered = true;
+            });
+
+            this.editor.on('connectionpick', io => {
+                const isOutput = io instanceof Rete.Output;
+                const disabled = io.node.data['disabled'] || false;
+                return !(isOutput && disabled);
+            });
+
+            this.engine.on('error', ({message, data}) => {
+                const msg = `Error in Rete engine: ${message}`;
+                alert(msg);
+                console.error(msg);
+                console.info(data);
+            });
+
+            // this.engine.on('warn', (exc) => {
+            //     console.warn(`Warning from Rete engine`);
+            //     console.warn(exc);
+            // });
+        },
+
         async handleEngineProcess() {
             console.log('NodeEditor handleEngineProcess', this.editor.toJSON());
             await this.engine.abort(); // Stop old job if running // TODO this is not syncronized with other invocations of handleEngineProcess
@@ -562,19 +644,7 @@ export default {
         (async () => {
             await this.loadState();
 
-            // Don't set up undo/redo callbacks until after finished loading to prevent user from undoing load
-            this.editor.use(HistoryPlugin, { keyboard: true });
-
-            // TODO should at least name this event something different to avoid confusion
-            EventBus.$on('addhistory', action => {
-                // Bit of a hack; prevent changes that happen as a result of undo/redo from themselves being added to the history stack
-                // (which would erase any potential redo-able actions)
-                // The History plugin already does something like this to prevent infinite recursion, but that only works within the same
-                // stack frame, whereas this works for the whole Vue tick (important when a watcher is the one adding the history)
-                if (!this.currentlyHandlingHistoryAction) {
-                    this.editor.trigger('addhistory', action);
-                }
-            });
+            this.postLoad();
 
             // Don't trigger any of these events until after the initial load is done
             // TODO still not perfect, doesn't prevent multiple changes from user getting queued up; is there something like Java's 'synchronized' keyword?
@@ -585,44 +655,6 @@ export default {
             this.editor.on('connectioncreated connectionremoved', this.handleConnectionChanged);
             this.handleConnectionChanged(); // Run once to set up socket types
         })();
-
-        this.editor.on('nodecreated', node => {
-            // TODO why am I doing this to every node instead of only the one that was just created?
-            Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
-                nodeView.addEventListener('contextmenu', event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.contextMenuPos = { x: event.clientX, y: event.clientY };
-                    this.showContextMenu = true;
-                });
-            });
-        });
-
-        this.editor.on('zoom', ({transform, zoom, source}) => {
-            return (this.minZoom <= zoom && zoom <= this.maxZoom);
-        });
-
-        this.editor.on('translated zoomed', () => {
-            this.newNodesShouldBeCentered = true;
-        });
-
-        this.editor.on('connectionpick', io => {
-            const isOutput = io instanceof Rete.Output;
-            const disabled = io.node.data['disabled'] || false;
-            return !(isOutput && disabled);
-        });
-
-        this.engine.on('error', ({message, data}) => {
-            const msg = `Error in Rete engine: ${message}`;
-            alert(msg);
-            console.error(msg);
-            console.info(data);
-        });
-
-        // this.engine.on('warn', (exc) => {
-        //     console.warn(`Warning from Rete engine`);
-        //     console.warn(exc);
-        // });
 
         this.editor.view.resize();
         this.editor.trigger('process');

@@ -12,7 +12,7 @@
 <script>
 import { FieldChangeAction } from '../history_actions';
 import ColorPickerButton from '../ColorPickerButton';
-import { EventBus } from '../EventBus';
+import history from '../history';
 
 export default {
     components: {
@@ -50,7 +50,7 @@ export default {
                 this.prevColor = Object.assign({}, this.color);
             } else {
                 // console.log('colorPicker closed, emitting history', this.color, this.prevColor);
-                EventBus.$emit('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
+                history.add(new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
             }
         },
         visible(newVal, oldVal) {
@@ -61,7 +61,7 @@ export default {
                 this.putData(this.dataKey, this.makeData(newVal, this.color));
             }
             // console.log('colorPicker visible changed, emitting history', newVal);
-            EventBus.$emit('addhistory', new FieldChangeAction(oldVal, newVal, (visible) => { this.visible = visible; }));
+            history.add(new FieldChangeAction(oldVal, newVal, (visible) => { this.visible = visible; }));
             this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
         },
         color: {
@@ -105,7 +105,7 @@ export default {
                 this.prevColor = this.color;
             } else {
                 // console.log('colorPicker toggled, emitting history', showing, this.color, this.prevColor);
-                EventBus.$emit('addhistory', new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
+                history.add(new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
             }
         },
     },
