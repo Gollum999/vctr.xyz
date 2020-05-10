@@ -15,7 +15,7 @@
 export default {
     name: 'ColorPickerButton',
     props: {
-        value:    { type: String, required: true },
+        value:    { type: String, default: '#ffffff' },
         disabled: { type: Boolean, default: false },
     },
     data() {

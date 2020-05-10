@@ -30,8 +30,8 @@ export default {
 
     data() {
         return {
-            visible: true,
-            color: '#000000',
+            visible: null,
+            color: null,
             prevColor: null,
         };
     },
@@ -54,6 +54,9 @@ export default {
             }
         },
         visible(newVal, oldVal) {
+            if (oldVal === null) {
+                return; // Don't trigger history when first loading node
+            }
             if (this.dataKey) {
                 this.putData(this.dataKey, this.makeData(newVal, this.color));
             }
@@ -64,6 +67,9 @@ export default {
         color: {
             deep: true,
             handler(newVal, oldVal) {
+                if (oldVal === null) {
+                    return; // Don't trigger history when first loading node
+                }
                 /* console.log('color watcher', this.dataKey, this.color, oldVal, newVal); */
                 if (this.dataKey) {
                     this.putData(this.dataKey, this.makeData(this.visible, newVal));
