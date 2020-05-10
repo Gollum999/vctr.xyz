@@ -53,11 +53,11 @@
       <span class="buttons-group buttons-spacer" />
 
       <div class="buttons-group buttons-history">
-        <v-btn fab ripple x-small type="button" title="Undo" @click="onUndo">
+        <v-btn fab ripple x-small type="button" title="Undo" :disabled="!history.canUndo()" @click="onUndo">
           <!-- TODO color not working -->
           <v-icon>undo</v-icon>
         </v-btn>
-        <v-btn fab x-small type="button" title="Redo" @click="onRedo">
+        <v-btn fab x-small type="button" title="Redo" :disabled="!history.canRedo()" @click="onRedo">
           <v-icon>redo</v-icon>
         </v-btn>
       </div>
@@ -158,6 +158,7 @@ export default {
         return {
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
             settings: settings.nodeEditorSettings,
+            history: history, // For checking whether to disable undo/redo buttons // TODO is it better to do this or add a computed property?
 
             lastNodePosition: null,
             newNodesShouldBeCentered: true,
