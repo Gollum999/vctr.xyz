@@ -370,8 +370,10 @@ export class BinaryOperationComponent extends Rete.Component {
                 editorNode.data['disabled'] = true;
                 editorNode.controls.get('warning').setWarning(e.message);
                 // TODO merge with the action that caused this, so both things can be undone in one step
-                const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
-                history.addAndDo(action);
+                if (Array.from(editorNode.outputs.values()).some(io => io.connections.length)) {
+                    const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
+                    history.addAndDo(action);
+                }
             } else {
                 throw e;
             }
