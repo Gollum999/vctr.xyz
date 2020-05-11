@@ -199,7 +199,7 @@ class AdvancedRenderControlsActionHelper {
         console.log('AdvancedRenderControlsActionHelper remove from node:', this.node.id, this.node);
 
         // Remove all connections
-        const input = this.node.inputs['pos']; // TODO make this more generic
+        const input = this.node.inputs.get('pos'); // TODO make this more generic
         if (input == null) {
             throw new Error(`Could not find 'pos' input for node ${this.node.id}`);
         }
