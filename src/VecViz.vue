@@ -1,7 +1,13 @@
 <template>
 <div class="vec-viz">
   <div class="top-settings-container">
-    <v-switch color="primary" v-model="nodeEditorSettings.values.showAdvancedRenderSettings" label="Show advanced controls" hide-details />
+    <v-switch
+        color="primary"
+        :input-value="nodeEditorSettings.values.showAdvancedRenderSettings"
+        @change="onShowAdvancedControlsChanged"
+        label="Show advanced controls"
+        hide-details
+    />
 
     <v-dialog v-model="showSettingsDialog" class="settings-dialog-container" width="600">
         <template v-slot:activator="{ on: showDialog }">
@@ -50,6 +56,10 @@ export default {
         SettingsModal,
     },
     methods: {
+        onShowAdvancedControlsChanged(val) {
+            // console.log('CHANGE', this.nodeEditorSettings.values);
+            EventBus.$emit('show-advanced-controls-toggled', val);
+        },
         onDrag(size) {
             EventBus.$emit('split-resized', size);
         },

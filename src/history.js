@@ -1,13 +1,13 @@
 // Copied and modified from rete-history-plugin
 export class History {
     constructor() {
-        this.disabled = false;
+        this.disabledCount = 0;
         this.produced = [];
         this.reserved = [];
     }
 
     add(action) {
-        if (this.disabled) {
+        if (this.disabledCount) {
             console.log('Not adding', action, 'because history is currently disabled');
             return;
         }
@@ -17,7 +17,9 @@ export class History {
     }
 
     addAndDo(action) {
-        action.do();
+        this.disableDuring(() => {
+            action.do();
+        });
         this.add(action);
     }
 
@@ -56,12 +58,19 @@ export class History {
         this._do(this.reserved, this.produced, 'redo');
     }
 
+    // TODO rename?  'disable' just means disallow adding new actions, but undo/redo still allowed
     disable() {
-        this.disabled = true;
+        // Why not just use a boolean?  This lets me have multiple scopes of disabling at once that overlap
+        ++this.disabledCount;
+        // console.log('HISTORY DISABLE', this.disabledCount);
     }
 
     enable() {
-        this.disabled = false;
+        --this.disabledCount;
+        // console.log('HISTORY ENABLE', this.disabledCount);
+        if (this.disabledCount < 0) {
+            throw new Error('History disabled more than enabled');
+        }
     }
 
     disableDuring(body) {

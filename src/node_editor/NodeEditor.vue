@@ -195,48 +195,6 @@ export default {
         };
     },
 
-    watch: {
-        'settings.values.showAdvancedRenderSettings': function (newVal, oldVal) {
-            console.log('adding or removing advanced render controls', newVal);
-            const actionStack = [];
-            const graphTraveler = new GraphTraveler(this.engine, this.editor);
-            graphTraveler.applyToAllNodes((engineNode, editorNode) => {
-                if (engineNode.inputs.has('pos')) { // TODO make this more generic
-                    console.log('NodeEditor advanced render controls handler', engineNode, editorNode);
-                    if (newVal) {
-                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, editorNode);
-                        actionStack.push(renderControlsAction);
-                    } else {
-                        // Reset origin
-                        // TODO probably should be bundled in with RemoveAdvancedRenderControlsAction, but it's convenient to
-                        //      use FieldChangeAction (which I could still do inside of RemoveAdvancedRenderControlsAction)
-                        const resetOriginAction = new actions.FieldChangeAction(engineNode.data['pos'], [0, 0, 0], val => {
-                            engineNode.data['pos'] = val;
-                        });
-                        actionStack.push(resetOriginAction);
-
-                        // console.log('Pushing RemoveAdvancedRenderControlsAction', this.editor, engineNode);
-                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, editorNode);
-                        actionStack.push(renderControlsAction);
-                    }
-                }
-            });
-
-            const updateSettingAction = new actions.FieldChangeAction(oldVal, newVal, val => {
-                // console.log('saving settings from NodeEditor field change', val);
-                this.settings.update('showAdvancedRenderSettings', val);
-                this.$nextTick(() => { // Fix connection paths - do next tick to give newly added connections time to be added to the DOM
-                    for (const connectionView of this.editor.view.connections.values()) {
-                        connectionView.update();
-                    }
-                });
-            });
-            actionStack.push(updateSettingAction);
-
-            history.addAndDo(new actions.MultiAction(actionStack));
-        },
-    },
-
     methods: {
         test1() {
             // this.editor.trigger('resetconnection'); // TODO testing
@@ -269,6 +227,7 @@ export default {
                 if (_.isEqual(node.position, prev)) {
                     return;
                 }
+                // TODO may also want to enforce that we can't currently redo, otherwise you could move -> something else -> undo -> move (merged)
                 if (history.last instanceof actions.DragNodeAction && history.last.node === node) {
                     history.last.update(node);
                 } else {
@@ -397,7 +356,15 @@ export default {
                 // this.$nextTick(() => {
                 //     this.currentlyHandlingHistoryAction = false;
                 // });
+                history.disable();
                 history.undo();
+                // HACK: Disable new history items from being added for the whole tick; the default behavior only disables it
+                //       while undo() is on the call stack, but since we may add new history items via watchers, the history
+                //       will be re-enabled by that point
+                // TODO: Does that just mean that I shouldn't use watchers with fields that could trigger history?
+                this.$nextTick(() => {
+                    history.enable();
+                });
             } catch (error) {
                 console.warn('caught error in undo event', error);
             }
@@ -604,6 +571,46 @@ export default {
             console.log('NodeEditor handleConnectionChanged');
             updateAllSockets(this.engine, this.editor);
         },
+
+        addOrRemoveAdvancedControls(add) {
+            console.log('adding or removing advanced render controls', add);
+            const actionStack = [];
+            const graphTraveler = new GraphTraveler(this.engine, this.editor);
+            graphTraveler.applyToAllNodes((engineNode, editorNode) => {
+                if (editorNode.inputs.has('pos')) { // TODO make this more generic
+                    console.log('NodeEditor advanced render controls handler', engineNode, editorNode);
+                    if (add) {
+                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, editorNode);
+                        actionStack.push(renderControlsAction);
+                    } else {
+                        // Reset origin
+                        // TODO probably should be bundled in with RemoveAdvancedRenderControlsAction, but it's convenient to
+                        //      use FieldChangeAction (which I could still do inside of RemoveAdvancedRenderControlsAction)
+                        const resetOriginAction = new actions.FieldChangeAction(engineNode.data['pos'], [0, 0, 0], val => {
+                            engineNode.data['pos'] = val;
+                        });
+                        actionStack.push(resetOriginAction);
+
+                        // console.log('Pushing RemoveAdvancedRenderControlsAction', this.editor, engineNode);
+                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, editorNode);
+                        actionStack.push(renderControlsAction);
+                    }
+                }
+            });
+
+            const updateSettingAction = new actions.FieldChangeAction(!add, add, val => {
+                // console.log('saving settings from NodeEditor field change', val);
+                this.settings.update('showAdvancedRenderSettings', val);
+                this.$nextTick(() => { // Fix connection paths - do next tick to give newly added connections time to be added to the DOM
+                    for (const connectionView of this.editor.view.connections.values()) {
+                        connectionView.update();
+                    }
+                });
+            });
+            actionStack.push(updateSettingAction);
+
+            history.addAndDo(new actions.MultiAction(actionStack));
+        },
     },
 
     mounted() {
@@ -623,6 +630,10 @@ export default {
 
         EventBus.$on('split-resized', () => {
             this.editor.view.resize();
+        });
+
+        EventBus.$on('show-advanced-controls-toggled', val => {
+            this.addOrRemoveAdvancedControls(val);
         });
 
         Object.keys(this.components).map(key => {
