@@ -562,18 +562,6 @@ export default {
             //     }
             // });
 
-            this.editor.on('nodecreated', node => {
-                // TODO why am I doing this to every node instead of only the one that was just created?
-                Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
-                    nodeView.addEventListener('contextmenu', event => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        this.contextMenuPos = { x: event.clientX, y: event.clientY };
-                        this.showContextMenu = true;
-                    });
-                });
-            });
-
             this.editor.on('zoom', ({transform, zoom, source}) => {
                 return (this.minZoom <= zoom && zoom <= this.maxZoom);
             });
@@ -640,6 +628,18 @@ export default {
         Object.keys(this.components).map(key => {
             this.editor.register(this.components[key]);
             this.engine.register(this.components[key]);
+        });
+
+        this.editor.on('nodecreated', node => {
+            // TODO why am I doing this to every node instead of only the one that was just created?
+            Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
+                nodeView.addEventListener('contextmenu', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.contextMenuPos = { x: event.clientX, y: event.clientY };
+                    this.showContextMenu = true;
+                });
+            });
         });
 
         (async () => {
