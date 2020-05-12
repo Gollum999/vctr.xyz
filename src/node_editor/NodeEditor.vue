@@ -96,8 +96,22 @@ import history from '../history';
 import actions from '../history_actions';
 import { GraphTraveler, ValueType } from './node_util';
 import Rect from './Rect';
-import { UnaryOperation } from './UnaryOperationComponent';
-import { BinaryOperation } from './BinaryOperationComponent';
+import UnaryOperation from './UnaryOperation';
+import BinaryOperation from './BinaryOperation';
+
+// TODO kind of a hack, would it be better to use name as the key everywhere, or maybe assign extra data to each node?
+function getOperation(nodeName) {
+    switch (nodeName) {
+    case 'Length':        return UnaryOperation.LENGTH;
+    case 'Invert':        return UnaryOperation.INVERT;
+    case 'Add':           return BinaryOperation.ADD;
+    case 'Subtract':      return BinaryOperation.SUBTRACT;
+    case 'Multiply':      return BinaryOperation.MULTIPLY;
+    case 'Divide':        return BinaryOperation.DIVIDE;
+    case 'Dot Product':   return BinaryOperation.DOT_PRODUCT;
+    case 'Cross Product': return BinaryOperation.CROSS_PRODUCT;
+    }
+}
 
 // Engine updates have to happen *before* this because they set up the data we iterate over
 function updateAllSockets(engine, editor) {
@@ -108,7 +122,7 @@ function updateAllSockets(engine, editor) {
         // console.log(outputs);
         // console.log(editorNode.inputs);
         // console.log(editorNode.outputs);
-        const operation = UnaryOperation[engineNode.name] || BinaryOperation[engineNode.name];
+        const operation = getOperation(engineNode.name);
         if (!_.isNil(operation)) {
             _updateOperationSockets(editor, engineNode, editorNode, operation);
         }
@@ -182,15 +196,15 @@ export default {
                 'vector':             new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
                 'matrix':             new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
 
-                'operation-length':   new allComponents.UnaryOperationComponent('Length'),
-                'operation-invert':   new allComponents.UnaryOperationComponent('Invert'),
+                'operation-length':   new allComponents.UnaryOperationComponent(UnaryOperation.LENGTH),
+                'operation-invert':   new allComponents.UnaryOperationComponent(UnaryOperation.INVERT),
 
-                'operation-add':      new allComponents.BinaryOperationComponent('Add'),
-                'operation-subtract': new allComponents.BinaryOperationComponent('Subtract'),
-                'operation-multiply': new allComponents.BinaryOperationComponent('Multiply'),
-                'operation-divide':   new allComponents.BinaryOperationComponent('Divide'),
-                'operation-dot':      new allComponents.BinaryOperationComponent('Dot Product'),
-                'operation-cross':    new allComponents.BinaryOperationComponent('Cross Product'),
+                'operation-add':      new allComponents.BinaryOperationComponent(BinaryOperation.ADD),
+                'operation-subtract': new allComponents.BinaryOperationComponent(BinaryOperation.SUBTRACT),
+                'operation-multiply': new allComponents.BinaryOperationComponent(BinaryOperation.MULTIPLY),
+                'operation-divide':   new allComponents.BinaryOperationComponent(BinaryOperation.DIVIDE),
+                'operation-dot':      new allComponents.BinaryOperationComponent(BinaryOperation.DOT_PRODUCT),
+                'operation-cross':    new allComponents.BinaryOperationComponent(BinaryOperation.CROSS_PRODUCT),
             },
         };
     },
