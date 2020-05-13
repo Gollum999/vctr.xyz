@@ -117,7 +117,7 @@ class InvertOperation extends UnaryOperation {
     static defaultOutputSockets = s.matrix;
 
     static getOutputName() {
-        return 'x⁻¹';
+        return 'X⁻¹';
     }
     // Only matrix -> matrix supported
     static inputToOutputTypeMap = {
@@ -145,7 +145,7 @@ class NormalizeOperation extends UnaryOperation {
     static defaultOutputSockets = s.vector;
 
     static getOutputName() {
-        return 'norm(x)';
+        return 'norm(X)';
     }
     // Only vector -> vector supported
     static inputToOutputTypeMap = {
