@@ -150,7 +150,7 @@ class AddOperation extends BinaryOperation {
             const out = mat4.create();
             return mat4.add(out, lhs.value, rhs.value);
         }
-        throw new Error('AddOperation unsupported input types', lhs.type, rhs.type);
+        throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
     }
 }
 
@@ -179,7 +179,7 @@ class SubtractOperation extends BinaryOperation {
             const out = mat4.create();
             return mat4.subtract(out, lhs.value, rhs.value);
         }
-        throw new Error('SubtractOperation unsupported input types', lhs.type, rhs.type);
+        throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
     }
 }
 
@@ -227,7 +227,7 @@ class MultiplyOperation extends BinaryOperation {
             mat4.multiply(out, lhsT, rhsT);
             return mat4.transpose(out, out); // TODO will this work, or do I need a second temp matrix?
         }
-        throw new Error('MultiplyOperation unsupported input types', lhs.type, rhs.type);
+        throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
     }
 }
 
@@ -263,7 +263,7 @@ class DivideOperation extends BinaryOperation {
                 return mat4.multiplyScalar(out, lhs.value, 1.0 / rhs.value[0]);
             }
         }
-        throw new Error('DivideOperation unsupported input types', lhs.type, rhs.type);
+        throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
     }
 }
 
@@ -281,7 +281,7 @@ class DotOperation extends BinaryOperation {
 
     static calculate(lhs, rhs) {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error('DotOperation unsupported input types', lhs.type, rhs.type);
+            throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
         }
         return [vec3.dot(lhs.value, rhs.value)];
     }
@@ -301,7 +301,7 @@ class CrossOperation extends BinaryOperation {
 
     static calculate(lhs, rhs) {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error('CrossOperation unsupported input types', lhs.type, rhs.type);
+            throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
         }
         const out = vec3.create();
         return vec3.cross(out, lhs.value, rhs.value);
