@@ -46,6 +46,7 @@
             <v-list-item @click="addNode('operation-divide')">Divide</v-list-item>
             <v-list-item @click="addNode('operation-dot')">Dot Product</v-list-item>
             <v-list-item @click="addNode('operation-cross')">Cross Product</v-list-item>
+            <v-list-item @click="addNode('operation-angle')">Angle</v-list-item>
           </v-list>
         </v-menu>
       </div>
@@ -110,6 +111,7 @@ function getOperation(nodeName) {
     case 'Divide':        return BinaryOperation.DIVIDE;
     case 'Dot Product':   return BinaryOperation.DOT_PRODUCT;
     case 'Cross Product': return BinaryOperation.CROSS_PRODUCT;
+    case 'Angle':         return BinaryOperation.ANGLE;
     }
 }
 
@@ -205,6 +207,7 @@ export default {
                 'operation-divide':   new allComponents.BinaryOperationComponent(BinaryOperation.DIVIDE),
                 'operation-dot':      new allComponents.BinaryOperationComponent(BinaryOperation.DOT_PRODUCT),
                 'operation-cross':    new allComponents.BinaryOperationComponent(BinaryOperation.CROSS_PRODUCT),
+                'operation-angle':    new allComponents.BinaryOperationComponent(BinaryOperation.ANGLE),
             },
         };
     },
@@ -299,6 +302,7 @@ export default {
             case 'operation-divide':
             case 'operation-dot':
             case 'operation-cross':
+            case 'operation-angle':
                 node = await this.components[nodeType].createNode();
                 break;
             default:

@@ -308,6 +308,31 @@ class CrossOperation extends BinaryOperation {
     }
 }
 
+class AngleOperation extends BinaryOperation {
+    static title = 'Angle';
+    static symbol = '∠';
+    static defaultLhsSockets = s.vector;
+    static defaultRhsSockets = s.vector;
+    static defaultOutputSockets = s.scalar;
+
+    // Socket types are static
+    static lhsToRhsTypeMap = null;
+    static rhsToLhsTypeMap = null;
+    static inputToOutputTypeMap = null;
+
+    static getOutputName() {
+        return `${this.symbol}AB`;
+    }
+
+    static calculate(lhs, rhs) {
+        if (lhs.type !== 'vector' || rhs.type !== 'vector') {
+            throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+        }
+        // TODO round display to some number of decimals
+        return [vec3.angle(lhs.value, rhs.value)];
+    }
+}
+
 export default {
     ADD:           AddOperation,
     SUBTRACT:      SubtractOperation,
@@ -315,4 +340,5 @@ export default {
     DIVIDE:        DivideOperation,
     DOT_PRODUCT:   DotOperation,
     CROSS_PRODUCT: CrossOperation,
+    ANGLE:         AngleOperation,
 };
