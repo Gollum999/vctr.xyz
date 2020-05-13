@@ -110,6 +110,7 @@ class LengthOperation extends UnaryOperation {
     }
 }
 
+// TODO use this for unary "-" for vectors, or maybe 1/v?
 class InvertOperation extends UnaryOperation {
     static title = 'Invert';
     static defaultInputSockets = s.matrix;
@@ -138,7 +139,32 @@ class InvertOperation extends UnaryOperation {
     }
 }
 
+class NormalizeOperation extends UnaryOperation {
+    static title = 'Normalize';
+    static defaultInputSockets = s.vector;
+    static defaultOutputSockets = s.vector;
+
+    static getOutputName() {
+        return 'norm(x)';
+    }
+    // Only vector -> vector supported
+    static inputToOutputTypeMap = {
+        'scalar': s.invalid,
+        'vector': s.vector,
+        'matrix': s.invalid,
+    };
+
+    static calculate(input) {
+        if (input.type === 'vector') {
+            const out = vec3.create();
+            return vec3.normalize(out, input.value);
+        }
+        throw new Error(`${this.title} unsupported input type`, input.type);
+    }
+}
+
 export default {
-    LENGTH: LengthOperation,
-    INVERT: InvertOperation,
+    LENGTH:    LengthOperation,
+    INVERT:    InvertOperation,
+    NORMALIZE: NormalizeOperation,
 };
