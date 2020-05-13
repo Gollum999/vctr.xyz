@@ -9,6 +9,7 @@
  - [ ] s ^ s
  - [ ] s % s
  - [ ] |s|
+ - [ ] sqrt(s)
 ** Vectors
  - [X] v * s
  - [X] v / s
@@ -20,6 +21,7 @@
  - [X] norm(v) -> v
  - [ ] v.proj(v) -> v
  - [ ] lerp(v, v, s) -> v
+ - [ ] rotate[XYZ](v, origin, rad) -> v
 ** Matrices
  - [X] m + m
  - [X] m - m
@@ -32,7 +34,7 @@
  - [ ] translate/rotate/scale/skew helpers -> m
    - Should this produce a value, or should it act like an operation?  or both somehow?
    - Maybe inverse these functions too?
- - [ ] transpose(m) -> m
+ - [X] transpose(m) -> m
 ** Mux/demux
  - [ ] v -> (s, s, s)
  - [ ] (s, s, s) -> v

@@ -30,6 +30,7 @@
             <v-list-item @click="addNode('operation-length')">Length</v-list-item>
             <v-list-item @click="addNode('operation-invert')">Invert</v-list-item>
             <v-list-item @click="addNode('operation-normalize')">Normalize</v-list-item>
+            <v-list-item @click="addNode('operation-transpose')">Transpose</v-list-item>
           </v-list>
         </v-menu>
         <v-menu>
@@ -107,6 +108,7 @@ function getOperation(nodeName) {
     case 'Length':        return UnaryOperation.LENGTH;
     case 'Invert':        return UnaryOperation.INVERT;
     case 'Normalize':     return UnaryOperation.NORMALIZE;
+    case 'Transpose':     return UnaryOperation.TRANSPOSE;
     case 'Add':           return BinaryOperation.ADD;
     case 'Subtract':      return BinaryOperation.SUBTRACT;
     case 'Multiply':      return BinaryOperation.MULTIPLY;
@@ -203,6 +205,7 @@ export default {
                 'operation-length':    new allComponents.UnaryOperationComponent(UnaryOperation.LENGTH),
                 'operation-invert':    new allComponents.UnaryOperationComponent(UnaryOperation.INVERT),
                 'operation-normalize': new allComponents.UnaryOperationComponent(UnaryOperation.NORMALIZE),
+                'operation-transpose': new allComponents.UnaryOperationComponent(UnaryOperation.TRANSPOSE),
 
                 'operation-add':       new allComponents.BinaryOperationComponent(BinaryOperation.ADD),
                 'operation-subtract':  new allComponents.BinaryOperationComponent(BinaryOperation.SUBTRACT),
@@ -300,6 +303,7 @@ export default {
             case 'operation-length':
             case 'operation-invert':
             case 'operation-normalize':
+            case 'operation-transpose':
             case 'operation-add':
             case 'operation-subtract':
             case 'operation-multiply':

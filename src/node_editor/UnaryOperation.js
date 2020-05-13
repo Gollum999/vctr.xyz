@@ -163,8 +163,33 @@ class NormalizeOperation extends UnaryOperation {
     }
 }
 
+class TransposeOperation extends UnaryOperation {
+    static title = 'Transpose';
+    static defaultInputSockets = s.matrix;
+    static defaultOutputSockets = s.matrix;
+
+    static getOutputName() {
+        return 'Xᵀ';
+    }
+    // Only matrix -> matrix supported
+    static inputToOutputTypeMap = {
+        'scalar': s.invalid,
+        'vector': s.invalid,
+        'matrix': s.matrix,
+    };
+
+    static calculate(input) {
+        if (input.type === 'matrix') {
+            const out = mat4.create();
+            return mat4.transpose(out, input.value);
+        }
+        throw new Error(`${this.title} unsupported input type`, input.type);
+    }
+}
+
 export default {
     LENGTH:    LengthOperation,
     INVERT:    InvertOperation,
     NORMALIZE: NormalizeOperation,
+    TRANSPOSE: TransposeOperation,
 };
