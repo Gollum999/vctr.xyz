@@ -31,6 +31,7 @@
             <v-list-item @click="addNode('operation-invert')">Invert</v-list-item>
             <v-list-item @click="addNode('operation-normalize')">Normalize</v-list-item>
             <v-list-item @click="addNode('operation-transpose')">Transpose</v-list-item>
+            <v-list-item @click="addNode('operation-determinant')">Determinant</v-list-item>
           </v-list>
         </v-menu>
         <v-menu>
@@ -109,6 +110,7 @@ function getOperation(nodeName) {
     case 'Invert':        return UnaryOperation.INVERT;
     case 'Normalize':     return UnaryOperation.NORMALIZE;
     case 'Transpose':     return UnaryOperation.TRANSPOSE;
+    case 'Determinant':   return UnaryOperation.DETERMINANT;
     case 'Add':           return BinaryOperation.ADD;
     case 'Subtract':      return BinaryOperation.SUBTRACT;
     case 'Multiply':      return BinaryOperation.MULTIPLY;
@@ -198,22 +200,23 @@ export default {
             contextMenuPos: { x: 0, y: 0 },
 
             components: {
-                'scalar':              new allComponents.ValueComponent(this.$vuetify, ValueType.SCALAR),
-                'vector':              new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
-                'matrix':              new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
+                'scalar':                new allComponents.ValueComponent(this.$vuetify, ValueType.SCALAR),
+                'vector':                new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
+                'matrix':                new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
 
-                'operation-length':    new allComponents.UnaryOperationComponent(UnaryOperation.LENGTH),
-                'operation-invert':    new allComponents.UnaryOperationComponent(UnaryOperation.INVERT),
-                'operation-normalize': new allComponents.UnaryOperationComponent(UnaryOperation.NORMALIZE),
-                'operation-transpose': new allComponents.UnaryOperationComponent(UnaryOperation.TRANSPOSE),
+                'operation-length':      new allComponents.UnaryOperationComponent(UnaryOperation.LENGTH),
+                'operation-invert':      new allComponents.UnaryOperationComponent(UnaryOperation.INVERT),
+                'operation-normalize':   new allComponents.UnaryOperationComponent(UnaryOperation.NORMALIZE),
+                'operation-transpose':   new allComponents.UnaryOperationComponent(UnaryOperation.TRANSPOSE),
+                'operation-determinant': new allComponents.UnaryOperationComponent(UnaryOperation.DETERMINANT),
 
-                'operation-add':       new allComponents.BinaryOperationComponent(BinaryOperation.ADD),
-                'operation-subtract':  new allComponents.BinaryOperationComponent(BinaryOperation.SUBTRACT),
-                'operation-multiply':  new allComponents.BinaryOperationComponent(BinaryOperation.MULTIPLY),
-                'operation-divide':    new allComponents.BinaryOperationComponent(BinaryOperation.DIVIDE),
-                'operation-dot':       new allComponents.BinaryOperationComponent(BinaryOperation.DOT_PRODUCT),
-                'operation-cross':     new allComponents.BinaryOperationComponent(BinaryOperation.CROSS_PRODUCT),
-                'operation-angle':     new allComponents.BinaryOperationComponent(BinaryOperation.ANGLE),
+                'operation-add':         new allComponents.BinaryOperationComponent(BinaryOperation.ADD),
+                'operation-subtract':    new allComponents.BinaryOperationComponent(BinaryOperation.SUBTRACT),
+                'operation-multiply':    new allComponents.BinaryOperationComponent(BinaryOperation.MULTIPLY),
+                'operation-divide':      new allComponents.BinaryOperationComponent(BinaryOperation.DIVIDE),
+                'operation-dot':         new allComponents.BinaryOperationComponent(BinaryOperation.DOT_PRODUCT),
+                'operation-cross':       new allComponents.BinaryOperationComponent(BinaryOperation.CROSS_PRODUCT),
+                'operation-angle':       new allComponents.BinaryOperationComponent(BinaryOperation.ANGLE),
             },
         };
     },
@@ -304,6 +307,7 @@ export default {
             case 'operation-invert':
             case 'operation-normalize':
             case 'operation-transpose':
+            case 'operation-determinant':
             case 'operation-add':
             case 'operation-subtract':
             case 'operation-multiply':

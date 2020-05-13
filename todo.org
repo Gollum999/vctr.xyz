@@ -27,7 +27,7 @@
  - [X] m - m
  - [X] m * m
  - [X] inverse(m) -> m
- - [ ] determinant(m) -> s
+ - [X] determinant(m) -> s
  - [ ] eigenvalue(m) -> s
  - [ ] eigenvector(m) -> v
  - [X] v * m -> v

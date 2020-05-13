@@ -187,9 +187,33 @@ class TransposeOperation extends UnaryOperation {
     }
 }
 
+class DeterminantOperation extends UnaryOperation {
+    static title = 'Determinant';
+    static defaultInputSockets = s.matrix;
+    static defaultOutputSockets = s.scalar;
+
+    static getOutputName() {
+        return '|X|';
+    }
+    // Only matrix -> scalar supported
+    static inputToOutputTypeMap = {
+        'scalar': s.invalid,
+        'vector': s.invalid,
+        'matrix': s.scalar,
+    };
+
+    static calculate(input) {
+        if (input.type === 'matrix') {
+            return [mat4.determinant(input.value)];
+        }
+        throw new Error(`${this.title} unsupported input type`, input.type);
+    }
+}
+
 export default {
-    LENGTH:    LengthOperation,
-    INVERT:    InvertOperation,
-    NORMALIZE: NormalizeOperation,
-    TRANSPOSE: TransposeOperation,
+    LENGTH:      LengthOperation,
+    INVERT:      InvertOperation,
+    NORMALIZE:   NormalizeOperation,
+    TRANSPOSE:   TransposeOperation,
+    DETERMINANT: DeterminantOperation,
 };
