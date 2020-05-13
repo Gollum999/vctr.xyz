@@ -1,47 +1,49 @@
 * Operations to support
 ** Scalars
- - -s?
+ - [ ] -s?
    - Could just use * -1
- - s + s
- - s - s
- - s * s
- - s / s
- - s ^ s
- - s % s
- - |s|
+ - [X] s + s
+ - [X] s - s
+ - [X] s * s
+ - [X] s / s
+ - [ ] s ^ s
+ - [ ] s % s
+ - [ ] |s|
 ** Vectors
- - v * s
- - v / s
- - v + v
- - v - v
- - v . v
- - v x v
- - ||v||
- - norm(v) -> v
- - v.proj(v) -> v
- - lerp(v, v, s) -> v
+ - [X] v * s
+ - [X] v / s
+ - [X] v + v
+ - [X] v - v
+ - [X] v . v
+ - [X] v x v
+ - [X] ||v||
+ - [X] norm(v) -> v
+ - [ ] v.proj(v) -> v
+ - [ ] lerp(v, v, s) -> v
 ** Matrices
- - m + m
- - m - m
- - m * m
- - inverse(m) -> m
- - determinant(m) -> s
- - eigenvalue(m) -> s
- - eigenvector(m) -> v
- - v * m -> v
- - translate/rotate/scale/skew helpers -> m
+ - [X] m + m
+ - [X] m - m
+ - [X] m * m
+ - [X] inverse(m) -> m
+ - [ ] determinant(m) -> s
+ - [ ] eigenvalue(m) -> s
+ - [ ] eigenvector(m) -> v
+ - [X] v * m -> v
+ - [ ] translate/rotate/scale/skew helpers -> m
    - Should this produce a value, or should it act like an operation?  or both somehow?
    - Maybe inverse these functions too?
- - transpose(m) -> m
+ - [ ] transpose(m) -> m
 ** Mux/demux
- - v -> (s, s, s)
- - (s, s, s) -> v
- - m -> (v, v, v, v)
- - (v, v, v, v) -> m
+ - [ ] v -> (s, s, s)
+ - [ ] (s, s, s) -> v
+ - [ ] m -> (v, v, v, v)
+ - [ ] (v, v, v, v) -> m
 ** Trig
- - sin/cos/tan... etc(s) -> s
- - angle_between(v, v) -> s
+ - [ ] sin/cos/tan... etc(s) -> s
+ - [X] angle_between(v, v) -> s
 ** Misc
+ - [ ] rad -> deg, deg -> rad
+   - or should this be a global option?
 *** Quaternions?
 *** Other geometry?
  - Sphere
@@ -93,7 +95,7 @@
 * 2D mode?
 * Named save/load support
 * Misc viewport
-** Draggable quadrants
+- [ ] Draggable quadrants
 * Misc node editor
  - More operation types
 ** Undo/redo support
@@ -101,7 +103,7 @@
    me from doing a couple things.  Maybe submit a patch to the plugin, or write
    my own, or just try to find some workarounds...
    - https://github.com/retejs/history-plugin/issues/2
-     - [ ] Need to re-work BasicOperationComponent to not change any state in
+     - [X] Need to re-work BasicOperationComponent to not change any state in
        worker().  Re-write functions to be pure, traverse graph myself.
    - [ ] "Collapse" multiple similar actions (node value updates, cascading
      socket type changes + connection changes, etc.)
@@ -115,22 +117,24 @@
  - [ ] Left click box select?
  - [X] When adding nodes, add to center of view and only reposition if node too close to center
 ** Nodes
- - [ ] More render settings
-   - [ ] "Render at pos"/"Origin"
-   - [ ] Togglable rendering, or maybe just alpha support
-   - [ ] Random output colors
-   - [ ] Hide some of these in a "show advanced render settings" option?
+ - [X] More render settings
+   - [X] "Render at pos"/"Origin"
+   - [X] Togglable rendering, or maybe just alpha support
+   - [X] Random output colors
+   - [X] Hide some of these in a "show advanced render settings" option?
  - [ ] Custom node titles
    - [ ] Render node name in viewport?
  - [ ] Custom paste handler
  - [ ] Slightly wider vector input (enough for 3 digits + decimal)
    - [ ] Configurable?
- - [ ] Truncate input display values?
- - [ ] Condense padding a bit more if possible
+ - [ ] Truncate input display values
+ - [ ] Condense everything a bit more if possible
 ** Node types
  - [ ] Render scalar values
-   - [ ] More render types:
-     - [ ] Vector?
+   - [ ] As circle
+     - [ ] Update on horizontal resize, or figure out how to write in such a way that viewport size doesn't matter
+       - Can I somehow use the camera's current matrices?
+   - [ ] As vector?
  - [-] Render matrices?
    - [ ] grid w/ transform?
    - [X] vector field?
