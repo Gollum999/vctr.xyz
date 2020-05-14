@@ -22,7 +22,7 @@ v-card.node(dark hover :class="[selected(), node.name] | kebab")
 
     // Outputs
     .output(v-for='(output, idx) in outputs()' :key="output.key" :class="{disabled: isDisabled()}" :style="{'grid-row': idx + 1}")
-      .output-title {{output.name}}
+      .output-title(v-html="output.name")
       Socket(v-socket:output="output" type="output" :socket="output.socket")
 </template>
 
