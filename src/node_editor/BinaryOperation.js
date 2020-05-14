@@ -15,6 +15,7 @@ class BinaryOperation {
     static defaultOutputSockets = s.anything;
 
     static getOutputName() {
+        console.assert(this.symbol != null);
         return `A ${this.symbol} B`;
     }
 
@@ -333,6 +334,34 @@ class AngleOperation extends BinaryOperation {
     }
 }
 
+class ProjectionOperation extends BinaryOperation {
+    static title = 'Projection';
+    static symbol = null;
+    static defaultLhsSockets = s.vector;
+    static defaultRhsSockets = s.vector;
+    static defaultOutputSockets = s.vector;
+
+    // Socket types are static
+    static lhsToRhsTypeMap = null;
+    static rhsToLhsTypeMap = null;
+    static inputToOutputTypeMap = null;
+
+    static getOutputName() {
+        return `proj<sub> B </sub>A`;
+    }
+
+    static calculate(lhs, rhs) {
+        if (lhs.type !== 'vector' || rhs.type !== 'vector') {
+            throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+        }
+        const num = vec3.dot(lhs.value, rhs.value);
+        const den = vec3.dot(rhs.value, rhs.value);
+        const out = vec3.create();
+        vec3.scale(out, rhs.value, num / den);
+        return out;
+    }
+}
+
 export default {
     ADD:           AddOperation,
     SUBTRACT:      SubtractOperation,
@@ -341,4 +370,5 @@ export default {
     DOT_PRODUCT:   DotOperation,
     CROSS_PRODUCT: CrossOperation,
     ANGLE:         AngleOperation,
+    PROJECTION:    ProjectionOperation,
 };

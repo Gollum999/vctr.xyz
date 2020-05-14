@@ -19,7 +19,7 @@
  - [X] v x v
  - [X] ||v||
  - [X] norm(v) -> v
- - [ ] v.proj(v) -> v
+ - [X] v.proj(v) -> v
  - [ ] lerp(v, v, s) -> v
  - [ ] rotate[XYZ](v, origin, rad) -> v
 ** Matrices
