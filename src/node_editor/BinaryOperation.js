@@ -362,6 +362,30 @@ class ProjectionOperation extends BinaryOperation {
     }
 }
 
+class ExponentOperation extends BinaryOperation {
+    static title = 'Exponent';
+    static symbol = null;
+    static defaultLhsSockets = s.scalar;
+    static defaultRhsSockets = s.scalar;
+    static defaultOutputSockets = s.scalar;
+
+    // Socket types are static
+    static lhsToRhsTypeMap = null;
+    static rhsToLhsTypeMap = null;
+    static inputToOutputTypeMap = null;
+
+    static getOutputName() {
+        return 'A<sup>B</sup>';
+    }
+
+    static calculate(lhs, rhs) {
+        if (lhs.type !== 'scalar' || rhs.type !== 'scalar') {
+            throw new Error(`${this.title} unsupported input types`, lhs.type, rhs.type);
+        }
+        return [Math.pow(lhs.value, rhs.value)];
+    }
+}
+
 export default {
     ADD:           AddOperation,
     SUBTRACT:      SubtractOperation,
@@ -371,4 +395,5 @@ export default {
     CROSS_PRODUCT: CrossOperation,
     ANGLE:         AngleOperation,
     PROJECTION:    ProjectionOperation,
+    EXPONENT:      ExponentOperation,
 };

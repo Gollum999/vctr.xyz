@@ -51,6 +51,7 @@
             <v-list-item @click="addNode('operation-cross')">Cross Product</v-list-item>
             <v-list-item @click="addNode('operation-angle')">Angle</v-list-item>
             <v-list-item @click="addNode('operation-projection')">Projection</v-list-item>
+            <v-list-item @click="addNode('operation-exponent')">Exponent</v-list-item>
           </v-list>
         </v-menu>
       </div>
@@ -120,6 +121,7 @@ function getOperation(nodeName) {
     case 'Cross Product': return BinaryOperation.CROSS_PRODUCT;
     case 'Angle':         return BinaryOperation.ANGLE;
     case 'Projection':    return BinaryOperation.PROJECTION;
+    case 'Exponent':      return BinaryOperation.EXPONENT;
     }
 }
 
@@ -220,6 +222,7 @@ export default {
                 'operation-cross':       new allComponents.BinaryOperationComponent(BinaryOperation.CROSS_PRODUCT),
                 'operation-angle':       new allComponents.BinaryOperationComponent(BinaryOperation.ANGLE),
                 'operation-projection':  new allComponents.BinaryOperationComponent(BinaryOperation.PROJECTION),
+                'operation-exponent':    new allComponents.BinaryOperationComponent(BinaryOperation.EXPONENT),
             },
         };
     },
@@ -319,6 +322,7 @@ export default {
             case 'operation-cross':
             case 'operation-angle':
             case 'operation-projection':
+            case 'operation-exponent':
                 node = await this.components[nodeType].createNode();
                 break;
             default:

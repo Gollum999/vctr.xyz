@@ -6,7 +6,7 @@
  - [X] s - s
  - [X] s * s
  - [X] s / s
- - [ ] s ^ s
+ - [X] s ^ s
  - [ ] s % s
  - [ ] |s|
  - [ ] sqrt(s)
