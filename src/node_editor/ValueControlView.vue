@@ -11,7 +11,7 @@
     :readonly="readOnly"
     @input="onInput($event, idx)"
     @copy.prevent.stop="onCopy"
-    @paste.prevent.stop="onPaste(idx, $event)"
+    @paste.prevent.stop="onPaste($event)"
   />
 </div>
 </template>
@@ -123,25 +123,31 @@ export default {
 
         onCopy(event) {
             const valueArray = wrapperToArray(this.values);
-            const text = valueArray.join(', '); // TODO what delimiters to use?
+            const text = (() => {
+                switch (this.valueType) {
+                case ValueType.SCALAR: return valueArray.join(', ');
+                case ValueType.VECTOR: // fallthrough
+                case ValueType.MATRIX: return '[' + valueArray.join(', ') + ']'; // TODO could copy as 4x4 instead of 1x16
+                };
+            })();
             console.log('ValueControlView onCopy', event, valueArray, 'setting clipboard to "', text, '"');
             event.clipboardData.setData('text', text);
         },
 
-        onPaste(idx, event) {
-            // TODO should I paste "visually"?  e.g. if you paste into middle cell, shift pasted values over (no wrapping)?
-            // TODO should I support the shifting at all, or always paste whole thing?
-            // TODO   possibly useful for vectors, but probably just confusing for matrices
+        onPaste(event) {
             if (this.readOnly) {
                 return;
             }
-            console.log(`ValueControlView onPaste ${idx}`, event);
+            console.log(`ValueControlView onPaste`, event);
             const text = event.clipboardData.getData('text');
-            const split = text.split(/[ ,;]+/);
+            const split = text.replace(/[[\]{}()]/g, '').split(/[ ,;]+/);
+            if (split.length !== EXPECTED_SIZE[this.valueType]) {
+                return;
+            }
             // TODO consider falling back to default paste handler if split is wrong length (so pasting single numbers appends instead of overwrites selected cell)
             const result = wrapperToArray(this.values);
-            for (let offset = 0; idx + offset < EXPECTED_SIZE[this.valueType] && offset < split.length; ++offset) {
-                result[idx + offset] = parseFloat(split[offset]);
+            for (let offset = 0; offset < EXPECTED_SIZE[this.valueType] && offset < split.length; ++offset) {
+                result[offset] = parseFloat(split[offset]);
             }
             this.setValue(result);
         },
