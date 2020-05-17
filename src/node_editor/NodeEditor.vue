@@ -626,6 +626,8 @@ export default {
                         //      use FieldChangeAction (which I could still do inside of RemoveAdvancedRenderControlsAction)
                         const resetOriginAction = new actions.FieldChangeAction(engineNode.data['pos'], [0, 0, 0], val => {
                             engineNode.data['pos'] = val;
+                            // Make sure 'pos' changes are processed
+                            this.editor.trigger('process'); // TODO I could maybe go through vue component to make sure this happens automatically
                         });
                         actionStack.push(resetOriginAction);
 
