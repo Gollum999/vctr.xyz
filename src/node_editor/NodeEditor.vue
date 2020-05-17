@@ -463,6 +463,10 @@ export default {
                 const clearAllNodesAction = new actions.MultiAction([
                     new actions.RemoveAllConnectionsAction(this.editor),
                     new actions.RemoveAllNodesAction(this.editor),
+                    new actions.FieldChangeAction(this.editor.view.area.transform, { k: 1, x: 0, y: 0 }, val => {
+                        this.editor.view.area.transform = val;
+                        this.editor.view.area.update();
+                    }),
                 ]);
                 history.addAndDo(clearAllNodesAction);
             }
