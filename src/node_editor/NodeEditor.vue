@@ -81,7 +81,7 @@
 
       <v-menu v-model="showContextMenu" :position-x="contextMenuPos.x" :position-y="contextMenuPos.y" absolute>
         <v-list dense>
-          <v-list-item @click="deleteNode">Delete</v-list-item>
+          <v-list-item @click="deleteSelectedNodes">Delete</v-list-item>
         </v-list>
       </v-menu>
     </div>
@@ -271,33 +271,28 @@ export default {
             this.editor.on('connectionremoved', c => history.add(new actions.RemoveConnectionAction(this.editor, c)));
         },
 
-        async addNode(nodeType) {
-            console.log(`Add node (type ${nodeType})`);
-
-            var node = null;
+        async createNode(nodeType) {
             switch (nodeType) {
             case 'scalar': {
                 const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultScalarColor;
                 // TODO need a factory or something for these
-                node = await this.components['scalar'].createNode({
+                return this.components['scalar'].createNode({
                     'color': { color: color, visible: false },
                     'value': [1],
                     'pos': [0, 0, 0],
                 });
-                break;
             }
             case 'vector': {
                 const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultVectorColor;
-                node = await this.components['vector'].createNode({
+                return this.components['vector'].createNode({
                     'color': { color: color, visible: true },
                     'value': [1, 1, 1],
                     'pos': [0, 0, 0],
                 });
-                break;
             }
             case 'matrix': {
                 const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultMatrixColor;
-                node = await this.components['matrix'].createNode({
+                return this.components['matrix'].createNode({
                     'color': { color: color, visible: false },
                     'value': [
                         1, 0, 0, 0,
@@ -307,7 +302,6 @@ export default {
                     ],
                     'pos': [0, 0, 0],
                 });
-                break;
             }
             case 'operation-length':
             case 'operation-invert':
@@ -323,12 +317,13 @@ export default {
             case 'operation-angle':
             case 'operation-projection':
             case 'operation-exponent':
-                node = await this.components[nodeType].createNode();
-                break;
+                return this.components[nodeType].createNode();
             default:
                 throw new Error(`Cannot add node of type ${nodeType}`);
             }
+        },
 
+        addAndRepositionNode(node) {
             this.editor.addNode(node);
             const nodeView = this.editor.view.nodes.get(node);
 
@@ -344,7 +339,13 @@ export default {
             this.lastNodePosition = node.position.slice();
         },
 
+        async addNode(nodeType) {
+            console.log(`Add node (type ${nodeType})`);
+            this.addAndRepositionNode(await this.createNode(nodeType));
+        },
+
         getNewNodePos(node, nodeView) {
+            // TODO really need a simple vector class
             const editorX = this.editor.view.area.transform.x;
             const editorY = this.editor.view.area.transform.y;
             const nodeEditorWidth = this.editor.view.container.parentElement.parentElement.clientWidth;
@@ -378,7 +379,8 @@ export default {
             }
         },
 
-        deleteNode() {
+        deleteSelectedNodes() {
+            // TODO remove connections first, make everything a single history action
             this.editor.selected.each(node => {
                 this.editor.removeNode(node);
             });
@@ -416,6 +418,80 @@ export default {
             // this.$nextTick(() => {
             //     this.currentlyHandlingHistoryAction = false;
             // });
+        },
+
+        serializeNode(node, originPos) {
+            // TODO hack, probably just use the node names everywhere since they have to be unique anyway
+            const type = {
+                'Scalar':        'scalar',
+                'Vector':        'vector',
+                'Matrix':        'matrix',
+
+                'Length':        'operation-length',
+                'Invert':        'operation-invert',
+                'Normalize':     'operation-normalize',
+                'Transpose':     'operation-transpose',
+                'Determinant':   'operation-determinant',
+
+                'Add':           'operation-add',
+                'Subtract':      'operation-subtract',
+                'Multiply':      'operation-multiply',
+                'Divide':        'operation-divide',
+                'Dot Product':   'operation-dot',
+                'Cross Product': 'operation-cross',
+                'Angle':         'operation-angle',
+                'Projection':    'operation-projection',
+                'Exponent':      'operation-exponent',
+            }[node.name];
+            return {
+                type: type,
+                data: node.data,
+                posOffset: [node.position[0] - originPos[0], node.position[1] - originPos[1]],
+            };
+        },
+
+        onCut(event) {
+            console.log('NodeEditor.onCut', event);
+            this.onCopy(event);
+            this.deleteSelectedNodes();
+        },
+
+        onCopy(event) {
+            console.log('NodeEditor.onCopy', event, this.editor.selected);
+            if (this.editor.selected.list.length) {
+                const originPos = this.editor.selected.list[0].position; // TODO I think best would be to find the node closest to center of selected
+                // const nodeRects = this.editor.selected.list.map(node => {
+                //     return new Rect(node.position[1], node.position[0], node.position[0], node.position[1]);
+                // });
+                // const combined = nodeRects.reduce((combined, current) => { return combined.union(current); });
+                // const originPos = combined.midpoint();
+                event.clipboardData.setData('application/json', JSON.stringify(this.editor.selected.list.map(node => {
+                    return this.serializeNode(node, originPos);
+                })));
+            }
+        },
+
+        async onPaste(event) {
+            console.log('NodeEditor.onPaste', event);
+            const nodes = JSON.parse(event.clipboardData.getData('application/json'));
+            console.log(nodes);
+            let rootPosition = null;
+            // TODO these need to be a single history action
+            for (const nodeDescription of nodes) {
+                const node = await this.createNode(nodeDescription.type);
+                node.data = nodeDescription.data;
+                // console.log('PASTING', nodeDescription, node);
+                if (!rootPosition) { // TODO currently assuming that the first node is the one that was used for origin pos
+                    // Use the standard node positioning logic for the "root" of the pasted nodes
+                    console.assert(_.isEqual(nodeDescription.posOffset, [0, 0]));
+                    this.addAndRepositionNode(node);
+                    rootPosition = node.position;
+                } else {
+                    // For all of the remaining nodes, position them relative to the root node
+                    node.position = [rootPosition[0] + nodeDescription.posOffset[0], rootPosition[1] + nodeDescription.posOffset[1]];
+                    this.editor.addNode(node);
+                }
+            }
         },
 
         recenterView() {
@@ -719,6 +795,19 @@ export default {
             this.editor.on('connectioncreated connectionremoved', this.handleConnectionChanged);
             this.handleConnectionChanged(); // Run once to set up socket types
         })();
+
+        document.body.addEventListener('cut', event => {
+            this.onCut(event);
+            event.preventDefault();
+        });
+        document.body.addEventListener('copy', event => {
+            this.onCopy(event);
+            event.preventDefault();
+        });
+        document.body.addEventListener('paste', event => {
+            this.onPaste(event);
+            event.preventDefault();
+        });
 
         this.editor.view.resize();
         this.editor.trigger('process');
