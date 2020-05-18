@@ -799,6 +799,14 @@ export default {
             this.handleConnectionChanged(); // Run once to set up socket types
         })();
 
+        // Using body for these because that will be the active element after a node has been selected (not sure if that is necessary?)
+        document.body.addEventListener('keydown', event => {
+            if (event.key === 'Delete' && this.editor.selected.list.length) {
+                this.deleteSelectedNodes();
+                event.preventDefault();
+            }
+        });
+
         document.body.addEventListener('cut', event => {
             this.onCut(event);
             event.preventDefault();
