@@ -380,13 +380,11 @@ export default {
         },
 
         deleteSelectedNodes() {
+            const lastHistoryIdx = history.length - 1;
             this.editor.selected.each(node => {
                 this.editor.removeNode(node);
             });
-            history.add(new actions.MultiAction(history.squashTopActionsOfType(
-                actions.RemoveConnectionAction,
-                actions.RemoveNodeAction,
-            )));
+            history.add(new actions.MultiAction(history.squashTopActionsDownToIndex(lastHistoryIdx)));
         },
 
         onUndo() {

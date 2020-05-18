@@ -27,6 +27,10 @@ export class History {
         return this.produced[this.produced.length - 1];
     }
 
+    get length() {
+        return this.produced.length;
+    }
+
     _do(from, to, type) {
         const action = from.pop();
 
@@ -79,13 +83,11 @@ export class History {
         this.enable();
     }
 
-    // Caller's responsibility to wrap in MultiAction to avoid circular dependency
+    // Caller's responsibility to wrap in MultiAction to avoid circular dependency.  idx is non-inclusive.
     // TODO better way to write this to include the MultiAction?
-    // TODO need some way to signal where to stop other than just types... there could be an unrelated action of matching
-    //      type beneath the actions being squashed.
-    squashTopActionsOfType(...types) {
+    squashTopActionsDownToIndex(idx) {
         const actions = [];
-        while (types.some(t => { return this.last instanceof t; })) {
+        for (let i = this.produced.length - 1; i > idx; --i) {
             actions.push(this.produced.pop());
         }
         return actions.reverse();
