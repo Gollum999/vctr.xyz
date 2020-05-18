@@ -380,10 +380,13 @@ export default {
         },
 
         deleteSelectedNodes() {
-            // TODO remove connections first, make everything a single history action
             this.editor.selected.each(node => {
                 this.editor.removeNode(node);
             });
+            history.add(new actions.MultiAction(history.squashTopActionsOfType(
+                actions.RemoveConnectionAction,
+                actions.RemoveNodeAction,
+            )));
         },
 
         onUndo() {

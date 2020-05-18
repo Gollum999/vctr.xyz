@@ -78,6 +78,18 @@ export class History {
         body();
         this.enable();
     }
+
+    // Caller's responsibility to wrap in MultiAction to avoid circular dependency
+    // TODO better way to write this to include the MultiAction?
+    // TODO need some way to signal where to stop other than just types... there could be an unrelated action of matching
+    //      type beneath the actions being squashed.
+    squashTopActionsOfType(...types) {
+        const actions = [];
+        while (types.some(t => { return this.last instanceof t; })) {
+            actions.push(this.produced.pop());
+        }
+        return actions.reverse();
+    }
 }
 
 export default new History();
