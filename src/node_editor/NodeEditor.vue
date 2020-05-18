@@ -554,8 +554,16 @@ export default {
                 if (!e.ctrlKey) return;
 
                 switch (e.code) {
-                case 'KeyZ': history.undo(); break;
-                case 'KeyY': history.redo(); break;
+                case 'KeyZ':
+                    if (e.shiftKey) {
+                        history.redo();
+                    } else {
+                        history.undo();
+                    }
+                    break;
+                case 'KeyY':
+                    history.redo();
+                    break;
                 default: break;
                 }
             });
