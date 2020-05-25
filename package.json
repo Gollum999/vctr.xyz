@@ -28,6 +28,7 @@
     "three": "^0.105.2",
     "vue": "^2.6.6",
     "vue-gl": "^0.15.0",
+    "vue-resize": "^0.5.0",
     "vue-router": "^3.0.1",
     "vue-split-panel": "^1.0.4",
     "vuetify": "^2.0.2"

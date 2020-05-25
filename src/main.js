@@ -6,13 +6,16 @@ import App from './App';
 import router from './router';
 import * as VueGL from 'vue-gl';
 import vuetify from './plugins/vuetify';
+import VueResize from 'vue-resize';
 
 import 'roboto-fontface/css/roboto/roboto-fontface.css';
 import '@mdi/font/css/materialdesignicons.css';
+import 'vue-resize/dist/vue-resize.css';
 import '../static/global.css';
 
 Vue.config.productionTip = false;
 Vue.use(VueSplit);
+Vue.use(VueResize);
 
 console.log('Initializing VueGL components');
 Object.keys(VueGL).forEach(name => {
