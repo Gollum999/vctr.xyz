@@ -44,6 +44,7 @@
         <div :class="['viewport-container', isHidden('side') ? 'hidden' : '', isExpanded('side') ? 'fill' : '']">
           <Viewport ref="viewport_side" view="side" sceneName="main_scene" :scene="$refs.scene" :expanded="isExpanded('side')" @expand-viewport="expandViewport" />
         </div>
+        <resize-observer @notify="handleResize" />
       </vgl-scene>
     </vgl-namespace>
   </div>
@@ -76,10 +77,12 @@ class MatrixView { // TODO combine, move somewhere common?
 
 export default {
     name: 'QuadViewport',
+
     components: {
         Matrix,
         Viewport,
     },
+
     data() {
         return {
             settings: settings.viewportSettings,
@@ -89,6 +92,7 @@ export default {
             expandedView: null,
         };
     },
+
     computed: {
         // TODO may be faster to check this on insert
         renderVectors() {
@@ -102,6 +106,7 @@ export default {
             });
         },
     },
+
     mounted() {
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
         /* this.$refs.scene.inst.background = new THREE.Color(0xffffff); */
@@ -123,7 +128,13 @@ export default {
             // console.log('QuadViewport rendering vectors:', this.vectors);
             // console.log('QuadViewport rendering matrices:', this.matrices);
         });
+
+        this.$nextTick(() => { // TODO have to do next tick because of the same bug that causes flashing when shrinking; remove this whenever I fix that
+            const size = this.$refs.scene.$el.getBoundingClientRect();
+            this.handleResize({width: size.width, height: size.height});
+        });
     },
+
     methods: {
         expandViewport(view) {
             console.log('QuadViewport expanding', view);
@@ -138,13 +149,30 @@ export default {
             // Make sure scalars see the new canvas size so they can draw correctly
             ['top', 'free', 'front', 'side'].forEach(view => this.$refs[`viewport_${view}`].updateCanvasSize());
         },
+
         isHidden(view) {
             /* console.log('checking', view, 'for hidden', (this.expandedView !== null && this.expandedView !== view)); */
             return (this.expandedView !== null && this.expandedView !== view);
         },
+
         isExpanded(view) {
             /* console.log('checking', view, 'for expanded', this.expandedView === view); */
             return this.expandedView === view;
+        },
+
+        handleResize({width, height}) {
+            // HACK: Viewports don't render anything when they have sub-pixel widths, so force integer sizes
+            // TODO something causes flashing when shrinking
+            ['top', 'front'].forEach(view => {
+                const viewport = this.$refs[`viewport_${view}`].$el;
+                const parent = viewport.parentElement;
+                parent.style.width = `${Math.ceil(width / 2)}px`;
+            });
+            ['free', 'side'].forEach(view => {
+                const viewport = this.$refs[`viewport_${view}`].$el;
+                const parent = viewport.parentElement;
+                parent.style.width = `${Math.floor(width / 2)}px`;
+            });
         },
     },
 };
@@ -153,6 +181,7 @@ export default {
 <style scoped>
 .vgl-scene {
     line-height: 0px;
+    position: relative; /* for vue-resize */
 }
 .viewport-container {
     display: inline-block;
