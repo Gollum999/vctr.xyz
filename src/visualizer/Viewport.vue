@@ -66,12 +66,14 @@ export default {
     components: {
         Scalar,
     },
+
     props: {
         view:      { type: String, required: true, validator: value => { return ['side', 'front', 'top', 'free'].indexOf(value) !== -1; } },
         sceneName: { type: String, required: true },
         scene:     { required: true, validator: value => { return value instanceof Object || _.isNil(value); } },
         expanded:  { type: Boolean, default: false },
     },
+
     data() {
         return {
             VIEW_VALUES: {
@@ -112,23 +114,28 @@ export default {
             controls: null,
             clock: new THREE.Clock(),
             scalars: [],
+            lastViewportSize: null,
         };
     },
+
     computed: {
         orbitPos() {
             var result = this.VIEW_VALUES[this.view].initial_camera_pos;
             /* console.log(`Setting orbitPos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`); */
             return `${result.radius} ${result.phi} ${result.theta}`; // TODO can I avoid this string step?
         },
+
         renderScalars() {
             return this.scalars.filter(s => {
                 return s && s.value !== 0 && s.color !== null;
             });
         },
     },
+
     filters: {
         capitalize: util.capitalize,
     },
+
     watch: {
         'settings.values.showAxis': function (newVal, oldVal) { this.render(); }, // TODO ortho viewports don't immediately re-render
         'settings.values.showGrid': function (newVal, oldVal) {
@@ -141,6 +148,7 @@ export default {
             this.render();
         },
     },
+
     mounted() {
         // console.log(`Viewport mounted ${this.view} ${this.sceneName}`, this, this.updateCanvasSize);
 
@@ -186,11 +194,14 @@ export default {
         // TODO need to re-render when expanding, or somehow maintain state
         EventBus.$on('node_engine_processed', this.updateScalars);
 
-        this.updateCanvasSize();
+        this.$nextTick(() => {
+            this.updateCanvasSize();
+        });
         // TODO need to detect other resizes, e.g. from window
         EventBus.$on('split-resized', this.updateCanvasSize);
         /* this.$on('expand-viewport', this.updateCanvasSize); // This needs to happen for all viewports when any expanded or collapsed */
     },
+
     methods: {
         updateScalars(editorJson) {
             /* console.log('Viewport re-drawing scalars'); */
@@ -205,16 +216,24 @@ export default {
             }
             /* console.log('Viewport rendering scalars:', this.scalars); */
         },
+
         updateCanvasSize() {
-            this.$nextTick(() => { // TODO pretty gross
-                /* console.log('updating canvas size', this.$refs.viewport, this.scalars); */
-                this.canvasSize = {
-                    x: this.$refs.viewport.getBoundingClientRect().width,
-                    y: this.$refs.viewport.getBoundingClientRect().height,
-                };
-            });
+            // console.log('updating canvas size', this.$refs.viewport.getBoundingClientRect(), this.lastViewportSize.width, this.lastViewportSize.height);
+            this.canvasSize = {
+                x: this.lastViewportSize.width,
+                y: this.lastViewportSize.height,
+            };
+            this.render();
         },
+
         anim() {
+            // This is a hack -- not sure how to make this reactive, but this function is already conveniently called every tick...
+            const viewportSize = new THREE.Vector2(this.$refs.viewport.getBoundingClientRect().width, this.$refs.viewport.getBoundingClientRect().height);
+            if (this.lastViewportSize === null || !viewportSize.equals(this.lastViewportSize)) {
+                this.lastViewportSize = viewportSize;
+                this.updateCanvasSize();
+            }
+
             const delta = this.clock.getDelta();
             const updated = this.controls.update(delta);
             requestAnimationFrame(this.anim);
@@ -222,9 +241,13 @@ export default {
                 this.render();
             }
         },
+
         render() {
+            // console.log('render', this.$refs, this.$refs.renderer, this.$refs.camera, this.scene);
             // TODO might be cleaner to emit a 'render' event
-            this.$refs.renderer.inst.render(this.scene.inst, this.$refs.camera.inst);
+            if (!_.isNil(this.scene)) {
+                this.$refs.renderer.inst.render(this.scene.inst, this.$refs.camera.inst);
+            }
         },
 
         expandThis() {
