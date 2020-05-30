@@ -42,7 +42,7 @@ function wrapperToArray(wrapper) {
 }
 
 function arrayToWrapper(array) {
-    return array.map(i => { return {val: i}; });
+    return array.map(i => { return {val: parseFloat(i.toFixed(3))}; }); // TODO could add a component that stores the raw value and only rounds in the display layer
 }
 
 export default {

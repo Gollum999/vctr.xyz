@@ -329,7 +329,6 @@ class AngleOperation extends BinaryOperation {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
             throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
         }
-        // TODO round display to some number of decimals
         return [vec3.angle(lhs.value, rhs.value)];
     }
 }
