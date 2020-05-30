@@ -5,7 +5,7 @@ import NodeRenderer from './NodeRenderer.vue';
 import nodeUtil from './node_util';
 import { CalculationError } from './WarningControl.js';
 import history from '../history';
-import { RemoveAllNodeOutputConnectionsAction } from '../history_actions.js';
+import { MultiAction, RemoveAllNodeOutputConnectionsAction } from '../history_actions.js';
 
 export default class BinaryOperationComponent extends Rete.Component {
     constructor(operation) {
@@ -51,10 +51,10 @@ export default class BinaryOperationComponent extends Rete.Component {
             if (e instanceof CalculationError) {
                 editorNode.data['disabled'] = true;
                 editorNode.controls.get('warning').setWarning(e.message);
-                // TODO merge with the action that caused this, so both things can be undone in one step
                 if (Array.from(editorNode.outputs.values()).some(io => io.connections.length)) {
                     const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
                     history.addAndDo(action);
+                    history.add(new MultiAction(history.squashTopActions(2))); // Squash the value change that caused this
                 }
             } else {
                 throw e;

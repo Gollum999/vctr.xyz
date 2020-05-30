@@ -83,14 +83,20 @@ export class History {
         this.enable();
     }
 
-    // Caller's responsibility to wrap in MultiAction to avoid circular dependency.  idx is non-inclusive.
+    // Caller's responsibility to wrap in MultiAction to avoid circular dependency.
     // TODO better way to write this to include the MultiAction?
-    squashTopActionsDownToIndex(idx) {
+    squashTopActions(count) {
+        console.assert(count >= 2, 'Not enough actions to squash');
         const actions = [];
-        for (let i = this.produced.length - 1; i > idx; --i) {
+        for (let i = 0; i < count; ++i) {
             actions.push(this.produced.pop());
         }
         return actions.reverse();
+    }
+
+    // Caller's responsibility to wrap in MultiAction to avoid circular dependency.  idx is inclusive.
+    squashTopActionsDownToIndex(idx) {
+        return this.squashTopActions(this.produced.length - idx);
     }
 }
 

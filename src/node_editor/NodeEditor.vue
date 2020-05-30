@@ -384,7 +384,7 @@ export default {
             this.editor.selected.each(node => {
                 this.editor.removeNode(node);
             });
-            history.add(new actions.MultiAction(history.squashTopActionsDownToIndex(lastHistoryIdx)));
+            history.add(new actions.MultiAction(history.squashTopActionsDownToIndex(lastHistoryIdx + 1)));
         },
 
         onUndo() {
