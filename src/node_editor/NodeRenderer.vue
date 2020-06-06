@@ -77,7 +77,7 @@ export default {
 // $node-color: #aaaaaa
 $node-color: #ffffff
 // $node-color-selected: #ffe2e2
-$node-color-selected: #4d4d4d
+$node-color-selected: #4f4f4f
 // I don't use the node group plugin...
 $group-color: rgba(15, 80, 255, 0.2)
 $group-handler-size: 40px
