@@ -2,9 +2,9 @@
 // TODO may need to have manual control over class name
 // TODO why is dark theme not applying?
 v-card.node(dark hover :class="[selected(), node.name.toLowerCase()] | kebab")
-  // TODO editable titles
-  // .title {{node.name}}
-  .title {{node.name}} ({{node.id}})
+  // TODO change style on focus?
+  v-text-field.node-title(dense hide-details flat solo v-model="title" @blur="onTitleBlur" @keyup.enter="$event.target.blur()")
+  .debug-node-id {{node.id}}
 
   .node-body
     // Inputs
@@ -38,9 +38,15 @@ export default {
         return {
             advancedRenderControlsKey: 'pos', // TODO Remove this assumption
             settings: settings.nodeEditorSettings,
+            displayTitle: this.node.name,
         };
     },
     methods: {
+        onTitleBlur() {
+            if (!this.displayTitle) {
+                this.displayTitle = this.node.name;
+            }
+        },
         isDisabled() {
             return this.node.data['disabled'] || false;
         },
@@ -49,6 +55,16 @@ export default {
         Socket,
     },
     computed: {
+        title: {
+            get() {
+                console.log('node displayTitle ', this.displayTitle, this.node.name);
+                return this.displayTitle;
+            },
+            set(val) {
+                console.log('setting node displayTitle to ', val);
+                this.displayTitle = val;
+            },
+        },
         filteredInputs() {
             return this.inputs().filter(input => input.key !== this.advancedRenderControlsKey || this.settings.values.showAdvancedRenderSettings);
         },
@@ -74,17 +90,8 @@ export default {
 // @import "@material/card/mdc-card.scss"
 
 // @import "../../node_modules/rete-vue-render-plugin/src/vars"
-// $node-color: #aaaaaa
-$node-color: #ffffff
-// $node-color-selected: #ffe2e2
-$node-color-selected: #4f4f4f
-// I don't use the node group plugin...
-$group-color: rgba(15, 80, 255, 0.2)
-$group-handler-size: 40px
-$group-handler-offset: -10px
 $socket-size: 14px
 $socket-margin: 4px
-$socket-color: #96b38a
 $node-width: 100px
 
 #app .socket
@@ -96,9 +103,6 @@ $node-width: 100px
     transform: translate(-50%)
 
 .node
-  // background: $node-color
-  // border: 1px solid #555555
-  // border-radius: 10px
   cursor: pointer
   min-width: $node-width
   height: auto
@@ -114,20 +118,16 @@ $node-width: 100px
     grid-template-rows: auto
     .item
       border: 1px solid black
-  // &:hover
-  //   background: lighten($node-color,4%)
   &.selected
-    background-color: $node-color-selected
-    // border: 1px solid black // TODO temp, figure out a better indicator
-  .title
-    // background-color: #888888
-    // color: white
-    // font-family: sans-serif
-    font-size: 14px
+    filter: brightness(120%)
+  .debug-node-id
+    position: absolute
+    top: 4px
+    right: 4px
+  .node-title
     padding: 4px
     margin: 0px 16px 4px
     border-bottom: 1px solid rgba(128, 128, 128, 0.4)
-    // border-radius: 10px 10px 0 0
   .input,.output
     height: 100%
     display: flex
@@ -158,8 +158,24 @@ $node-width: 100px
 
 <style lang="sass">
 /* Global overrides for Rete style */
+$socket-color-scalar: #7777dd
+$socket-color-vector: #ff4444
+$socket-color-matrix: #44ffff
+
 #app
   .node
+    .node-title
+      input
+        font-size: 14px
+        // font-weight: bold // TODO doesn't look amazing, something weird with sub-pixel alignment in canvas?
+        padding: 4px 0 4px
+        text-align: center
+      .v-input__control
+        min-height: 0
+        &:focus-within
+          filter: brightness(120%)
+      .v-input__slot
+        width: initial // TOOD hack?  otherwise doesn't fit in my node
     .control
       padding: 8px // TODO doesn't work because of display: contents
 
@@ -181,22 +197,22 @@ $node-width: 100px
     &.output
       margin-right: -7px
     &.scalar-value
-      background: #7777dd
+      background: $socket-color-scalar
     &.vector-value
-      background: #ff4444
+      background: $socket-color-vector
     &.matrix-value
-      background: #44ffff
+      background: $socket-color-matrix
     &.scalar-or-vector
       background: #bb5d90 // TODO is there a more graceful way to have a "fallback" style?  media query?
-      background: linear-gradient(180deg, #7777dd 50%, #ff4444 50%)
+      background: linear-gradient(180deg, $socket-color-scalar 50%, $socket-color-vector 50%)
     &.scalar-or-matrix
       background: #5dbbee
-      background: linear-gradient(180deg, #7777dd 50%, #44ffff 50%)
+      background: linear-gradient(180deg, $socket-color-scalar 50%, $socket-color-matrix 50%)
     &.vector-or-matrix
       background: #a1a1a1
-      background: linear-gradient(180deg, #ff4444 50%, #44ffff 50%)
+      background: linear-gradient(180deg, $socket-color-vector 50%, $socket-color-matrix 50%)
     &.anything
       background: #aaaaaa
-      background: linear-gradient(180deg, #7777dd 34%, #ff4444 34% 66%, #44ffff 66%)
-      background: conic-gradient(#7777dd 120deg, #ff4444 120deg 240deg, #44ffff 240deg 360deg)
+      background: linear-gradient(180deg, $socket-color-scalar 34%, $socket-color-vector 34% 66%, $socket-color-matrix 66%)
+      background: conic-gradient($socket-color-scalar 120deg, $socket-color-vector 120deg 240deg, $socket-color-matrix 240deg 360deg)
 </style>

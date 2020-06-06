@@ -181,7 +181,7 @@ export default {
 }
 #app .control-container .v-input__slot {
     padding: 0px 4px; /* This is the padding between the container bounds and the actual contained input */
-    background-color: rgba(255, 255, 255, 0.05);
+    filter: brightness(120%);
 }
 #app .control-container .v-input__control {
     min-height: 28px;
