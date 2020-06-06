@@ -1,3 +1,11 @@
+function capitalize(str) {
+    if (!str) {
+        return '';
+    }
+    str = str.toString().toLowerCase();
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export default {
     clamp(num, min, max) {
         return Math.min(Math.max(num, min), max);
@@ -66,12 +74,14 @@ export default {
         return this.hslToRgb(h, s, l);
     },
 
-    capitalize(str) {
+    capitalize,
+
+    titleCase(str) {
         if (!str) {
             return '';
         }
-        str = str.toString();
-        return str.charAt(0).toUpperCase() + str.slice(1);
+        const words = str.toString().toLowerCase().split(/\s+/);
+        return words.map(capitalize).join(' ');
     },
 
     // Is x a subset of y?
