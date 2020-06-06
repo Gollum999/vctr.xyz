@@ -61,8 +61,6 @@ class ConnectionActionHelper {
     }
     remove() {
         console.log('ConnectionActionHelper removing', this.editor, this.connection);
-        // TODO: 'connectioncreated'/'connectionremoved' events automatically add themselves to the history...
-        //       May need to fork the entire history plugin myself to work around this and avoid duplicate events
         this.editor.removeConnection(this.connection);
     }
 }

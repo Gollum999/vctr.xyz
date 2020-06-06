@@ -17,7 +17,6 @@
         </v-btn>
         </template>
 
-        <!-- TODO add confirm dialog when toggling this off, since doing so will remove some controls -->
         <SettingsModal ref="settings-modal" @settings-modal-closed="showSettingsDialog = false"/>
     </v-dialog>
   </div>

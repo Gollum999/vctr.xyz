@@ -197,7 +197,6 @@ export default {
         this.$nextTick(() => {
             this.updateCanvasSize();
         });
-        // TODO need to detect other resizes, e.g. from window
         EventBus.$on('split-resized', this.updateCanvasSize);
         /* this.$on('expand-viewport', this.updateCanvasSize); // This needs to happen for all viewports when any expanded or collapsed */
     },

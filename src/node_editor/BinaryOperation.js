@@ -226,7 +226,7 @@ class MultiplyOperation extends BinaryOperation {
             mat4.transpose(lhsT, lhs.value); // gl-matrix is column-major, but I am row-major; transpose before and after calculating
             mat4.transpose(rhsT, rhs.value);
             mat4.multiply(out, lhsT, rhsT);
-            return mat4.transpose(out, out); // TODO will this work, or do I need a second temp matrix?
+            return mat4.transpose(out, out);
         }
         throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
     }

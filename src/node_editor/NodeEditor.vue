@@ -3,7 +3,6 @@
   <div class="node-editor" @dblclick.capture.stop>
     <div class="rete" id="rete" />
 
-    <!-- TODO this container swallows clicks -->
     <div class="buttons-container">
       <div class="buttons-group buttons-add-nodes">
         <!-- <v-btn x-small type="button" title="test1" @click="test1">test1</v-btn> -->
@@ -60,7 +59,6 @@
 
       <div class="buttons-group buttons-history">
         <v-btn fab ripple x-small type="button" title="Undo" :disabled="!history.canUndo()" @click="onUndo">
-          <!-- TODO color not working -->
           <v-icon>undo</v-icon>
         </v-btn>
         <v-btn fab x-small type="button" title="Redo" :disabled="!history.canRedo()" @click="onRedo">
@@ -259,7 +257,6 @@ export default {
                 if (_.isEqual(node.position, prev)) {
                     return;
                 }
-                // TODO may also want to enforce that we can't currently redo, otherwise you could move -> something else -> undo -> move (merged)
                 if (history.last instanceof actions.DragNodeAction && history.last.node === node) {
                     history.last.update(node);
                 } else {

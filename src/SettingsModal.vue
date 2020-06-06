@@ -16,7 +16,6 @@
 
       <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <v-tab-item>
-        <!-- TODO use switch instead of checkbox? -->
         <v-switch color="primary" v-model="viewportSettings.values.showAxis" label="Show axis" hide-details />
         <v-switch color="primary" v-model="viewportSettings.values.showGrid" label="Show grid" hide-details />
 
