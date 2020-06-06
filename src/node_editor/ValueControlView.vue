@@ -1,8 +1,8 @@
 <template>
-<div :class="[valueType, 'control-container']" :style="{'grid-row': rowIdx}">
+<div :class="[nodeType.toLowerCase(), 'control-container']" :style="{'grid-row': rowIdx}">
   <!-- TODO why is dark theme not applying to font color? -->
   <v-text-field
-    v-for="(item, idx) in values" :key="`${valueType}-value-${idx}`"
+    v-for="(item, idx) in values" :key="`${nodeType}-value-${idx}`"
     solo
     dark
     hide-details
@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import history from '../history';
 import { FieldChangeAction } from '../history_actions';
-import { ValueType } from './node_util';
+import { ValueNodeType } from './node_util';
 
 const DEFAULT_SCALAR_WRAPPER = Object.freeze([{val: 1}]);
 const DEFAULT_VECTOR_WRAPPER = Object.freeze([{val: 1}, {val: 1}, {val: 1}]);
@@ -32,9 +32,9 @@ const DEFAULT_MATRIX_WRAPPER = Object.freeze([
 ]);
 
 const EXPECTED_SIZE = {
-    [ValueType.SCALAR]: 1,
-    [ValueType.VECTOR]: 3,
-    [ValueType.MATRIX]: 16,
+    [ValueNodeType.SCALAR]: 1,
+    [ValueNodeType.VECTOR]: 3,
+    [ValueNodeType.MATRIX]: 16,
 };
 
 function wrapperToArray(wrapper) {
@@ -53,17 +53,17 @@ export default {
         dataKey:       { type: String,   required: true }, // injected by Rete
         globalVuetify: { type: Object,   required: true },
         rowIdx:        { type: Number,   required: true }, // used to position control within parent grid
-        valueType:     { type: String,   required: true, validator: value => Object.values(ValueType).includes(value) },
+        nodeType:      { type: String,   required: true, validator: value => Object.values(ValueNodeType).includes(value) },
     },
 
     data() {
         // To make everything properly reactive, must use proxy array instead of raw vec3/mat4, and must wrap array elements in objects
         // Scalars don't actually need this, but just follow the pattern for consistency
         const defaultValues = {
-            [ValueType.SCALAR]: DEFAULT_SCALAR_WRAPPER,
-            [ValueType.VECTOR]: DEFAULT_VECTOR_WRAPPER,
-            [ValueType.MATRIX]: DEFAULT_MATRIX_WRAPPER,
-        }[this.valueType];
+            [ValueNodeType.SCALAR]: DEFAULT_SCALAR_WRAPPER,
+            [ValueNodeType.VECTOR]: DEFAULT_VECTOR_WRAPPER,
+            [ValueNodeType.MATRIX]: DEFAULT_MATRIX_WRAPPER,
+        }[this.nodeType];
         return {
             defaultValues: defaultValues,
             values: defaultValues.slice(),
@@ -95,7 +95,7 @@ export default {
         setValue(value) {
             // console.log('ValueControlView setValue', value);
             // TODO repeat this check for other types
-            if (_.isNil(value) || value.length !== EXPECTED_SIZE[this.valueType]) {
+            if (_.isNil(value) || value.length !== EXPECTED_SIZE[this.nodeType]) {
                 this.values = this.defaultValues.slice();
                 // console.log('ValueControlView setValue DEFAULT to', this.values);
             } else {
@@ -117,17 +117,17 @@ export default {
             });
             history.addAndDo(action);
 
-            console.log('ValueControlView', this.valueType, 'triggering engine process from onInput');
+            console.log('ValueControlView', this.nodeType, 'triggering engine process from onInput');
             this.emitter.trigger('process');
         },
 
         onCopy(event) {
             const valueArray = wrapperToArray(this.values);
             const text = (() => {
-                switch (this.valueType) {
-                case ValueType.SCALAR: return valueArray.join(', ');
-                case ValueType.VECTOR: // fallthrough
-                case ValueType.MATRIX: return '[' + valueArray.join(', ') + ']'; // TODO could copy as 4x4 instead of 1x16
+                switch (this.nodeType) {
+                case ValueNodeType.SCALAR: return valueArray.join(', ');
+                case ValueNodeType.VECTOR: // fallthrough
+                case ValueNodeType.MATRIX: return '[' + valueArray.join(', ') + ']'; // TODO could copy as 4x4 instead of 1x16
                 };
             })();
             console.log('ValueControlView onCopy', event, valueArray, 'setting clipboard to "', text, '"');
@@ -141,12 +141,12 @@ export default {
             console.log(`ValueControlView onPaste`, event);
             const text = event.clipboardData.getData('text');
             const split = text.replace(/[[\]{}()]/g, '').split(/[ ,;]+/);
-            if (split.length !== EXPECTED_SIZE[this.valueType]) {
+            if (split.length !== EXPECTED_SIZE[this.nodeType]) {
                 return;
             }
             // TODO consider falling back to default paste handler if split is wrong length (so pasting single numbers appends instead of overwrites selected cell)
             const result = wrapperToArray(this.values);
-            for (let offset = 0; offset < EXPECTED_SIZE[this.valueType] && offset < split.length; ++offset) {
+            for (let offset = 0; offset < EXPECTED_SIZE[this.nodeType] && offset < split.length; ++offset) {
                 result[offset] = parseFloat(split[offset]);
             }
             this.setValue(result);

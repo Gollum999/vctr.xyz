@@ -71,11 +71,38 @@ export class GraphTraveler {
     }
 };
 
-export const ValueType = {
-    SCALAR: 'scalar',
-    VECTOR: 'vector',
-    MATRIX: 'matrix',
-};
+// TODO these match node titles, so probably don't need to re-specify in unary/binaryoperation
+export const ValueNodeType = Object.freeze({
+    SCALAR:        'Scalar',
+    VECTOR:        'Vector',
+    MATRIX:        'Matrix',
+});
+
+export const UnaryOperationNodeType = Object.freeze({
+    LENGTH:        'Length',
+    INVERT:        'Invert',
+    NORMALIZE:     'Normalize',
+    TRANSPOSE:     'Transpose',
+    DETERMINANT:   'Determinant',
+});
+
+export const BinaryOperationNodeType = Object.freeze({
+    ADD:           'Add',
+    SUBTRACT:      'Subtract',
+    MULTIPLY:      'Multiply',
+    DIVIDE:        'Divide',
+    DOT_PRODUCT:   'Dot Product',
+    CROSS_PRODUCT: 'Cross Product',
+    ANGLE:         'Angle',
+    PROJECTION:    'Projection',
+    EXPONENT:      'Exponent',
+});
+
+export const NodeType = Object.freeze({
+    ...ValueNodeType,
+    ...UnaryOperationNodeType,
+    ...BinaryOperationNodeType,
+});
 
 export default {
     getEditorNode,

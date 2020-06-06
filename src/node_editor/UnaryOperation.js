@@ -5,6 +5,7 @@ import Rete from 'rete';
 import sockets from './sockets';
 import util, { s } from './operation_util';
 import { WarningControl, CalculationError } from './WarningControl.js';
+import { UnaryOperationNodeType } from './node_util';
 
 class UnaryOperation {
     static title = null;
@@ -211,9 +212,9 @@ class DeterminantOperation extends UnaryOperation {
 }
 
 export default {
-    LENGTH:      LengthOperation,
-    INVERT:      InvertOperation,
-    NORMALIZE:   NormalizeOperation,
-    TRANSPOSE:   TransposeOperation,
-    DETERMINANT: DeterminantOperation,
+    [UnaryOperationNodeType.LENGTH]:      LengthOperation,
+    [UnaryOperationNodeType.INVERT]:      InvertOperation,
+    [UnaryOperationNodeType.NORMALIZE]:   NormalizeOperation,
+    [UnaryOperationNodeType.TRANSPOSE]:   TransposeOperation,
+    [UnaryOperationNodeType.DETERMINANT]: DeterminantOperation,
 };

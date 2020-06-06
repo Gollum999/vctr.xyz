@@ -6,7 +6,7 @@ import Vuetify from 'vuetify';
 
 import allComponents from '@/node_editor/components';
 import sockets from '@/node_editor/sockets';
-import { ValueType } from '@/node_editor/node_util';
+import { ValueNodeType } from '@/node_editor/node_util';
 
 const module = require('@/node_editor/BasicOperationComponent.js');
 const s                          = module.__get__('s');
@@ -231,9 +231,9 @@ describe('BasicOperationComponent', () => {
 
         const vuetify = new Vuetify();
         components = {
-            'scalar':             new allComponents.ValueComponent(vuetify, ValueType.SCALAR),
-            'vector':             new allComponents.ValueComponent(vuetify, ValueType.VECTOR),
-            'matrix':             new allComponents.ValueComponent(vuetify, ValueType.MATRIX),
+            'scalar':             new allComponents.ValueComponent(vuetify, ValueNodeType.SCALAR),
+            'vector':             new allComponents.ValueComponent(vuetify, ValueNodeType.VECTOR),
+            'matrix':             new allComponents.ValueComponent(vuetify, ValueNodeType.MATRIX),
             'operation-add':      new allComponents.BasicOperationComponent('Add'),
             'operation-subtract': new allComponents.BasicOperationComponent('Subtract'),
             'operation-multiply': new allComponents.BasicOperationComponent('Multiply'),

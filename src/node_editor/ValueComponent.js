@@ -5,39 +5,38 @@ import sockets from './sockets';
 import { ValueControl } from './ValueControl';
 import { AxesLabelControl } from './AxesLabelControl';
 import { ColorControl } from './ColorControl';
-import util from '../util';
-import nodeUtil, { ValueType } from './node_util';
+import nodeUtil, { ValueNodeType } from './node_util';
 
 export class ValueComponent extends Rete.Component {
-    constructor(globalVuetify, valueType) {
+    constructor(globalVuetify, nodeType) {
         // TODO should consider patching Rete to allow specifying extra attributes or something
         // TODO   not sure of the best design since render plugin is entirely separate from components
-        super(util.capitalize(valueType)); // Note that the node name affects the element class as well as the node title
+        super(nodeType); // Note that the node name affects the element class as well as the node title
         this.globalVuetify = globalVuetify;
-        this.valueType = valueType;
+        this.nodeType = nodeType;
         this.data.component = NodeRenderer;
     }
 
     builder(node) {
-        // console.log('ValueComponent builder: this: ', this, 'valueType:', this.valueType, 'globalVuetify:', this.globalVuetify);
+        // console.log('ValueComponent builder: this: ', this, 'nodeType:', this.nodeType, 'globalVuetify:', this.globalVuetify);
 
         const socket = {
-            [ValueType.SCALAR]: sockets.scalar,
-            [ValueType.VECTOR]: sockets.vector,
-            [ValueType.MATRIX]: sockets.matrix,
-        }[this.valueType];
+            [ValueNodeType.SCALAR]: sockets.scalar,
+            [ValueNodeType.VECTOR]: sockets.vector,
+            [ValueNodeType.MATRIX]: sockets.matrix,
+        }[this.nodeType];
 
         node.addInput(new Rete.Input('value', 'Value', socket));
         node.addInput(new Rete.Input('color_label', 'Color', null));
         // If this key changes, NodeRenderer must also change // TODO remove this assumption
         node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
 
-        if (this.valueType === ValueType.VECTOR || this.valueType === ValueType.MATRIX) {
-            node.addControl(new AxesLabelControl(this.valueType, this.editor, 'label', -999));
+        if (this.nodeType === ValueNodeType.VECTOR || this.nodeType === ValueNodeType.MATRIX) {
+            node.addControl(new AxesLabelControl(this.nodeType, this.editor, 'label', -999));
         }
-        node.addControl(new ValueControl(this.valueType, this.editor, 'value', 1, this.globalVuetify));
+        node.addControl(new ValueControl(this.nodeType, this.editor, 'value', 1, this.globalVuetify));
         node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
-        node.addControl(new ValueControl(ValueType.VECTOR, this.editor, 'pos', 3, this.globalVuetify));
+        node.addControl(new ValueControl(ValueNodeType.VECTOR, this.editor, 'pos', 3, this.globalVuetify));
 
         node.addOutput(new Rete.Output('value', 'Value', socket));
 

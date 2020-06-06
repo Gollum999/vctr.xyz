@@ -1,7 +1,7 @@
 <template lang="pug">
 // TODO may need to have manual control over class name
 // TODO why is dark theme not applying?
-v-card.node(dark hover :class="[selected(), node.name] | kebab")
+v-card.node(dark hover :class="[selected(), node.name.toLowerCase()] | kebab")
   // TODO editable titles
   // .title {{node.name}}
   .title {{node.name}} ({{node.id}})

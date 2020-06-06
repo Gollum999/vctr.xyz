@@ -7,13 +7,13 @@
       <div class="buttons-group buttons-add-nodes">
         <!-- <v-btn x-small type="button" title="test1" @click="test1">test1</v-btn> -->
         <!-- <v-btn x-small type="button" title="test2" @click="test2">test2</v-btn> -->
-        <v-btn fab x-small type="button" title="Add scalar" @click="addNode('scalar')">
+        <v-btn fab x-small type="button" title="Add scalar" @click="addNode('Scalar')">
           <v-icon>$vuetify.icons.scalar</v-icon>
         </v-btn>
-        <v-btn fab x-small type="button" title="Add vector" @click="addNode('vector')">
+        <v-btn fab x-small type="button" title="Add vector" @click="addNode('Vector')">
           <v-icon>$vuetify.icons.vector</v-icon>
         </v-btn>
-        <v-btn fab x-small type="button" title="Add matrix" @click="addNode('matrix')">
+        <v-btn fab x-small type="button" title="Add matrix" @click="addNode('Matrix')">
           <v-icon>$vuetify.icons.matrix</v-icon>
         </v-btn>
         <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
@@ -26,11 +26,9 @@
           </template>
 
           <v-list dense>
-            <v-list-item @click="addNode('operation-length')">Length</v-list-item>
-            <v-list-item @click="addNode('operation-invert')">Invert</v-list-item>
-            <v-list-item @click="addNode('operation-normalize')">Normalize</v-list-item>
-            <v-list-item @click="addNode('operation-transpose')">Transpose</v-list-item>
-            <v-list-item @click="addNode('operation-determinant')">Determinant</v-list-item>
+            <v-list-item v-for="nodeType in Object.keys(UnaryOperation)" :key="nodeType" @click="addNode(nodeType)" >
+              {{nodeType}}
+            </v-list-item>
           </v-list>
         </v-menu>
         <v-menu>
@@ -42,15 +40,9 @@
           </template>
 
           <v-list dense>
-            <v-list-item @click="addNode('operation-add')">Add</v-list-item>
-            <v-list-item @click="addNode('operation-subtract')">Subtract</v-list-item>
-            <v-list-item @click="addNode('operation-multiply')">Multiply</v-list-item>
-            <v-list-item @click="addNode('operation-divide')">Divide</v-list-item>
-            <v-list-item @click="addNode('operation-dot')">Dot Product</v-list-item>
-            <v-list-item @click="addNode('operation-cross')">Cross Product</v-list-item>
-            <v-list-item @click="addNode('operation-angle')">Angle</v-list-item>
-            <v-list-item @click="addNode('operation-projection')">Projection</v-list-item>
-            <v-list-item @click="addNode('operation-exponent')">Exponent</v-list-item>
+            <v-list-item v-for="nodeType in Object.keys(BinaryOperation)" :key="nodeType" @click="addNode(nodeType)" >
+              {{nodeType}}
+            </v-list-item>
           </v-list>
         </v-menu>
       </div>
@@ -91,36 +83,20 @@ import _ from 'lodash';
 import Rete from 'rete';
 import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
-import allComponents from './components';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { EventBus } from '../EventBus';
 import settings from '../settings';
 import util from '../util';
 import history from '../history';
 import actions from '../history_actions';
-import { GraphTraveler, ValueType } from './node_util';
+import { GraphTraveler, NodeType } from './node_util';
 import Rect from './Rect';
 import UnaryOperation from './UnaryOperation';
 import BinaryOperation from './BinaryOperation';
+import NodeFactory from './node_factory';
 
-// TODO kind of a hack, would it be better to use name as the key everywhere, or maybe assign extra data to each node?
 function getOperation(nodeName) {
-    switch (nodeName) {
-    case 'Length':        return UnaryOperation.LENGTH;
-    case 'Invert':        return UnaryOperation.INVERT;
-    case 'Normalize':     return UnaryOperation.NORMALIZE;
-    case 'Transpose':     return UnaryOperation.TRANSPOSE;
-    case 'Determinant':   return UnaryOperation.DETERMINANT;
-    case 'Add':           return BinaryOperation.ADD;
-    case 'Subtract':      return BinaryOperation.SUBTRACT;
-    case 'Multiply':      return BinaryOperation.MULTIPLY;
-    case 'Divide':        return BinaryOperation.DIVIDE;
-    case 'Dot Product':   return BinaryOperation.DOT_PRODUCT;
-    case 'Cross Product': return BinaryOperation.CROSS_PRODUCT;
-    case 'Angle':         return BinaryOperation.ANGLE;
-    case 'Projection':    return BinaryOperation.PROJECTION;
-    case 'Exponent':      return BinaryOperation.EXPONENT;
-    }
+    return UnaryOperation[nodeName] || BinaryOperation[nodeName];
 }
 
 // Engine updates have to happen *before* this because they set up the data we iterate over
@@ -180,6 +156,9 @@ export default {
     name: 'NodeEditor',
     data() {
         return {
+            UnaryOperation,
+            BinaryOperation,
+
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
             settings: settings.nodeEditorSettings,
             history: history, // For checking whether to disable undo/redo buttons // TODO is it better to do this or add a computed property?
@@ -200,28 +179,6 @@ export default {
 
             showContextMenu: false,
             contextMenuPos: { x: 0, y: 0 },
-
-            components: {
-                'scalar':                new allComponents.ValueComponent(this.$vuetify, ValueType.SCALAR),
-                'vector':                new allComponents.ValueComponent(this.$vuetify, ValueType.VECTOR),
-                'matrix':                new allComponents.ValueComponent(this.$vuetify, ValueType.MATRIX),
-
-                'operation-length':      new allComponents.UnaryOperationComponent(UnaryOperation.LENGTH),
-                'operation-invert':      new allComponents.UnaryOperationComponent(UnaryOperation.INVERT),
-                'operation-normalize':   new allComponents.UnaryOperationComponent(UnaryOperation.NORMALIZE),
-                'operation-transpose':   new allComponents.UnaryOperationComponent(UnaryOperation.TRANSPOSE),
-                'operation-determinant': new allComponents.UnaryOperationComponent(UnaryOperation.DETERMINANT),
-
-                'operation-add':         new allComponents.BinaryOperationComponent(BinaryOperation.ADD),
-                'operation-subtract':    new allComponents.BinaryOperationComponent(BinaryOperation.SUBTRACT),
-                'operation-multiply':    new allComponents.BinaryOperationComponent(BinaryOperation.MULTIPLY),
-                'operation-divide':      new allComponents.BinaryOperationComponent(BinaryOperation.DIVIDE),
-                'operation-dot':         new allComponents.BinaryOperationComponent(BinaryOperation.DOT_PRODUCT),
-                'operation-cross':       new allComponents.BinaryOperationComponent(BinaryOperation.CROSS_PRODUCT),
-                'operation-angle':       new allComponents.BinaryOperationComponent(BinaryOperation.ANGLE),
-                'operation-projection':  new allComponents.BinaryOperationComponent(BinaryOperation.PROJECTION),
-                'operation-exponent':    new allComponents.BinaryOperationComponent(BinaryOperation.EXPONENT),
-            },
         };
     },
 
@@ -268,58 +225,6 @@ export default {
             this.editor.on('connectionremoved', c => history.add(new actions.RemoveConnectionAction(this.editor, c)));
         },
 
-        async createNode(nodeType) {
-            switch (nodeType) {
-            case 'scalar': {
-                const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultScalarColor;
-                // TODO need a factory or something for these
-                return this.components['scalar'].createNode({
-                    'color': { color: color, visible: false },
-                    'value': [1],
-                    'pos': [0, 0, 0],
-                });
-            }
-            case 'vector': {
-                const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultVectorColor;
-                return this.components['vector'].createNode({
-                    'color': { color: color, visible: true },
-                    'value': [1, 1, 1],
-                    'pos': [0, 0, 0],
-                });
-            }
-            case 'matrix': {
-                const color = this.settings.values.useRandomColors ? util.rgbToHex(...Object.values(util.getRandomColor())) : this.settings.values.defaultMatrixColor;
-                return this.components['matrix'].createNode({
-                    'color': { color: color, visible: false },
-                    'value': [
-                        1, 0, 0, 0,
-                        0, 1, 0, 0,
-                        0, 0, 1, 0,
-                        0, 0, 0, 1,
-                    ],
-                    'pos': [0, 0, 0],
-                });
-            }
-            case 'operation-length':
-            case 'operation-invert':
-            case 'operation-normalize':
-            case 'operation-transpose':
-            case 'operation-determinant':
-            case 'operation-add':
-            case 'operation-subtract':
-            case 'operation-multiply':
-            case 'operation-divide':
-            case 'operation-dot':
-            case 'operation-cross':
-            case 'operation-angle':
-            case 'operation-projection':
-            case 'operation-exponent':
-                return this.components[nodeType].createNode();
-            default:
-                throw new Error(`Cannot add node of type ${nodeType}`);
-            }
-        },
-
         addAndRepositionNode(node) {
             this.editor.addNode(node);
             const nodeView = this.editor.view.nodes.get(node);
@@ -338,7 +243,7 @@ export default {
 
         async addNode(nodeType) {
             console.log(`Add node (type ${nodeType})`);
-            this.addAndRepositionNode(await this.createNode(nodeType));
+            this.addAndRepositionNode(await this.nodeFactory.createNode(nodeType));
         },
 
         getNewNodePos(node, nodeView) {
@@ -419,30 +324,8 @@ export default {
         },
 
         serializeNode(node, originPos) {
-            // TODO hack, probably just use the node names everywhere since they have to be unique anyway
-            const type = {
-                'Scalar':        'scalar',
-                'Vector':        'vector',
-                'Matrix':        'matrix',
-
-                'Length':        'operation-length',
-                'Invert':        'operation-invert',
-                'Normalize':     'operation-normalize',
-                'Transpose':     'operation-transpose',
-                'Determinant':   'operation-determinant',
-
-                'Add':           'operation-add',
-                'Subtract':      'operation-subtract',
-                'Multiply':      'operation-multiply',
-                'Divide':        'operation-divide',
-                'Dot Product':   'operation-dot',
-                'Cross Product': 'operation-cross',
-                'Angle':         'operation-angle',
-                'Projection':    'operation-projection',
-                'Exponent':      'operation-exponent',
-            }[node.name];
             return {
-                type: type,
+                type: node.name,
                 data: node.data,
                 posOffset: [node.position[0] - originPos[0], node.position[1] - originPos[1]],
             };
@@ -476,7 +359,7 @@ export default {
             let rootPosition = null;
             // TODO these need to be a single history action
             for (const nodeDescription of nodes) {
-                const node = await this.createNode(nodeDescription.type);
+                const node = await this.nodeFactory.createNode(nodeDescription.type);
                 node.data = nodeDescription.data;
                 // console.log('PASTING', nodeDescription, node);
                 if (!rootPosition) { // TODO currently assuming that the first node is the one that was used for origin pos
@@ -567,14 +450,15 @@ export default {
         async createDemoNodes() {
             const [scalarLhs, scalarRhs, scalarAdd, scalarOut, vecLhs, vecRhs, vecAdd, vecOut] = await Promise.all([
                 // TODO color stuff is still pretty gross
-                this.components['scalar'].createNode({ 'value': [5], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
-                this.components['scalar'].createNode({ 'value': [4], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
-                this.components['operation-add'].createNode(),
-                this.components['scalar'].createNode({ 'value': [0], 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultScalarColor, visible: true } }),
-                this.components['vector'].createNode({ 'value': [3, 2, 1], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
-                this.components['vector'].createNode({ 'value': [2, 2, 2], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
-                this.components['operation-add'].createNode(),
-                this.components['vector'].createNode({ 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultVectorColor, visible: true } }),
+                // TODO need a single enum for all node types
+                this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [5], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
+                this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [4], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
+                this.nodeFactory.createNode(NodeType.ADD),
+                this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [0], 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultScalarColor, visible: true } }),
+                this.nodeFactory.createNode(NodeType.VECTOR, { 'value': [3, 2, 1], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
+                this.nodeFactory.createNode(NodeType.VECTOR, { 'value': [2, 2, 2], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
+                this.nodeFactory.createNode(NodeType.ADD),
+                this.nodeFactory.createNode(NodeType.VECTOR, { 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultVectorColor, visible: true } }),
             ]);
             scalarLhs.position = [20, 80];
             scalarRhs.position = [20, 190];
@@ -742,6 +626,8 @@ export default {
     mounted() {
         console.log('NodeEditor mounted', this.editor, this.engine);
 
+        this.nodeFactory = new NodeFactory(this.$vuetify);
+
         this.container = document.getElementById('rete');
         this.editor = new Rete.NodeEditor(this.version, this.container);
 
@@ -762,9 +648,9 @@ export default {
             this.addOrRemoveAdvancedControls(val);
         });
 
-        Object.keys(this.components).map(key => {
-            this.editor.register(this.components[key]);
-            this.engine.register(this.components[key]);
+        Object.values(this.nodeFactory.components).map(component => {
+            this.editor.register(component);
+            this.engine.register(component);
         });
 
         this.editor.on('nodecreated', node => {

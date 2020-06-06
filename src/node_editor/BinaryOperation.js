@@ -5,6 +5,7 @@ import Rete from 'rete';
 import sockets from './sockets';
 import util, { s } from './operation_util';
 import { WarningControl, CalculationError } from './WarningControl.js';
+import { BinaryOperationNodeType } from './node_util';
 
 class BinaryOperation {
     static title = null;
@@ -386,13 +387,13 @@ class ExponentOperation extends BinaryOperation {
 }
 
 export default {
-    ADD:           AddOperation,
-    SUBTRACT:      SubtractOperation,
-    MULTIPLY:      MultiplyOperation,
-    DIVIDE:        DivideOperation,
-    DOT_PRODUCT:   DotOperation,
-    CROSS_PRODUCT: CrossOperation,
-    ANGLE:         AngleOperation,
-    PROJECTION:    ProjectionOperation,
-    EXPONENT:      ExponentOperation,
+    [BinaryOperationNodeType.ADD]:           AddOperation,
+    [BinaryOperationNodeType.SUBTRACT]:      SubtractOperation,
+    [BinaryOperationNodeType.MULTIPLY]:      MultiplyOperation,
+    [BinaryOperationNodeType.DIVIDE]:        DivideOperation,
+    [BinaryOperationNodeType.DOT_PRODUCT]:   DotOperation,
+    [BinaryOperationNodeType.CROSS_PRODUCT]: CrossOperation,
+    [BinaryOperationNodeType.ANGLE]:         AngleOperation,
+    [BinaryOperationNodeType.PROJECTION]:    ProjectionOperation,
+    [BinaryOperationNodeType.EXPONENT]:      ExponentOperation,
 };
