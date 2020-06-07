@@ -94,6 +94,7 @@ import Rect from './Rect';
 import UnaryOperation from './UnaryOperation';
 import BinaryOperation from './BinaryOperation';
 import NodeFactory from './node_factory';
+import vuetify from '../plugins/vuetify';
 
 function getOperation(nodeName) {
     return UnaryOperation[nodeName] || BinaryOperation[nodeName];
@@ -632,7 +633,11 @@ export default {
         this.editor = new Rete.NodeEditor(this.version, this.container);
 
         this.editor.use(ConnectionPlugin);
-        this.editor.use(VueRenderPlugin);
+        this.editor.use(VueRenderPlugin, {
+            options: {
+                vuetify,
+            },
+        });
         console.log('NodeEditor mounted, plugins list:', this.editor.plugins);
         console.log('NodeEditor mounted, events:', this.editor.events);
         // console.log('NodeEditor mounted, connectionremoved:', this.editor.events['connectionremoved']);
