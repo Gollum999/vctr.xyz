@@ -8,17 +8,16 @@ import { ColorControl } from './ColorControl';
 import nodeUtil, { ValueNodeType } from './node_util';
 
 export class ValueComponent extends Rete.Component {
-    constructor(globalVuetify, nodeType) {
+    constructor(nodeType) {
         // TODO should consider patching Rete to allow specifying extra attributes or something
         // TODO   not sure of the best design since render plugin is entirely separate from components
         super(nodeType); // Note that the node name affects the element class as well as the node title
-        this.globalVuetify = globalVuetify;
         this.nodeType = nodeType;
         this.data.component = NodeRenderer;
     }
 
     builder(node) {
-        // console.log('ValueComponent builder: this: ', this, 'nodeType:', this.nodeType, 'globalVuetify:', this.globalVuetify);
+        // console.log('ValueComponent builder: this: ', this, 'nodeType:', this.nodeType);
 
         const socket = {
             [ValueNodeType.SCALAR]: sockets.scalar,
@@ -34,9 +33,9 @@ export class ValueComponent extends Rete.Component {
         if (this.nodeType === ValueNodeType.VECTOR || this.nodeType === ValueNodeType.MATRIX) {
             node.addControl(new AxesLabelControl(this.nodeType, this.editor, 'label', -999));
         }
-        node.addControl(new ValueControl(this.nodeType, this.editor, 'value', 1, this.globalVuetify));
-        node.addControl(new ColorControl(this.editor, 'color', 2, this.globalVuetify));
-        node.addControl(new ValueControl(ValueNodeType.VECTOR, this.editor, 'pos', 3, this.globalVuetify));
+        node.addControl(new ValueControl(this.nodeType, this.editor, 'value', 1));
+        node.addControl(new ColorControl(this.editor, 'color', 2));
+        node.addControl(new ValueControl(ValueNodeType.VECTOR, this.editor, 'pos', 3));
 
         node.addOutput(new Rete.Output('value', 'Value', socket));
 

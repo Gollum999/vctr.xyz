@@ -6,10 +6,10 @@ import BinaryOperation from './BinaryOperation';
 import { ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType } from './node_util';
 
 export default class NodeFactory {
-    constructor(globalVuetify) {
+    constructor() {
         console.log(ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType);
         this.components = Object.freeze({
-            ...Object.fromEntries(Object.values(ValueNodeType).map(nodeType => [nodeType, new allComponents.ValueComponent(globalVuetify, nodeType)])),
+            ...Object.fromEntries(Object.values(ValueNodeType).map(nodeType => [nodeType, new allComponents.ValueComponent(nodeType)])),
             ...Object.fromEntries(Object.values(UnaryOperationNodeType).map(nodeType => [nodeType, new allComponents.UnaryOperationComponent(UnaryOperation[nodeType])])),
             ...Object.fromEntries(Object.values(BinaryOperationNodeType).map(nodeType => [nodeType, new allComponents.BinaryOperationComponent(BinaryOperation[nodeType])])),
         });

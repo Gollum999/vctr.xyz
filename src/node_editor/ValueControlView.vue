@@ -51,7 +51,6 @@ export default {
         putData:       { type: Function, required: true },
         emitter:       { type: Object,   required: true }, // injected by Rete
         dataKey:       { type: String,   required: true }, // injected by Rete
-        globalVuetify: { type: Object,   required: true },
         rowIdx:        { type: Number,   required: true }, // used to position control within parent grid
         nodeType:      { type: String,   required: true, validator: value => Object.values(ValueNodeType).includes(value) },
     },
@@ -69,12 +68,6 @@ export default {
             values: defaultValues.slice(),
             readOnly: false,
         };
-    },
-
-    created() {
-        // HACK: There is some bug when using Vuetify in local Vue contexts that causes certain components to break
-        // https://github.com/retejs/vue-render-plugin/issues/14
-        this.$vuetify = this.globalVuetify;
     },
 
     watch: {

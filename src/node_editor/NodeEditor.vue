@@ -627,7 +627,7 @@ export default {
     mounted() {
         console.log('NodeEditor mounted', this.editor, this.engine);
 
-        this.nodeFactory = new NodeFactory(this.$vuetify);
+        this.nodeFactory = new NodeFactory();
 
         this.container = document.getElementById('rete');
         this.editor = new Rete.NodeEditor(this.version, this.container);

@@ -2,12 +2,12 @@ import Rete from 'rete';
 import ValueControlView from './ValueControlView.vue';
 
 export class ValueControl extends Rete.Control {
-    constructor(nodeType, emitter, key, rowIdx, globalVuetify) {
+    constructor(nodeType, emitter, key, rowIdx) {
         // console.log('ValueControl constructor', key, nodeType);
         super(key);
         this.render = 'vue';
         this.component = ValueControlView;
-        this.props = { emitter, dataKey: key, globalVuetify, rowIdx, nodeType: nodeType };
+        this.props = { emitter, dataKey: key, rowIdx, nodeType: nodeType };
     }
 
     setValue(val) {

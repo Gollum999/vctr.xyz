@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { vec3, mat4 } from 'gl-matrix';
 import Rete from 'rete';
-import Vuetify from 'vuetify';
 // import VueRenderPlugin from 'rete-vue-render-plugin';
 
 import allComponents from '@/node_editor/components';
@@ -229,11 +228,10 @@ describe('BasicOperationComponent', () => {
         // editor.use(VueRenderPlugin); // TODO this causes the JS heap to run out of memory somehow?
         engine = new Rete.Engine('BasicOperationComponent_spec_js@1.0.0'); // TODO do I need an engine for this test?
 
-        const vuetify = new Vuetify();
         components = {
-            'scalar':             new allComponents.ValueComponent(vuetify, ValueNodeType.SCALAR),
-            'vector':             new allComponents.ValueComponent(vuetify, ValueNodeType.VECTOR),
-            'matrix':             new allComponents.ValueComponent(vuetify, ValueNodeType.MATRIX),
+            'scalar':             new allComponents.ValueComponent(ValueNodeType.SCALAR),
+            'vector':             new allComponents.ValueComponent(ValueNodeType.VECTOR),
+            'matrix':             new allComponents.ValueComponent(ValueNodeType.MATRIX),
             'operation-add':      new allComponents.BasicOperationComponent('Add'),
             'operation-subtract': new allComponents.BasicOperationComponent('Subtract'),
             'operation-multiply': new allComponents.BasicOperationComponent('Multiply'),
