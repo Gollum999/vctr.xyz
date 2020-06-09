@@ -57,11 +57,9 @@ export default {
     computed: {
         title: {
             get() {
-                console.log('node displayTitle ', this.displayTitle, this.node.name);
                 return this.displayTitle;
             },
             set(val) {
-                console.log('setting node displayTitle to ', val);
                 this.displayTitle = val;
             },
         },
