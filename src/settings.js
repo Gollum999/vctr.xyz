@@ -12,6 +12,7 @@ const defaultSettings = {
         scalar: {
         },
         vector: {
+            headSize: 0.5,
         },
         matrix: {
             colorStyle: MATRIX_COLOR_STYLE.SOLID,

@@ -15,8 +15,8 @@
             :dir="`${v.value[0]} ${v.value[1]} ${v.value[2]}`"
             :color="v.color"
             :length="`${vec3.length(v.value)}`"
-            :head-length="0.5"
-            :head-width="0.5"
+            :head-length="settings.values.vector.headSize"
+            :head-width="settings.values.vector.headSize"
         />
         <Matrix v-for="(m, idx) in renderMatrices"
             :key="`matrix-${idx}`"

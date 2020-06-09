@@ -19,24 +19,34 @@
         <v-switch color="primary" v-model="viewportSettings.values.showAxis" label="Show axis" hide-details />
         <v-switch color="primary" v-model="viewportSettings.values.showGrid" label="Show grid" hide-details />
 
+        <v-divider/>
+        <v-subheader>Vector Rendering</v-subheader>
+        <v-slider step="0.1" min="0.0" max="1" label="Head Size" v-model.number="headSize"
+                  @change="updateSetting('viewportSettings.values.vector.headSize', $event)">
+          <template v-slot:append>
+            {{headSize | formatSliderValue}}
+          </template>
+        </v-slider>
+
+        <v-divider/>
         <v-subheader>Matrix Rendering</v-subheader>
         <!-- Keep a separate model for these so we get high precision for "live" updates, but only trigger watchers from specific events -->
         <v-slider step="0.1" min="0.1" max="1" label="Vector Scale" v-model.number="vectorScale"
                   @change="updateSetting('viewportSettings.values.matrix.vectorScale', $event)">
           <template v-slot:append>
-            {{vectorScale | formatMatrixSliderValue}}
+            {{vectorScale | formatSliderValue}}
           </template>
         </v-slider>
         <v-slider step="0.1" min="1" :max="fieldSizeMax" label="Field Size" v-model.number="fieldSize"
                   @change="updateSetting('viewportSettings.values.matrix.fieldSize', $event)">
           <template v-slot:append>
-            {{fieldSize | formatMatrixSliderValue}}
+            {{fieldSize | formatSliderValue}}
           </template>
         </v-slider>
         <v-slider step="0.1" min="0.1" :max="fieldDensityMax" label="Field Density" v-model.number="fieldDensity"
                   @change="updateSetting('viewportSettings.values.matrix.fieldDensity', $event)">
           <template v-slot:append>
-            {{fieldDensity | formatMatrixSliderValue}}
+            {{fieldDensity | formatSliderValue}}
           </template>
         </v-slider>
         <!--
@@ -80,6 +90,7 @@ const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too
 const ALL_SETTINGS_KEYS = new Set([ // TODO Can I get this dynamically?
     'viewportSettings.values.showAxis',
     'viewportSettings.values.showGrid',
+    'viewportSettings.values.vector.headSize',
     'viewportSettings.values.matrix.colorStyle',
     'viewportSettings.values.matrix.vectorScale',
     'viewportSettings.values.matrix.fieldSize',
@@ -104,13 +115,15 @@ export default {
             nodeEditorSettings: settingsUtil.nodeEditorSettings,
             viewportSettings: settingsUtil.viewportSettings,
 
+            headSize: settingsUtil.viewportSettings.values.vector.headSize,
+
             vectorScale: settingsUtil.viewportSettings.values.matrix.vectorScale,
             fieldSize: settingsUtil.viewportSettings.values.matrix.fieldSize,
             fieldDensity: settingsUtil.viewportSettings.values.matrix.fieldDensity,
         };
     },
     filters: {
-        formatMatrixSliderValue(value) {
+        formatSliderValue(value) {
             return value.toFixed(1);
         },
     },
