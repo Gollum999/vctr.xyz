@@ -6,7 +6,7 @@ const MATRIX_COLOR_STYLE = Object.freeze({
 });
 
 const defaultSettings = {
-    'viewport_settings': {
+    viewport_settings: {
         showAxis: true,
         showGrid: true,
         scalar: {
@@ -21,7 +21,7 @@ const defaultSettings = {
             // showVectorHeads: true, // TODO adjustable size?
         },
     },
-    'node_editor_settings': {
+    node_editor_settings: {
         useRandomColors: false,
         // TODO Can I somehow use the class that vue-color uses?
         defaultScalarColor: '#7676dd',
@@ -44,8 +44,8 @@ class SettingsStore {
         console.log(`Loading ${this.key}`);
         const settingsJson = window.localStorage.getItem(this.key);
         if (settingsJson) {
-            this.values = JSON.parse(settingsJson);
-            console.log(`Successfully loaded ${this.key}`);
+            this.values = _.merge({}, defaultSettings[this.key], JSON.parse(settingsJson));
+            console.log(`Successfully loaded ${this.key}`, this.values);
         } else {
             console.log(`Using default ${this.key}`);
             this.values = defaultSettings[this.key];
