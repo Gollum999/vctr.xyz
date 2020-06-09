@@ -4,7 +4,7 @@
     <div class="rete" id="rete" />
 
     <div class="buttons-container">
-      <div class="buttons-group buttons-add-nodes">
+      <div class="buttons-group left buttons-add-nodes">
         <!-- <v-btn x-small type="button" title="test1" @click="test1">test1</v-btn> -->
         <!-- <v-btn x-small type="button" title="test2" @click="test2">test2</v-btn> -->
         <v-btn fab x-small type="button" title="Add scalar" @click="addNode('Scalar')">
@@ -47,9 +47,7 @@
         </v-menu>
       </div>
 
-      <span class="buttons-group buttons-spacer" />
-
-      <div class="buttons-group buttons-history">
+      <div class="buttons-group center buttons-history">
         <v-btn fab ripple x-small type="button" title="Undo" :disabled="!history.canUndo()" @click="onUndo">
           <v-icon>undo</v-icon>
         </v-btn>
@@ -58,9 +56,7 @@
         </v-btn>
       </div>
 
-      <span class="buttons-group buttons-spacer" />
-
-      <div class="buttons-group buttons-delete-nodes">
+      <div class="buttons-group right buttons-delete-nodes">
         <v-btn fab x-small type="button" title="Recenter view" @click="recenterView">
           <v-icon>center_focus_weak</v-icon>
         </v-btn>
@@ -727,8 +723,17 @@ export default {
   overflow-y: hidden
   .buttons-container
     pointer-events: none
-    .buttons-group:first-child
-      margin-left: 8px
+    .buttons-group
+      display: inline-block
+      width: 33%
+      &:first-child
+        margin-left: 8px
+      &.left
+        text-align: left
+      &.center
+        text-align: center
+      &.right
+        text-align: right
     button.v-btn
       pointer-events: auto
       // &:first-of-type
@@ -738,14 +743,10 @@ export default {
         height: 24px
         width: 24px // TODO v-icon "size" attribute doesn't set this?
         font-size: 24px
-    display: flex
     position: absolute
     left: 5px
     top: 12px
     right: 5px
-    .buttons-spacer
-      flex-grow: 1
-      pointer-events: none
 .rete
   display: block
   height: 100%
