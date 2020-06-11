@@ -3,7 +3,7 @@
 // TODO why is dark theme not applying?
 v-card.node(dark hover :class="[selected(), node.name.toLowerCase()] | kebab")
   // TODO change style on focus?
-  v-text-field.node-title(dense hide-details flat solo v-model="title" @blur="onTitleBlur" @keyup.enter="$event.target.blur()")
+  v-text-field.node-title(dense hide-details flat solo v-model="title" @blur="onTitleBlur" @keyup.enter="$event.target.blur()" size="10")
   .debug-node-id {{node.id}}
 
   .node-body
@@ -114,8 +114,6 @@ $node-width: 100px
     display: inline-grid
     grid-template-columns: [inputs] auto [controls] auto [outputs] auto [end]
     grid-template-rows: auto
-    .item
-      border: 1px solid black
   &.selected
     filter: brightness(120%)
   .debug-node-id
@@ -123,9 +121,10 @@ $node-width: 100px
     top: 4px
     right: 4px
   .node-title
-    padding: 4px
-    margin: 0px 16px 4px
+    padding: 2px
+    margin: 0px 8px 4px
     border-bottom: 1px solid rgba(128, 128, 128, 0.4)
+    border-radius: 0
   .input,.output
     height: 100%
     display: flex
@@ -163,6 +162,7 @@ $socket-color-matrix: #44ffff
 #app
   .node
     .node-title
+      width: auto
       input
         font-size: 14px
         // font-weight: bold // TODO doesn't look amazing, something weird with sub-pixel alignment in canvas?
@@ -173,7 +173,8 @@ $socket-color-matrix: #44ffff
         &:focus-within
           filter: brightness(120%)
       .v-input__slot
-        width: initial // TOOD hack?  otherwise doesn't fit in my node
+        width: initial // TODO hack?  otherwise doesn't fit in my node
+        padding: 0
     .control
       padding: 8px // TODO doesn't work because of display: contents
 
