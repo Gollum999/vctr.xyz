@@ -104,6 +104,28 @@ export const NodeType = Object.freeze({
     ...BinaryOperationNodeType,
 });
 
+// TODO not sure the best way to organize these
+export const BasicOperationNodeType = Object.freeze(new Set([
+    BinaryOperationNodeType.ADD,
+    BinaryOperationNodeType.SUBTRACT,
+    BinaryOperationNodeType.MULTIPLY,
+    BinaryOperationNodeType.DIVIDE,
+    BinaryOperationNodeType.EXPONENT,
+]));
+
+export const AdvancedOperationNodeType = Object.freeze(new Set([
+    UnaryOperationNodeType.LENGTH,
+    UnaryOperationNodeType.INVERT,
+    UnaryOperationNodeType.NORMALIZE,
+    UnaryOperationNodeType.TRANSPOSE,
+    UnaryOperationNodeType.DETERMINANT,
+    BinaryOperationNodeType.DOT_PRODUCT,
+    BinaryOperationNodeType.CROSS_PRODUCT,
+    BinaryOperationNodeType.ANGLE,
+    BinaryOperationNodeType.PROJECTION,
+]));
+// TODO assert that all values covered above?
+
 export default {
     getEditorNode,
 

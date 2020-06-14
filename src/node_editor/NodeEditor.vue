@@ -17,32 +17,36 @@
           <v-icon>$vuetify.icons.matrix</v-icon>
         </v-btn>
         <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
-        <v-menu>
-          <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
+        <v-menu open-on-hover :close-on-content-click="false">
           <template v-slot:activator="{ on: showMenu }">
-            <v-btn fab x-small type="button" title="Add unary operation" v-on="showMenu">
+            <v-btn fab x-small type="button" title="Add operation" v-on="showMenu">
               <v-icon>$vuetify.icons.operation</v-icon>
             </v-btn>
           </template>
 
           <v-list dense>
-            <v-list-item v-for="nodeType in Object.keys(UnaryOperation)" :key="nodeType" @click="addNode(nodeType)" >
-              {{nodeType}}
-            </v-list-item>
-          </v-list>
-        </v-menu>
-        <v-menu>
-          <!-- TODO I think I'm going to want to split operations into categories: maybe 'basic', 'matrix', 'trig'? -->
-          <template v-slot:activator="{ on: showMenu }">
-            <v-btn fab x-small type="button" title="Add binary operation" v-on="showMenu">
-              <v-icon>$vuetify.icons.operation</v-icon>
-            </v-btn>
-          </template>
+            <v-list-group>
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title>Basic</v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <v-list-item v-for="nodeType in BasicOperationNodeType" :key="nodeType" @click="addNode(nodeType)">
+                {{nodeType}}
+              </v-list-item>
+            </v-list-group>
 
-          <v-list dense>
-            <v-list-item v-for="nodeType in Object.keys(BinaryOperation)" :key="nodeType" @click="addNode(nodeType)" >
-              {{nodeType}}
-            </v-list-item>
+            <v-list-group>
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title>Advanced</v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <v-list-item v-for="nodeType in AdvancedOperationNodeType" :key="nodeType" @click="addNode(nodeType)" >
+                {{nodeType}}
+              </v-list-item>
+            </v-list-group>
+
           </v-list>
         </v-menu>
       </div>
@@ -85,7 +89,7 @@ import settings from '../settings';
 import util from '../util';
 import history from '../history';
 import actions from '../history_actions';
-import { GraphTraveler, NodeType } from './node_util';
+import { GraphTraveler, BasicOperationNodeType, AdvancedOperationNodeType, NodeType } from './node_util';
 import Rect from './Rect';
 import UnaryOperation from './UnaryOperation';
 import BinaryOperation from './BinaryOperation';
@@ -153,8 +157,8 @@ export default {
     name: 'NodeEditor',
     data() {
         return {
-            UnaryOperation,
-            BinaryOperation,
+            BasicOperationNodeType,
+            AdvancedOperationNodeType,
 
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
             settings: settings.nodeEditorSettings,
