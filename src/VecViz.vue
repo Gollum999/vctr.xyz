@@ -26,10 +26,9 @@
       <QuadViewport />
     </SplitArea>
     <SplitArea class="bottom-split" :size="50" :minSize="150">
-      <NodeEditor @process="editorJson = $event"/>
+      <NodeEditor />
     </SplitArea>
   </Split>
-  <p style="color: #333333">{{editorJson}}</p>
 </div>
 </template>
 
@@ -44,7 +43,6 @@ export default {
     name: 'VecViz',
     data() {
         return {
-            editorJson: '',
             nodeEditorSettings: settings.nodeEditorSettings,
             showSettingsDialog: false,
         };
