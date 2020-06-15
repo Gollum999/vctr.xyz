@@ -2,7 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import VueSplit from 'vue-split-panel';
-import App from './App';
+import App from './App.vue';
 import router from './router';
 import * as VueGL from 'vue-gl';
 import vuetify from './plugins/vuetify';
@@ -19,7 +19,7 @@ Vue.use(VueResize);
 
 console.log('Initializing VueGL components');
 Object.keys(VueGL).forEach(name => {
-    Vue.component(name, VueGL[name]);
+    Vue.component(name, (VueGL as any)[name]);
 });
 
 /* eslint-disable no-new */
