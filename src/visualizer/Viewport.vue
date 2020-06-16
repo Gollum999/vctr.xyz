@@ -48,7 +48,7 @@ import CameraControls from 'camera-controls';
 import Scalar from './Scalar';
 import settings from '../settings';
 import { EventBus } from '../EventBus';
-import util from '../util';
+import * as util from '../util';
 
 CameraControls.install({ THREE: THREE });
 

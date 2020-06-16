@@ -1,5 +1,5 @@
 import settings from '../settings';
-import util from '../util';
+import * as util from '../util';
 import allComponents from './components';
 import UnaryOperation from './UnaryOperation';
 import BinaryOperation from './BinaryOperation';

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import sockets from './sockets';
-import util from '../util';
+import * as util from '../util';
 
 export const invalid = 'INVALID'; // Sentinel indicating that the specified combination should never happen (raise an error if it does)
 export const ignore = 'IGNORE'; // Sentinel indicating that no changes need to be made

@@ -86,7 +86,7 @@ import VueRenderPlugin from 'rete-vue-render-plugin';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { EventBus } from '../EventBus';
 import settings from '../settings';
-import util from '../util';
+import * as util from '../util';
 import history from '../history';
 import actions from '../history_actions';
 import { GraphTraveler, BasicOperationNodeType, AdvancedOperationNodeType, NodeType } from './node_util';

@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import util from '../util';
+import * as util from '../util';
 import { vec3 } from 'gl-matrix';
 
 export default {

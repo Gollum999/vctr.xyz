@@ -84,7 +84,7 @@
 <script>
 import settingsUtil from './settings';
 import ColorPickerSetting from './ColorPickerSetting';
-import util from './util';
+import * as util from './util';
 
 const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too much
 const ALL_SETTINGS_KEYS = new Set([ // TODO Can I get this dynamically?
