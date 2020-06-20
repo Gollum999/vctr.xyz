@@ -5,7 +5,7 @@ import sockets from './sockets';
 import { ValueControl } from './ValueControl';
 import { AxesLabelControl } from './AxesLabelControl';
 import { ColorControl } from './ColorControl';
-import nodeUtil, { ValueNodeType } from './node_util';
+import * as nodeUtil from './node_util';
 
 export class ValueComponent extends Rete.Component {
     constructor(nodeType) {
@@ -20,9 +20,9 @@ export class ValueComponent extends Rete.Component {
         // console.log('ValueComponent builder: this: ', this, 'nodeType:', this.nodeType);
 
         const socket = {
-            [ValueNodeType.SCALAR]: sockets.scalar,
-            [ValueNodeType.VECTOR]: sockets.vector,
-            [ValueNodeType.MATRIX]: sockets.matrix,
+            [nodeUtil.ValueNodeType.SCALAR]: sockets.scalar,
+            [nodeUtil.ValueNodeType.VECTOR]: sockets.vector,
+            [nodeUtil.ValueNodeType.MATRIX]: sockets.matrix,
         }[this.nodeType];
 
         node.addInput(new Rete.Input('value', 'Value', socket));
@@ -30,12 +30,12 @@ export class ValueComponent extends Rete.Component {
         // If this key changes, NodeRenderer must also change // TODO remove this assumption
         node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
 
-        if (this.nodeType === ValueNodeType.VECTOR || this.nodeType === ValueNodeType.MATRIX) {
+        if (this.nodeType === nodeUtil.ValueNodeType.VECTOR || this.nodeType === nodeUtil.ValueNodeType.MATRIX) {
             node.addControl(new AxesLabelControl(this.nodeType, this.editor, 'label', -999));
         }
         node.addControl(new ValueControl(this.nodeType, this.editor, 'value', 1));
         node.addControl(new ColorControl(this.editor, 'color', 2));
-        node.addControl(new ValueControl(ValueNodeType.VECTOR, this.editor, 'pos', 3));
+        node.addControl(new ValueControl(nodeUtil.ValueNodeType.VECTOR, this.editor, 'pos', 3));
 
         node.addOutput(new Rete.Output('value', 'Value', socket));
 

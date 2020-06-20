@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Rete from 'rete';
 
 import NodeRenderer from './NodeRenderer.vue';
-import nodeUtil from './node_util';
+import * as nodeUtil from './node_util';
 import { CalculationError } from './WarningControl.js';
 import history from '../history';
 import { MultiAction, RemoveAllNodeOutputConnectionsAction } from '../history_actions.js';
