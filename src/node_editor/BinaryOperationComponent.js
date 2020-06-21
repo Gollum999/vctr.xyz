@@ -3,9 +3,9 @@ import Rete from 'rete';
 
 import NodeRenderer from './NodeRenderer.vue';
 import * as nodeUtil from './node_util';
-import { CalculationError } from './WarningControl.js';
+import { CalculationError } from './WarningControl';
 import history from '../history';
-import { MultiAction, RemoveAllNodeOutputConnectionsAction } from '../history_actions.js';
+import { MultiAction, RemoveAllNodeOutputConnectionsAction } from '../history_actions';
 
 export default class BinaryOperationComponent extends Rete.Component {
     constructor(operation) {

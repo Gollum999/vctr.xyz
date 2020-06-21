@@ -1,11 +1,15 @@
+import { Connection } from 'rete/types/connection';
+import { NodeEditor } from 'rete/types/editor';
+import { Node } from 'rete/types/node';
+
 export class Action {
-    do() { this.redo(); }
-    undo() { throw new Error('Not implemented'); }
-    redo() { throw new Error('Not implemented'); }
+    do(): void { this.redo(); }
+    undo(): void { throw new Error('Not implemented'); }
+    redo(): void { throw new Error('Not implemented'); }
 }
 
 export class MultiAction extends Action {
-    constructor(actions) { // Actions should be in the order that they happen; undos will happen in reverse order
+    constructor(private readonly actions: Array<Action>) { // Actions should be in the order that they happen; undos will happen in reverse order
         super();
         // console.log('MultiAction constructor, actions:', actions);
         this.actions = actions;
@@ -30,7 +34,7 @@ export class MultiAction extends Action {
 }
 
 export class FieldChangeAction extends Action {
-    constructor(oldValue, newValue, setter) {
+    constructor(private readonly oldValue: any, private readonly newValue: any, private readonly setter: (newVal: any) => void) {
         super();
         this.oldValue = oldValue;
         this.newValue = newValue;
@@ -41,14 +45,18 @@ export class FieldChangeAction extends Action {
 }
 
 // Add/RemoveConnectionAction are copied (and slightly modified) from rete-history-plugin
-function reassignConnection(connection) {
+function reassignConnection(connection: Connection) {
     const { input, output } = connection;
 
-    return output.connections.find(c => c.input === input);
+    const oldConn = output.connections.find(c => c.input === input);
+    if (oldConn == null) {
+        throw new Error(`Connection was null for input ${input}`);
+    }
+    return oldConn;
 }
 
 class ConnectionActionHelper {
-    constructor(editor, connection) {
+    constructor(private readonly editor: NodeEditor, private connection: Connection) {
         console.log('ConnectionActionHelper constructor', editor, connection);
         this.editor = editor;
         this.connection = connection;
@@ -66,7 +74,9 @@ class ConnectionActionHelper {
 }
 
 export class AddConnectionAction extends Action {
-    constructor(editor, connection) {
+    private readonly helper: ConnectionActionHelper;
+
+    constructor(editor: NodeEditor, connection: Connection) {
         super();
         this.helper = new ConnectionActionHelper(editor, connection);
     }
@@ -75,7 +85,9 @@ export class AddConnectionAction extends Action {
 }
 
 export class RemoveConnectionAction extends Action {
-    constructor(editor, connection) {
+    private readonly helper: ConnectionActionHelper;
+
+    constructor(editor: NodeEditor, connection: Connection) {
         super();
         this.helper = new ConnectionActionHelper(editor, connection);
     }
@@ -84,7 +96,9 @@ export class RemoveConnectionAction extends Action {
 }
 
 export class RemoveAllConnectionsAction extends Action {
-    constructor(editor) {
+    private readonly action: MultiAction;
+
+    constructor(editor: NodeEditor) {
         super();
         this.action = new MultiAction([
             ...Array.from(editor.view.connections.keys()).map(cxn => new RemoveConnectionAction(editor, cxn)),
@@ -96,7 +110,9 @@ export class RemoveAllConnectionsAction extends Action {
 }
 
 export class RemoveAllNodeInputConnectionsAction extends Action {
-    constructor(editor, node) {
+    private readonly action: MultiAction;
+
+    constructor(editor: NodeEditor, node: Node) {
         super();
         this.action = new MultiAction([
             ...Array.from(node.inputs.values()).map(io => {
@@ -110,7 +126,9 @@ export class RemoveAllNodeInputConnectionsAction extends Action {
 }
 
 export class RemoveAllNodeOutputConnectionsAction extends Action {
-    constructor(editor, node) {
+    private readonly action: MultiAction;
+
+    constructor(editor: NodeEditor, node: Node) {
         super();
         this.action = new MultiAction([
             ...Array.from(node.outputs.values()).map(io => {
@@ -125,7 +143,7 @@ export class RemoveAllNodeOutputConnectionsAction extends Action {
 
 // Likewise, these are copied and modified from rete-history-plugin
 class NodeAction extends Action {
-    constructor(editor, node) {
+    constructor(protected readonly editor: NodeEditor, public readonly node: Node) {
         super();
         this.editor = editor;
         this.node = node;
@@ -142,31 +160,41 @@ export class RemoveNodeAction extends NodeAction {
     redo() { this.editor.removeNode(this.node); }
 }
 
+type Position = [number, number];
 export class DragNodeAction extends NodeAction {
-    constructor(editor, node, prev) {
+    private readonly prevPos: Position;
+    private newPos: Position;
+
+    constructor(editor: NodeEditor, node: Node, prevPos: Position) {
         super(editor, node);
 
-        this.prev = [...prev];
-        this.new = [...node.position];
+        this.prevPos = [...prevPos];
+        this.newPos = [...node.position];
     }
 
-    _translate(position) {
-        this.editor.view.nodes.get(this.node).translate(...position);
+    _translate(position: Position) {
+        const node = this.editor.view.nodes.get(this.node);
+        if (node == null) {
+            throw new Error(`View node was null: ${this.node}`);
+        }
+        node.translate(...position);
     }
 
     undo() {
-        this._translate(this.prev);
+        this._translate(this.prevPos);
     }
     redo() {
-        this._translate(this.new);
+        this._translate(this.newPos);
     }
-    update(node) {
-        this.new = [...node.position];
+    update(node: Node) {
+        this.newPos = [...node.position];
     }
 }
 
 export class RemoveAllNodesAction extends Action {
-    constructor(editor) {
+    private readonly action: MultiAction;
+
+    constructor(editor: NodeEditor) {
         super();
         this.action = new MultiAction([
             ...editor.nodes.map(node => new RemoveNodeAction(editor, node)),
@@ -178,7 +206,11 @@ export class RemoveAllNodesAction extends Action {
 }
 
 class AdvancedRenderControlsActionHelper {
-    constructor(editor, node) {
+    private readonly editor: NodeEditor;
+    private readonly node: Node;
+    private connectionActions: Array<RemoveConnectionAction>;
+
+    constructor(editor: NodeEditor, node: Node) {
         console.log('AdvancedRenderControlsActionHelper constructor', node.id);
         this.editor = editor;
         this.node = node;
@@ -213,7 +245,9 @@ class AdvancedRenderControlsActionHelper {
 }
 
 export class AddAdvancedRenderControlsAction extends Action {
-    constructor(editor, node) {
+    private readonly helper: AdvancedRenderControlsActionHelper;
+
+    constructor(editor: NodeEditor, node: Node) {
         super();
         this.helper = new AdvancedRenderControlsActionHelper(editor, node);
     }
@@ -222,27 +256,12 @@ export class AddAdvancedRenderControlsAction extends Action {
 }
 
 export class RemoveAdvancedRenderControlsAction extends Action {
-    constructor(editor, node) {
+    private readonly helper: AdvancedRenderControlsActionHelper;
+
+    constructor(editor: NodeEditor, node: Node) {
         super();
         this.helper = new AdvancedRenderControlsActionHelper(editor, node);
     }
     undo() { this.helper.add(); }
     redo() { this.helper.remove(); }
 }
-
-export default {
-    Action,
-    MultiAction,
-    FieldChangeAction,
-    AddNodeAction,
-    RemoveNodeAction,
-    DragNodeAction,
-    RemoveAllNodesAction,
-    AddConnectionAction,
-    RemoveConnectionAction,
-    RemoveAllNodeInputConnectionsAction,
-    RemoveAllNodeOutputConnectionsAction,
-    RemoveAllConnectionsAction,
-    AddAdvancedRenderControlsAction,
-    RemoveAdvancedRenderControlsAction,
-};

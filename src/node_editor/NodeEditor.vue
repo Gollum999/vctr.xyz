@@ -88,7 +88,7 @@ import { EventBus } from '../EventBus';
 import settings from '../settings';
 import * as util from '../util';
 import history from '../history';
-import actions from '../history_actions';
+import * as actions from '../history_actions';
 import { GraphTraveler, BasicOperationNodeType, AdvancedOperationNodeType, NodeType } from './node_util';
 import Rect from './Rect';
 import UnaryOperation from './UnaryOperation';
