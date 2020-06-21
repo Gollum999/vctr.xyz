@@ -1,12 +1,18 @@
+import { Action } from './history_actions';
+
 // Copied and modified from rete-history-plugin
 export class History {
+    private disabledCount: number;
+    private produced: Array<Action>;
+    private reserved: Array<Action>;
+
     constructor() {
         this.disabledCount = 0;
         this.produced = [];
         this.reserved = [];
     }
 
-    add(action) {
+    add(action: Action): void {
         if (this.disabledCount) {
             console.log('Not adding', action, 'because history is currently disabled');
             return;
@@ -16,60 +22,60 @@ export class History {
         this.reserved = [];
     }
 
-    addAndDo(action) {
+    addAndDo(action: Action): void {
         this.disableDuring(() => {
             action.do();
         });
         this.add(action);
     }
 
-    get last() {
+    get last(): Action {
         return this.produced[this.produced.length - 1];
     }
 
-    get length() {
+    get length(): number {
         return this.produced.length;
     }
 
-    _do(from, to, type) {
-        const action = from.pop();
+    _do(fromStack: Array<Action>, toStack: Array<Action>, fnName: keyof Action): void {
+        const action = fromStack.pop();
 
         if (!action) {
             return;
         }
 
         this.disableDuring(() => {
-            action[type]();
-            to.push(action);
+            action[fnName]();
+            toStack.push(action);
         });
     }
 
-    canUndo() {
+    canUndo(): boolean {
         console.log('canUndo: ', this.produced.length);
         return this.produced.length > 0;
     }
 
-    canRedo() {
+    canRedo(): boolean {
         console.log('canRedo: ', this.reserved.length);
         return this.reserved.length > 0;
     }
 
-    undo() {
+    undo(): void {
         this._do(this.produced, this.reserved, 'undo');
     }
 
-    redo() {
+    redo(): void {
         this._do(this.reserved, this.produced, 'redo');
     }
 
     // TODO rename?  'disable' just means disallow adding new actions, but undo/redo still allowed
-    disable() {
+    disable(): void {
         // Why not just use a boolean?  This lets me have multiple scopes of disabling at once that overlap
         ++this.disabledCount;
         // console.log('HISTORY DISABLE', this.disabledCount);
     }
 
-    enable() {
+    enable(): void {
         --this.disabledCount;
         // console.log('HISTORY ENABLE', this.disabledCount);
         if (this.disabledCount < 0) {
@@ -77,7 +83,7 @@ export class History {
         }
     }
 
-    disableDuring(body) {
+    disableDuring(body: () => void): void {
         this.disable();
         body();
         this.enable();
@@ -85,17 +91,21 @@ export class History {
 
     // Caller's responsibility to wrap in MultiAction to avoid circular dependency.
     // TODO better way to write this to include the MultiAction?
-    squashTopActions(count) {
+    squashTopActions(count: number): Array<Action> {
         console.assert(count >= 2, 'Not enough actions to squash');
         const actions = [];
         for (let i = 0; i < count; ++i) {
-            actions.push(this.produced.pop());
+            const action = this.produced.pop();
+            if (action == null) {
+                throw new Error('Failed to pop history action');
+            }
+            actions.push(action);
         }
         return actions.reverse();
     }
 
     // Caller's responsibility to wrap in MultiAction to avoid circular dependency.  idx is inclusive.
-    squashTopActionsDownToIndex(idx) {
+    squashTopActionsDownToIndex(idx: number): Array<Action> {
         return this.squashTopActions(this.produced.length - idx);
     }
 }
