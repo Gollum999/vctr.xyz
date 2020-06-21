@@ -36,7 +36,7 @@
 import QuadViewport from './visualizer/QuadViewport';
 import NodeEditor from './node_editor/NodeEditor';
 import SettingsModal from './SettingsModal';
-import settings from './settings';
+import * as settings from './settings';
 import { EventBus } from './EventBus';
 
 export default {

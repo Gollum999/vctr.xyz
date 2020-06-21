@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import settingsUtil from './settings';
+import * as settingsUtil from './settings';
 import ColorPickerSetting from './ColorPickerSetting';
 import * as util from './util';
 

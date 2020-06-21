@@ -85,7 +85,7 @@ import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { EventBus } from '../EventBus';
-import settings from '../settings';
+import * as settings from '../settings';
 import * as util from '../util';
 import history from '../history';
 import * as actions from '../history_actions';

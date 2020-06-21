@@ -1,4 +1,4 @@
-import settings from '../settings';
+import * as settings from '../settings';
 import * as util from '../util';
 import allComponents from './components';
 import UnaryOperation from './UnaryOperation';

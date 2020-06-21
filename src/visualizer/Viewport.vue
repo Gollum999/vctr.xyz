@@ -46,7 +46,7 @@ import _ from 'lodash';
 import CameraControls from 'camera-controls';
 
 import Scalar from './Scalar';
-import settings from '../settings';
+import * as settings from '../settings';
 import { EventBus } from '../EventBus';
 import * as util from '../util';
 

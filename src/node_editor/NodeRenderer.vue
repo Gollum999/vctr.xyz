@@ -30,7 +30,7 @@ v-card.node(dark hover :class="[selected(), node.name.toLowerCase()] | kebab")
 import mixin from '@/../node_modules/rete-vue-render-plugin/src/mixin';
 import Socket from '@/../node_modules/rete-vue-render-plugin/src/Socket.vue';
 // import '@/../node_modules/@material/card/mdc-card.scss';
-import settings from '../settings';
+import * as settings from '../settings';
 
 export default {
     mixins: [mixin],

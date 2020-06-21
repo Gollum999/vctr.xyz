@@ -54,7 +54,7 @@
 /* import * as THREE from 'three'; */
 import { vec3 } from 'gl-matrix';
 
-import settings from '../settings';
+import * as settings from '../settings';
 import Matrix from './Matrix';
 import Viewport from './Viewport';
 import { EventBus } from '../EventBus';
