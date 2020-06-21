@@ -3,7 +3,7 @@ import { vec3, mat4 } from 'gl-matrix';
 import Rete from 'rete';
 // import VueRenderPlugin from 'rete-vue-render-plugin';
 
-import allComponents from '@/node_editor/components';
+import * as allComponents from '@/node_editor/components';
 import sockets from '@/node_editor/sockets';
 import { ValueNodeType } from '@/node_editor/node_util';
 
