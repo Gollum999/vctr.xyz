@@ -4,8 +4,13 @@ import allComponents from './components';
 import UnaryOperation from './UnaryOperation';
 import BinaryOperation from './BinaryOperation';
 import { ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType } from './node_util';
+import { Component } from 'rete/types/component';
+import { Node } from 'rete/types/node';
 
 export default class NodeFactory {
+    private readonly components: { [key: string]: Component };
+    private readonly settings: settings.SettingsStore<settings.NodeEditorSettings>;
+
     constructor() {
         console.log(ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType);
         this.components = Object.freeze({
@@ -15,18 +20,21 @@ export default class NodeFactory {
         });
         console.log('NodeFactory', this.components);
         this.settings = settings.nodeEditorSettings;
+        // if (this.settings.values.key !== 'node_editor_settings') {
+        //     throw new Error(`Malformed settings object ${this.settings}`);
+        // }
     }
 
-    getRandomColorHex() {
-        return util.rgbToHex(...Object.values(util.getRandomColor()));
+    getRandomColorHex(): string {
+        return util.rgbToHex(util.getRandomColor());
     }
 
-    getNewNodeColor(nodeType) {
-        const defaultColor = {
+    getNewNodeColor(nodeType: string): string {
+        const defaultColor = ({
             [ValueNodeType.SCALAR]: this.settings.values.defaultScalarColor,
             [ValueNodeType.VECTOR]: this.settings.values.defaultVectorColor,
             [ValueNodeType.MATRIX]: this.settings.values.defaultMatrixColor,
-        }[nodeType];
+        } as {[key: string]: string})[nodeType];
         if (defaultColor == null) {
             throw new Error(`Unsupported nodeType ${nodeType}`);
         }
@@ -34,7 +42,7 @@ export default class NodeFactory {
         return this.settings.values.useRandomColors ? this.getRandomColorHex() : defaultColor;
     }
 
-    async createNode(nodeType, initialData = null) {
+    async createNode(nodeType: string, initialData: any | null = null): Promise<Node> {
         const data = (() => {
             if (initialData !== null) {
                 return initialData;
