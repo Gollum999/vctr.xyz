@@ -11,8 +11,10 @@
   </v-menu>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+
+export default Vue.extend({
     name: 'ColorPickerButton',
     props: {
         value:    { type: String, default: '#ffffff' },
@@ -25,17 +27,17 @@ export default {
         };
     },
     watch: {
-        value(newVal, oldVal) { // TODO is there a Vue shortcut for this?
+        value(newVal: string, oldVal: string): void { // TODO is there a Vue shortcut for this?
             this.color = newVal;
         },
-        color(newVal, oldVal) {
+        color(newVal: string, oldVal: string): void {
             this.$emit('input', newVal);
         },
-        colorPickerShowing(newVal, oldVal) {
+        colorPickerShowing(newVal: boolean, oldVal: boolean): void {
             this.$emit('color-picker-toggled', newVal);
         },
     },
-};
+});
 </script>
 
 <style scoped>
