@@ -4,7 +4,7 @@ import Rete from 'rete';
 
 import sockets from './sockets';
 import util, { s } from './operation_util';
-import { WarningControl, CalculationError } from './WarningControl.js';
+import { WarningControl, CalculationError } from './WarningControl';
 import { UnaryOperationNodeType } from './node_util';
 
 class UnaryOperation {
