@@ -13,10 +13,11 @@
   </div>
 </template>
 
-<script>
-import ColorPickerButton from './ColorPickerButton';
+<script lang="ts">
+import Vue from 'vue';
+import ColorPickerButton from './ColorPickerButton.vue';
 
-export default {
+export default Vue.extend({
     name: 'ColorPickerSetting',
     components: {
         'color-picker-button': ColorPickerButton,
@@ -31,11 +32,11 @@ export default {
         };
     },
     watch: {
-        color(newVal, oldVal) {
+        color(newVal: string, oldVal: string) {
             this.$emit('input', newVal);
         },
     },
-};
+});
 </script>
 
 <style scoped>
