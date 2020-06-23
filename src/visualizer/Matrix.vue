@@ -17,23 +17,24 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { PropType } from 'vue';
 import { mat4, vec3 } from 'gl-matrix';
 
 class FieldVector {
-    constructor(value, pos) {
+    constructor(public value: vec3, public pos: vec3) {
         this.value = value;
         this.pos = pos;
     }
 };
 
-export default {
+export default Vue.extend({
     props: {
         displayType:   { type: String, required: true },
 
-        value:         { /* type: mat4, */ required: true },
+        value:         { type: Array as unknown as PropType<mat4>, required: true },
         color:         { type: String, default: '#ff0000' },
-        pos:           { type: Array,  default: () => vec3.create() },
+        pos:           { type: Array as unknown as PropType<vec3>, default: () => vec3.create() },
 
         vectorScale:   { type: Number, default: 0.2 },
         density:       { type: Number, default: 0.5 },
@@ -45,8 +46,8 @@ export default {
         };
     },
     computed: {
-        fieldVectors() {
-            const vectorsPerAxis = this.fieldSize * 2 * this.density; // Include both sides
+        fieldVectors(): Array<FieldVector> {
+            const vectorsPerAxis: number = this.fieldSize * 2.0 * this.density; // Include both sides
             const bounds = Math.floor(vectorsPerAxis) / 2.0;
             const spacing = 1.0 / this.density;
             console.log('fieldVectors vectorsPerAxis:', vectorsPerAxis, 'bounds:', bounds, 'spacing:', spacing);
@@ -79,7 +80,7 @@ export default {
     mounted() {
         /* console.log('Matrix mounted:', this.displayType, this.value, this.color, this.vectorScale, this.density, this.fieldSize); */
     },
-};
+});
 </script>
 
 <style scoped>
