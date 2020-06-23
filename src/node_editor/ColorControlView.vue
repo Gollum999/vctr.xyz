@@ -9,34 +9,39 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { PropType } from 'vue';
+import type { Emitter } from 'rete/types/core/emitter';
+import type { EventsTypes as DefaultEvents } from 'rete/types/events';
+import type { EventsTypes as CoreEvents } from 'rete/types/core/events';
+
 import { FieldChangeAction } from '../history_actions';
-import ColorPickerButton from '../ColorPickerButton';
+import ColorPickerButton from '../ColorPickerButton.vue';
 import history from '../history';
 
-export default {
+export default Vue.extend({
     components: {
         'color-picker-button': ColorPickerButton,
     },
 
     props: {
-        getData:       { type: Function, required: true }, // injected by Rete
-        putData:       { type: Function, required: true }, // injected by Rete
-        emitter:       { type: Object,   required: true },
-        dataKey:       { type: String,   required: true },
-        rowIdx:        { type: Number,   required: true }, // used to position control within parent grid
+        getData: { type: Function as PropType<(key: string) => any>,              required: true }, // injected by Rete
+        putData: { type: Function as PropType<(key: string, val: any) => void>,   required: true }, // injected by Rete
+        emitter: { type: Object as PropType<Emitter<DefaultEvents & CoreEvents>>, required: true },
+        dataKey: { type: String,                                                  required: true },
+        rowIdx:  { type: Number,                                                  required: true }, // used to position control within parent grid
     },
 
     data() {
         return {
-            visible: null,
-            color: null,
-            prevColor: null,
+            visible: null as boolean | null,
+            color: null as string | null,
+            prevColor: null as string | null,
         };
     },
 
     watch: {
-        colorPickerShowing(showing) {
+        colorPickerShowing(showing: boolean) {
             /* console.log('colorPickerShowing CHANGED', showing, this.color); */
             if (showing) {
                 /* console.log('colorPicker opened', this.color, this.prevColor); */
@@ -46,9 +51,9 @@ export default {
                 history.add(new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
             }
         },
-        visible(newVal, oldVal) {
+        visible(newVal: boolean, oldVal: boolean) {
             if (oldVal === null) {
-                return; // Don't trigger history when first loading node
+                return; // Avoid triggering history when first loading node
             }
             if (this.dataKey) {
                 this.putData(this.dataKey, this.makeData(newVal, this.color));
@@ -59,9 +64,9 @@ export default {
         },
         color: {
             deep: true,
-            handler(newVal, oldVal) {
+            handler(newVal: string, oldVal: string) {
                 if (oldVal === null) {
-                    return; // Don't trigger history when first loading node
+                    return; // Avoid triggering history when first loading node
                 }
                 /* console.log('color watcher', this.dataKey, this.color, oldVal, newVal); */
                 if (this.dataKey) {
@@ -86,13 +91,13 @@ export default {
     },
 
     methods: {
-        makeData(visible, color) {
+        makeData(visible: boolean | null, color: string | null) {
             return {
                 visible,
                 color,
             };
         },
-        colorPickerToggled(showing) {
+        colorPickerToggled(showing: boolean) {
             if (showing) {
                 /* console.log('colorPicker opened', this.color, this.prevColor); */
                 this.prevColor = this.color;
@@ -102,7 +107,7 @@ export default {
             }
         },
     },
-};
+});
 </script>
 
 <style scoped>
