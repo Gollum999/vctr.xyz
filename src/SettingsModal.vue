@@ -81,9 +81,10 @@
 </v-card>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import * as settingsUtil from './settings';
-import ColorPickerSetting from './ColorPickerSetting';
+import ColorPickerSetting from './ColorPickerSetting.vue';
 import * as util from './util';
 
 const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too much
@@ -104,7 +105,7 @@ const IGNORE_SETTINGS_KEYS = new Set([
 ]);
 const HANDLE_HISTORY_SETTINGS_KEYS = util.difference(ALL_SETTINGS_KEYS, IGNORE_SETTINGS_KEYS);
 
-export default {
+export default Vue.extend({
     name: 'SettingsModal',
     components: {
         'color-picker-setting': ColorPickerSetting,
@@ -123,13 +124,13 @@ export default {
         };
     },
     filters: {
-        formatSliderValue(value) {
+        formatSliderValue(value: number): string {
             return value.toFixed(1);
         },
     },
     watch: {
-        ...Object.fromEntries([...HANDLE_HISTORY_SETTINGS_KEYS].map(function (key) {
-            const handler = function (newVal, oldVal) {
+        ...Object.fromEntries([...HANDLE_HISTORY_SETTINGS_KEYS].map(function (this: any, key: string) { // TODO not sure what type to give 'this'
+            const handler = (newVal: any, oldVal: any) => {
                 this.nodeEditorSettings.save();
                 this.viewportSettings.save();
             };
@@ -138,10 +139,10 @@ export default {
     },
     computed: {
         // 2 * fieldSize * fieldDensity <= MAX_VECTORS_PER_SIDE
-        fieldSizeMax() {
+        fieldSizeMax(): string {
             return (MAX_VECTORS_PER_SIDE / (this.viewportSettings.values.matrix.fieldDensity * 2)).toFixed(1);
         },
-        fieldDensityMax() {
+        fieldDensityMax(): string {
             return (MAX_VECTORS_PER_SIDE / (this.viewportSettings.values.matrix.fieldSize * 2)).toFixed(1);
         },
     },
@@ -154,15 +155,15 @@ export default {
         close() {
             this.$emit('settings-modal-closed');
         },
-        updateNodeEditorSetting(key, value) {
+        updateNodeEditorSetting(key: string, value: any) {
             console.log('SettingsModal updating nodeEditorSetting', key, value);
             this.nodeEditorSettings.update(key, value);
         },
-        updateViewportSetting(key, value) {
+        updateViewportSetting(key: string, value: any) {
             console.log('SettingsModal updating viewportSetting', key, value);
             this.viewportSettings.update(key, value);
         },
-        updateSetting(key, value) {
+        updateSetting(key: string, value: any) {
             // TODO clean this up
             const trimmed = key.split('.').slice(2).join('.');
             if (key.startsWith('viewportSettings')) {
@@ -174,7 +175,7 @@ export default {
             }
         },
     },
-};
+});
 </script>
 
 <style scoped>
