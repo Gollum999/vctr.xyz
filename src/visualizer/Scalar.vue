@@ -15,54 +15,71 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { PropType } from 'vue';
 import * as util from '../util';
 import { vec3 } from 'gl-matrix';
 
-export default {
+type CanvasSize = { x: number, y: number };
+
+interface VglElement {
+    inst: any;
+}
+
+function colorObjToArray(color: util.Color): [number, number, number, number] {
+    return [color.r / 256.0, color.g / 256.0, color.b / 256.0, 1.0]; // TODO can support alpha if I want
+}
+
+export default Vue.extend({
     props: {
         scalarKey:     { type: String, required: true },
         displayType:   { type: String, required: true },
         layer:         { type: Number, default: 0 },
-        pos:           { type: Array,  default: () => vec3.create() }, // TODO I think to support this I need to use a vgl "billboard"
+        pos:           { type: Array as unknown as PropType<vec3>, default: () => vec3.create() }, // TODO I think to support this I need to use a vgl "billboard"
+        // pos:           { default: () => vec3.create() }, // TODO I think to support this I need to use a vgl "billboard"
 
         value:         { type: Number, required: true },
         color:         { type: String, default: '#000000' },
-        canvasSize:    { type: Object, required: true },
+        canvasSize:    { type: Object as PropType<CanvasSize>, required: true },
+        // canvasSize:    { type: Object, required: true },
         lineThickness: { type: Number, default: 0.1 },
         numSegments:   { type: Number, default: 12.0 },
         segmentRatio:  { type: Number, default: 0.65 },
     },
     watch: {
-        // For some reason, if 'uniforms' is a computed property, uniforms in shader don't seem to react to changes
-        value(newVal, oldVal) {
+        // For some reason, if 'uniforms' is a computed property, uniforms in shader do not seem to react to changes
+        value(newVal: number, oldVal: number) {
             /* console.log('value updated', oldVal, newVal); */
             this.uniforms.radius.value = newVal;
         },
         /* color: {
          *     deep: true,
-         *     handler(newVal, oldVal) {
+         *     handler(newVal: string, oldVal: string) {
          *         console.log('Scalar color updated', oldVal, newVal);
-         *         this.uniforms.color.value = this.colorObjToArray(util.hexToRgb(newVal));
+         *         this.uniforms.color.value = colorObjToArray(util.hexToRgb(newVal));
          *     },
          * }, */
-        color(newVal, oldVal) {
+        color(newVal: string, oldVal: string) {
             console.log('Scalar color updated', oldVal, newVal);
-            this.uniforms.color.value = this.colorObjToArray(util.hexToRgb(newVal));
+            const rgb = util.hexToRgb(newVal);
+            if (rgb === null) {
+                throw new Error(`Could not convert string "${newVal}" to RGB`);
+            }
+            this.uniforms.color.value = colorObjToArray(rgb);
         },
-        pos(newVal, oldVal) {
+        pos(newVal: vec3, oldVal: vec3) {
             this.uniforms.posOffset.value = newVal;
         },
-        lineThickness(newVal, oldVal) {
+        lineThickness(newVal: number, oldVal: number) {
             /* console.log('lineThickness updated', oldVal, newVal); */
             this.uniforms.lineThickness.value = newVal;
         },
-        canvasSize(newVal, oldVal) {
+        canvasSize(newVal: CanvasSize, oldVal: CanvasSize) {
             this.uniforms.canvasSize.value = [newVal.x, newVal.y];
         },
     },
     computed: {
-        geoRadius() {
+        geoRadius(): number {
             // TODO be careful of near plane clipping
             // TODO a "billboard" plane is probably the better solution
             /* console.log('calculating geo radius', this); */
@@ -70,16 +87,15 @@ export default {
             return this.value + this.lineThickness / 2.0 + PADDING;
         },
     },
-    methods: {
-        colorObjToArray(color) {
-            return [color.r / 256.0, color.g / 256.0, color.b / 256.0, color.a];
-        },
-    },
     data() {
+        const colorObj = util.hexToRgb(this.color);
+        if (colorObj === null) {
+            throw new Error('Color was null');
+        }
         return {
             uniforms: {
                 radius:                         { value: this.value },
-                color:                          { value: this.colorObjToArray(util.hexToRgb(this.color)) },
+                color:                          { value: colorObjToArray(colorObj) },
                 posOffset:                      { value: this.pos },
                 canvasSize:                     { value: [this.canvasSize.x, this.canvasSize.y] },
                 lineThickness:                  { value: this.lineThickness },
@@ -155,9 +171,9 @@ export default {
     },
     mounted() {
         /* console.log('Scalar mounted:', this.displayType, this.color, this.pos, this.value, this.circleStyle, this.layer); */
-        this.$refs[`scalar-mesh-${this.scalarKey}`].inst.layers.set(this.layer);
+        (this.$refs[`scalar-mesh-${this.scalarKey}`] as any).inst.layers.set(this.layer);
     },
-};
+});
 </script>
 
 <style scoped>
