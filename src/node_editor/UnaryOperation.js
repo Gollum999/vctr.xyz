@@ -22,10 +22,10 @@ class UnaryOperation {
     }
 
     static setupSockets(editor, node) {
-        node.addInput(new Rete.Input('input', this.getInputName(), sockets[util.socketTypeListToSocketName(this.defaultInputSockets)]));
+        node.addInput(new Rete.Input('input', this.getInputName(), sockets[util.socketTypesToCompoundSocket(this.defaultInputSockets)]));
         node.addControl(new WarningControl(editor, 'warning', 1));
         // TODO change socket names for consistency?
-        node.addOutput(new Rete.Output('output', this.getOutputName(), sockets[util.socketTypeListToSocketName(this.defaultOutputSockets)]));
+        node.addOutput(new Rete.Output('output', this.getOutputName(), sockets[util.socketTypesToCompoundSocket(this.defaultOutputSockets)]));
     }
 
     static getNewSocketTypesFromInputs(input) {

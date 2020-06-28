@@ -1,40 +1,47 @@
 import _ from 'lodash';
 
-import sockets from './sockets';
+import { SocketType, CompoundSocketType, sockets } from './sockets';
 import * as util from '../util';
+import type { NodeEditor } from 'rete/types/editor';
+import type { Input } from 'rete/types/input';
+import type { IO } from 'rete/types/io';
+import type { Output } from 'rete/types/output';
+import type { Socket } from 'rete/types/socket';
 
-export const invalid = 'INVALID'; // Sentinel indicating that the specified combination should never happen (raise an error if it does)
-export const ignore = 'IGNORE'; // Sentinel indicating that no changes need to be made
+export type InputSocketCompatibilityMap = { [lhs: string]: Set<SocketType> }
+export type UnaryInputToOutputSocketMap = { [input: string]: Set<SocketType> }
+export type BinaryInputToOutputSocketMap = { [lhs: string]: { [rhs: string]: Set<SocketType> } }
+
 export const s = Object.freeze({ // TODO better name (though brevity is convenient for compatibility matrices)
-    scalar:         new Set(['scalar']),
-    vector:         new Set(['vector']),
-    matrix:         new Set(['matrix']),
-    scalarOrVector: new Set(['scalar', 'vector']),
-    scalarOrMatrix: new Set(['scalar', 'matrix']),
-    vectorOrMatrix: new Set(['vector', 'matrix']),
-    anything:       new Set(['scalar', 'vector', 'matrix']),
-    invalid:        new Set([invalid]),
-    ignore:         new Set([ignore]),
+    scalar:         new Set([SocketType.SCALAR]),
+    vector:         new Set([SocketType.VECTOR]),
+    matrix:         new Set([SocketType.MATRIX]),
+    scalarOrVector: new Set([SocketType.SCALAR, SocketType.VECTOR]),
+    scalarOrMatrix: new Set([SocketType.SCALAR, SocketType.MATRIX]),
+    vectorOrMatrix: new Set([SocketType.VECTOR, SocketType.MATRIX]),
+    anything:       new Set([SocketType.SCALAR, SocketType.VECTOR, SocketType.MATRIX]),
+    invalid:        new Set([SocketType.INVALID]),
+    ignore:         new Set([SocketType.IGNORE]),
 });
 
-export function socketTypeListToSocketName(typeList) {
+export function socketTypesToCompoundSocket(typeList: Set<SocketType>): CompoundSocketType {
     if (!(typeList instanceof Set)) {
-        throw new Error('socketTypeListToSocketName: Input should be of type Set');
+        throw new Error('socketTypesToCompoundSocket: Input should be of type Set');
     }
     switch (true) {
-    case _.isEqual(typeList, s.scalar):         return 'scalar';
-    case _.isEqual(typeList, s.vector):         return 'vector';
-    case _.isEqual(typeList, s.matrix):         return 'matrix';
-    case _.isEqual(typeList, s.scalarOrVector): return 'scalarOrVector';
-    case _.isEqual(typeList, s.scalarOrMatrix): return 'scalarOrMatrix';
-    case _.isEqual(typeList, s.vectorOrMatrix): return 'vectorOrMatrix';
-    case _.isEqual(typeList, s.anything):       return 'anything';
+    case _.isEqual(typeList, s.scalar):         return CompoundSocketType.SCALAR;
+    case _.isEqual(typeList, s.vector):         return CompoundSocketType.VECTOR;
+    case _.isEqual(typeList, s.matrix):         return CompoundSocketType.MATRIX;
+    case _.isEqual(typeList, s.scalarOrVector): return CompoundSocketType.SCALAR_OR_VECTOR;
+    case _.isEqual(typeList, s.scalarOrMatrix): return CompoundSocketType.SCALAR_OR_MATRIX;
+    case _.isEqual(typeList, s.vectorOrMatrix): return CompoundSocketType.VECTOR_OR_MATRIX;
+    case _.isEqual(typeList, s.anything):       return CompoundSocketType.ANYTHING;
     default: throw new Error(`Could not determine socket name from list "${Array.from(typeList).join(',')}"`);
     }
 }
 
 // TODO There should be a way to avoid this...
-export function getSocketTypes(socket) {
+export function getSocketTypes(socket: Socket): Set<SocketType> {
     switch (socket.name) {
     case 'Scalar value':     return s.scalar;
     case 'Vector value':     return s.vector;
@@ -47,29 +54,25 @@ export function getSocketTypes(socket) {
     }
 }
 
-export function updateIoType(io, socketTypeNameOrList) {
-    // console.log('TEST updateIoType ', io.node.name, io.name, 'to', socketTypeNameOrList, typeof socketTypeNameOrList);
-    const socketTypeName = (() => {
-        if (typeof socketTypeNameOrList === 'string') {
-            return socketTypeNameOrList;
-        } else {
-            return socketTypeListToSocketName(socketTypeNameOrList);
-        }
-    })();
-
-    const newSocket = sockets[socketTypeName];
+export function updateIoType(io: IO, socketTypes: Set<SocketType>): void {
+    // console.log('TEST updateIoType ', io.node.name, io.name, 'to', socketTypes, typeof socketTypes);
+    const compoundSocket = socketTypesToCompoundSocket(socketTypes);
+    const newSocket = sockets[compoundSocket];
     if (_.isNil(newSocket)) {
-        throw new Error(`Could not find socket named ${socketTypeName}`);
+        throw new Error(`Could not find socket named ${compoundSocket}`);
     }
     io.socket = newSocket;
     // console.log('TEST new io:');
     // console.log(io);
 
+    if (io.node == null) {
+        throw new Error(`IO node was null: ${io}`);
+    }
     io.node.update(); // TODO may want to pull this out to worker() to only do once for performance
     // console.log('TEST updateIoType END');
 }
 
-export function getInputTypes(input) {
+export function getInputTypes(input: Input): Set<SocketType> | null {
     // console.log(input);
     console.assert(input.connections.length <= 1);
     if (_.isEmpty(input.connections)) {
@@ -79,7 +82,11 @@ export function getInputTypes(input) {
     }
 }
 
-export function getNewSocketTypesFromInput(typesFromInputConnection, typesFromInputSocket, defaultTypes) {
+export function getNewSocketTypesFromInput(
+    typesFromInputConnection: Set<SocketType> | null,
+    typesFromInputSocket: Set<SocketType>,
+    defaultTypes: Set<SocketType>,
+): Set<SocketType> {
     // console.log(`TEST _getNewSocketTypesFromInput ${input.node.name} "${typesFromInputConnection}" "${defaultTypes}"`);
     if (_.isNil(typesFromInputConnection)) { // TODO allowing this to be null is a bit annoying
         // const newTypes = util.intersection(getSocketTypes(input.socket), defaultTypes);
@@ -96,13 +103,17 @@ export function getNewSocketTypesFromInput(typesFromInputConnection, typesFromIn
     return typesFromInputSocket;
 }
 
-export function getNewSocketTypeForOperationCompatibility(socketTypes, oppositeSocketTypes, oppositeTypeToThisTypeMap) {
+export function getNewSocketTypeForOperationCompatibility(
+    socketTypes: Set<SocketType>,
+    oppositeSocketTypes: Set<SocketType>,
+    oppositeTypeToThisTypeMap: InputSocketCompatibilityMap,
+): Set<SocketType> {
     // if (!oppositeTypeToThisTypeMap) {
     //     throw new Error('oppositeTypeToThisTypeMap was null', oppositeTypeToThisTypeMap); // TODO why am I letting this be null?
     // }
     // console.log(`TEST _getNewSocketTypeForOperationCompatibility ${input.node.name} ${input.name} (opposite ${oppositeInput.name})"`);
 
-    const compatibleTypes = new Set();
+    const compatibleTypes = new Set<SocketType>();
     for (const socketType of oppositeSocketTypes) {
         // TODO this doesn't feel quite right... like it might choose socket types that are "too loose"
         // TODO maybe I need to explicitly list type mappings for hybrid types instead of auto-aggregating here
@@ -134,15 +145,15 @@ export function getNewSocketTypeForOperationCompatibility(socketTypes, oppositeS
     }
 }
 
-export function removeInputConnectionsIfIncompatible(editor, input) {
+export function removeInputConnectionsIfIncompatible(editor: NodeEditor, input: Input): void {
     _removeIoConnectionsIfIncompatible(editor, input, true);
 }
 
-export function removeOutputConnectionsIfIncompatible(editor, output) {
+export function removeOutputConnectionsIfIncompatible(editor: NodeEditor, output: Output): void {
     _removeIoConnectionsIfIncompatible(editor, output, false);
 }
 
-function _removeIoConnectionsIfIncompatible(editor, io, isInput) {
+function _removeIoConnectionsIfIncompatible(editor: NodeEditor, io: IO, isInput: boolean): void {
     // console.log('TEST _removeIoConnectionsIfIncompatible io:', io.name, 'isInput:', isInput, 'cxns empty:', _.isEmpty(io.connections));
     const socketTypes = getSocketTypes(io.socket);
     for (const connection of io.connections) {
@@ -160,10 +171,10 @@ function _removeIoConnectionsIfIncompatible(editor, io, isInput) {
 }
 
 export default {
-    invalid,
-    ignore,
+    SocketType,
+    CompoundSocketType,
     s,
-    socketTypeListToSocketName,
+    socketTypesToCompoundSocket,
     getSocketTypes,
     updateIoType,
     getInputTypes,

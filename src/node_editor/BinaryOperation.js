@@ -21,12 +21,12 @@ class BinaryOperation {
     }
 
     static setupSockets(editor, node) {
-        node.addInput(new Rete.Input('lhs', 'A', sockets[util.socketTypeListToSocketName(this.defaultLhsSockets)]));
-        node.addInput(new Rete.Input('rhs', 'B', sockets[util.socketTypeListToSocketName(this.defaultRhsSockets)]));
+        node.addInput(new Rete.Input('lhs', 'A', sockets[util.socketTypesToCompoundSocket(this.defaultLhsSockets)]));
+        node.addInput(new Rete.Input('rhs', 'B', sockets[util.socketTypesToCompoundSocket(this.defaultRhsSockets)]));
 
         node.addControl(new WarningControl(editor, 'warning', 1));
 
-        node.addOutput(new Rete.Output('result', this.getOutputName(), sockets[util.socketTypeListToSocketName(this.defaultOutputSockets)]));
+        node.addOutput(new Rete.Output('result', this.getOutputName(), sockets[util.socketTypesToCompoundSocket(this.defaultOutputSockets)]));
     }
 
     static getNewSocketTypesFromInputs(lhsInput, rhsInput) {

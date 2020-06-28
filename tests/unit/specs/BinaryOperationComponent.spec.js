@@ -9,7 +9,7 @@ import { ValueNodeType } from '@/node_editor/node_util';
 
 const module = require('@/node_editor/BasicOperationComponent.js');
 const s                          = module.__get__('s');
-const socketTypeListToSocketName = module.__get__('socketTypeListToSocketName');
+const socketTypesToCompoundSocket = module.__get__('socketTypesToCompoundSocket');
 const AddOperation               = module.__get__('AddOperation');
 const SubtractOperation          = module.__get__('SubtractOperation');
 const MultiplyOperation          = module.__get__('MultiplyOperation');
@@ -17,29 +17,29 @@ const DivideOperation            = module.__get__('DivideOperation');
 const DotOperation               = module.__get__('DotOperation');
 const CrossOperation             = module.__get__('CrossOperation');
 
-describe('socketTypeListToSocketName', () => {
+describe('socketTypesToCompoundSocket', () => {
     it('should return the correct types', () => {
-        expect( socketTypeListToSocketName(new Set(['scalar']))                     ).toBe('scalar');
-        expect( socketTypeListToSocketName(new Set(['vector']))                     ).toBe('vector');
-        expect( socketTypeListToSocketName(new Set(['matrix']))                     ).toBe('matrix');
-        expect( socketTypeListToSocketName(new Set(['scalar', 'vector']))           ).toBe('scalarOrVector');
-        expect( socketTypeListToSocketName(new Set(['scalar', 'matrix']))           ).toBe('scalarOrMatrix');
-        expect( socketTypeListToSocketName(new Set(['vector', 'matrix']))           ).toBe('vectorOrMatrix');
-        expect( socketTypeListToSocketName(new Set(['scalar', 'vector', 'matrix'])) ).toBe('anything');
+        expect( socketTypesToCompoundSocket(new Set(['scalar']))                     ).toBe('scalar');
+        expect( socketTypesToCompoundSocket(new Set(['vector']))                     ).toBe('vector');
+        expect( socketTypesToCompoundSocket(new Set(['matrix']))                     ).toBe('matrix');
+        expect( socketTypesToCompoundSocket(new Set(['scalar', 'vector']))           ).toBe('scalarOrVector');
+        expect( socketTypesToCompoundSocket(new Set(['scalar', 'matrix']))           ).toBe('scalarOrMatrix');
+        expect( socketTypesToCompoundSocket(new Set(['vector', 'matrix']))           ).toBe('vectorOrMatrix');
+        expect( socketTypesToCompoundSocket(new Set(['scalar', 'vector', 'matrix'])) ).toBe('anything');
     });
     it('should throw when given bad inputs', () => {
-        expect( () => { socketTypeListToSocketName(['invalid']); } ).toThrow('socketTypeListToSocketName: Input should be of type Set');
+        expect( () => { socketTypesToCompoundSocket(['invalid']); } ).toThrow('socketTypesToCompoundSocket: Input should be of type Set');
 
         const msg = 'Could not determine socket name from list';
-        expect( () => { socketTypeListToSocketName(new Set(['invalid']));                               } ).toThrow(msg);
-        expect( () => { socketTypeListToSocketName(new Set(['ignore']));                                } ).toThrow(msg);
-        expect( () => { socketTypeListToSocketName(new Set(['anything']));                              } ).toThrow(msg);
-        expect( () => { socketTypeListToSocketName(new Set(['scalarOrVector']));                        } ).toThrow(msg);
-        expect( () => { socketTypeListToSocketName(new Set(['scalarOrMatrix']));                        } ).toThrow(msg);
-        expect( () => { socketTypeListToSocketName(new Set(['vectorOrMatrix']));                        } ).toThrow(msg);
-        expect( () => { socketTypeListToSocketName(new Set(['scalar', 'invalid']));                     } ).toThrow(msg);
-        expect( () => { socketTypeListToSocketName(new Set(['scalar', 'vector', 'invalid']));           } ).toThrow(msg);
-        expect( () => { socketTypeListToSocketName(new Set(['scalar', 'vector', 'matrix', 'invalid'])); } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['invalid']));                               } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['ignore']));                                } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['anything']));                              } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['scalarOrVector']));                        } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['scalarOrMatrix']));                        } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['vectorOrMatrix']));                        } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['scalar', 'invalid']));                     } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['scalar', 'vector', 'invalid']));           } ).toThrow(msg);
+        expect( () => { socketTypesToCompoundSocket(new Set(['scalar', 'vector', 'matrix', 'invalid'])); } ).toThrow(msg);
     });
 });
 
