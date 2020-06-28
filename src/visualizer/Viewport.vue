@@ -3,9 +3,9 @@
     <!-- v-if="settings.values.showGrid" -->
     <vgl-grid-helper
         :ref="`grid-${view}`"
-        :rotation="VIEW_VALUES[view].grid_rotation"
-        :size="VIEW_VALUES[view].grid_size"
-        :divisions="VIEW_VALUES[view].grid_divisions"
+        :rotation="VIEW_VALUES[view].gridRotation"
+        :size="VIEW_VALUES[view].gridSize"
+        :divisions="VIEW_VALUES[view].gridDivisions"
         color-center-line="#888888"
         color-grid="#444444"
     />
@@ -40,29 +40,40 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { PropType } from 'vue';
 import * as THREE from 'three';
 import _ from 'lodash';
 import CameraControls from 'camera-controls';
 
-import Scalar from './Scalar';
+import Scalar from './Scalar.vue';
 import * as settings from '../settings';
 import { EventBus } from '../EventBus';
 import * as util from '../util';
+import type { vec3 } from 'gl-matrix';
+import type { VglScene } from 'vue-gl';
 
 CameraControls.install({ THREE: THREE });
 
 const HIDDEN_LAYER = 31;
 
 class ScalarView {
-    constructor(value, color, pos) {
+    constructor(public value: number, public color: string, public pos: vec3) {
         this.value = value;
         this.color = color;
         this.pos = pos;
     }
 };
 
-export default {
+interface ViewConfig {
+    layer: number;
+    initialCameraPos: THREE.Spherical;
+    gridSize: number;
+    gridDivisions: number;
+    gridRotation: string;
+}
+
+export default Vue.extend({
     components: {
         Scalar,
     },
@@ -79,53 +90,53 @@ export default {
             VIEW_VALUES: {
                 top: {
                     layer: 1,
-                    initial_camera_pos: new THREE.Spherical(20, 0, 0),
-                    grid_size: 200,
-                    grid_divisions: 200,
-                    grid_rotation: '0 0 0',
+                    initialCameraPos: new THREE.Spherical(20, 0, 0),
+                    gridSize: 200,
+                    gridDivisions: 200,
+                    gridRotation: '0 0 0',
                 },
                 free: {
                     layer: 2,
-                    initial_camera_pos: new THREE.Spherical(20, Math.PI / 4.0, Math.PI / 4.0),
-                    grid_size: 20,
-                    grid_divisions: 20,
-                    grid_rotation: '0 0 0',
+                    initialCameraPos: new THREE.Spherical(20, Math.PI / 4.0, Math.PI / 4.0),
+                    gridSize: 20,
+                    gridDivisions: 20,
+                    gridRotation: '0 0 0',
                 },
                 front: {
                     layer: 3,
-                    initial_camera_pos: new THREE.Spherical(20, Math.PI / 2.0, 0),
-                    grid_size: 200,
-                    grid_divisions: 200,
-                    grid_rotation: `${Math.PI / 2} 0 0`,
+                    initialCameraPos: new THREE.Spherical(20, Math.PI / 2.0, 0),
+                    gridSize: 200,
+                    gridDivisions: 200,
+                    gridRotation: `${Math.PI / 2} 0 0`,
                 },
                 side: {
                     layer: 4,
-                    initial_camera_pos: new THREE.Spherical(20, Math.PI / 2.0, Math.PI / 2.0),
-                    grid_size: 200,
-                    grid_divisions: 200,
-                    grid_rotation: `0 0 ${Math.PI / 2}`,
+                    initialCameraPos: new THREE.Spherical(20, Math.PI / 2.0, Math.PI / 2.0),
+                    gridSize: 200,
+                    gridDivisions: 200,
+                    gridRotation: `0 0 ${Math.PI / 2}`,
                 },
-            },
+            } as { [key: string]: ViewConfig },
             canvasSize: {
                 x: 0,
                 y: 0,
             },
             settings: settings.viewportSettings,
-            controls: null,
+            controls: null as CameraControls | null,
             clock: new THREE.Clock(),
-            scalars: [],
-            lastViewportSize: null,
+            scalars: [] as Array<ScalarView>,
+            lastViewportSize: null as THREE.Vector2 | null,
         };
     },
 
     computed: {
-        orbitPos() {
-            var result = this.VIEW_VALUES[this.view].initial_camera_pos;
+        orbitPos(): string {
+            var result = this.VIEW_VALUES[this.view].initialCameraPos;
             /* console.log(`Setting orbitPos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`); */
             return `${result.radius} ${result.phi} ${result.theta}`; // TODO can I avoid this string step?
         },
 
-        renderScalars() {
+        renderScalars(): Array<ScalarView> {
             return this.scalars.filter(s => {
                 return s && s.value !== 0 && s.color !== null;
             });
@@ -137,13 +148,13 @@ export default {
     },
 
     watch: {
-        'settings.values.showAxis': function (newVal, oldVal) { this.render(); }, // TODO ortho viewports don't immediately re-render
+        'settings.values.showAxis': function (newVal, oldVal) { this.render(); }, // TODO ortho viewports do not immediately re-render
         'settings.values.showGrid': function (newVal, oldVal) {
             // Putting the vgl-grid-helper in a v-if causes its layers to be reset each time, so this is easier
             if (newVal) {
-                this.$refs[`grid-${this.view}`].inst.layers.set(this.VIEW_VALUES[this.view].layer);
+                (this.$refs[`grid-${this.view}`] as any).inst.layers.set(this.VIEW_VALUES[this.view].layer);
             } else {
-                this.$refs[`grid-${this.view}`].inst.layers.set(HIDDEN_LAYER);
+                (this.$refs[`grid-${this.view}`] as any).inst.layers.set(HIDDEN_LAYER);
             }
             this.render();
         },
@@ -152,14 +163,15 @@ export default {
     mounted() {
         // console.log(`Viewport mounted ${this.view} ${this.sceneName}`, this, this.updateCanvasSize);
 
-        this.$refs.camera.inst.layers.set(0); // All views share the default layer 0
-        this.$refs.camera.inst.layers.enable(this.VIEW_VALUES[this.view].layer);
-        this.$refs.camera.inst.layers.disable(HIDDEN_LAYER); // Reserve layer 31 for hiding things
+        const camera = (this.$refs.camera as any).inst;
+        camera.layers.set(0); // All views share the default layer 0
+        camera.layers.enable(this.VIEW_VALUES[this.view].layer);
+        camera.layers.disable(HIDDEN_LAYER); // Reserve layer 31 for hiding things
 
-        this.$refs[`grid-${this.view}`].inst.layers.set(this.VIEW_VALUES[this.view].layer);
+        (this.$refs[`grid-${this.view}`] as any).inst.layers.set(this.VIEW_VALUES[this.view].layer);
 
         // TODO maybe move camera + controls to component
-        this.controls = new CameraControls(this.$refs.camera.inst, this.$refs.renderer.inst.domElement);
+        this.controls = new CameraControls(camera, (this.$refs.renderer as any).inst.domElement);
         this.controls.draggingDampingFactor = 0.3;
         this.controls.dampingFactor = 0.3; // Damping after drag finished
         if (this.view === 'free') {
@@ -168,9 +180,9 @@ export default {
             this.controls.maxPolarAngle = Math.PI / 2;
         } else {
             // TODO Get allow left click drag too?  (Will require modification of CameraControls I think...)
+            camera.zoom = 10;
             this.controls.minZoom = 2;
             this.controls.maxZoom = 100;
-            this.controls._camera.zoom = 10;
             this.controls.dollySpeed = -1; // TODO ortho zoom is inverted for some reason?
             this.controls.azimuthRotateSpeed = 0; // No rotation
             this.controls.polarRotateSpeed = 0; // No rotation
@@ -180,9 +192,12 @@ export default {
         // For some reason on Firefox, the iframe inside VglRenderer does not get an initial 'resize' callback after it loads;
         //   fake one to get viewports to render with the correct size.
         // TODO Maybe VglRenderer should be modified to do this
-        for (const iframe of this.$refs.renderer.$el.querySelectorAll('iframe')) {
+        for (const iframe of (this.$refs.renderer as Vue).$el.querySelectorAll('iframe')) {
             iframe.onload = () => {
-                // TODO internet says this won't work in IE, need to do block below?  depends if bug affects more than just Firefox
+                if (iframe == null || iframe.contentWindow == null) {
+                    throw new Error('Renderer iframe contentWindow was null');
+                }
+                // TODO internet says this will not work in IE, need to do block below?  depends if bug affects more than just Firefox
                 /* console.log('Viewport forcing resize event for VueGL renderer'); */
                 iframe.contentWindow.dispatchEvent(new Event('resize'));
                 // var resizeEvent = window.document.createEvent('UIEvents');
@@ -202,12 +217,12 @@ export default {
     },
 
     methods: {
-        updateScalars(editorJson) {
+        updateScalars(editorJson: { [key: string]: any }): void {
             /* console.log('Viewport re-drawing scalars'); */
             this.scalars = [];
             // TODO may be a more ideomatic way to write this (filter?)
-            for (const key in editorJson.nodes) {
-                const node = editorJson.nodes[key];
+            for (const key in editorJson['nodes']) {
+                const node = editorJson['nodes'][key];
                 if (node.name === 'Scalar') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
                     this.scalars.push(new ScalarView(node.data.value[0], node.data.color.visible ? node.data.color.color : null, node.data.pos));
                     /* console.log('pushed scalar', this.scalars, node.data); */
@@ -216,7 +231,10 @@ export default {
             /* console.log('Viewport rendering scalars:', this.scalars); */
         },
 
-        updateCanvasSize() {
+        updateCanvasSize(): void {
+            if (this.lastViewportSize === null) {
+                throw new Error('lastViewportSize was null');
+            }
             // console.log('updating canvas size', this.$refs.viewport.getBoundingClientRect(), this.lastViewportSize.width, this.lastViewportSize.height);
             this.canvasSize = {
                 x: this.lastViewportSize.width,
@@ -225,15 +243,19 @@ export default {
             this.render();
         },
 
-        anim() {
+        anim(): void {
             // This is a hack -- not sure how to make this reactive, but this function is already conveniently called every tick...
-            const viewportSize = new THREE.Vector2(this.$refs.viewport.getBoundingClientRect().width, this.$refs.viewport.getBoundingClientRect().height);
+            const viewportRect = (this.$refs.viewport as Element).getBoundingClientRect();
+            const viewportSize = new THREE.Vector2(viewportRect.width, viewportRect.height);
             if (this.lastViewportSize === null || !viewportSize.equals(this.lastViewportSize)) {
                 this.lastViewportSize = viewportSize;
                 this.updateCanvasSize();
             }
 
             const delta = this.clock.getDelta();
+            if (this.controls === null) {
+                throw new Error('Controls were null');
+            }
             const updated = this.controls.update(delta);
             requestAnimationFrame(this.anim);
             if (updated) {
@@ -241,21 +263,21 @@ export default {
             }
         },
 
-        render() {
+        render(): void {
             // console.log('render', this.$refs, this.$refs.renderer, this.$refs.camera, this.scene);
             // TODO might be cleaner to emit a 'render' event
             if (!_.isNil(this.scene)) {
-                this.$refs.renderer.inst.render(this.scene.inst, this.$refs.camera.inst);
+                (this.$refs.renderer as any).inst.render((this.scene as any).inst, (this.$refs.camera as any).inst);
             }
         },
 
-        expandThis() {
+        expandThis(): void {
             // TODO expanding viewport resets camera (I guess because they are seperate components?)
             console.log(`Expand viewport ${this.view}`);
             this.$emit('expand-viewport', this.view);
         },
     },
-};
+});
 </script>
 
 <style scoped>
