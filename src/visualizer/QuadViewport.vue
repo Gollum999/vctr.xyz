@@ -50,17 +50,18 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 /* import * as THREE from 'three'; */
-import { vec3 } from 'gl-matrix';
+import Vue from 'vue';
 
 import * as settings from '../settings';
-import Matrix from './Matrix';
-import Viewport from './Viewport';
+import Matrix from './Matrix.vue';
+import Viewport from './Viewport.vue';
 import { EventBus } from '../EventBus';
+import { vec3, mat4 } from 'gl-matrix';
 
 class VectorView {
-    constructor(value, color, pos) {
+    constructor(public value: vec3, public color: string, public pos: vec3) {
         this.value = value;
         this.color = color;
         this.pos = pos;
@@ -68,14 +69,23 @@ class VectorView {
 };
 
 class MatrixView { // TODO combine, move somewhere common?
-    constructor(value, color, pos) {
+    constructor(public value: mat4, public color: string, public pos: vec3) {
         this.value = value;
         this.color = color;
         this.pos = pos;
     }
 };
 
-export default {
+enum ViewType {
+    TOP = 'top',
+    FREE = 'free',
+    FRONT = 'front',
+    SIDE = 'side',
+}
+
+type Size = { width: number, height: number };
+
+export default Vue.extend({
     name: 'QuadViewport',
 
     components: {
@@ -86,21 +96,21 @@ export default {
     data() {
         return {
             settings: settings.viewportSettings,
-            vectors: [],
-            matrices: [],
+            vectors: [] as Array<VectorView>,
+            matrices: [] as Array<MatrixView>,
             vec3: vec3, // For use in render
-            expandedView: null,
+            expandedView: null as ViewType | null,
         };
     },
 
     computed: {
         // TODO may be faster to check this on insert
-        renderVectors() {
+        renderVectors(): Array<VectorView> {
             return this.vectors.filter(v => {
                 return v && vec3.length(v.value) && v.color !== null;
             });
         },
-        renderMatrices() {
+        renderMatrices(): Array<MatrixView> {
             return this.matrices.filter(m => {
                 return m && m.color !== null;
             });
@@ -111,7 +121,7 @@ export default {
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
         /* this.$refs.scene.inst.background = new THREE.Color(0xffffff); */
 
-        EventBus.$on('node_engine_processed', editorJson => {
+        EventBus.$on('node_engine_processed', (editorJson: { [key: string]: any }) => {
             console.log('QuadViewport handling process event');
             this.vectors = [];
             this.matrices = [];
@@ -130,13 +140,13 @@ export default {
         });
 
         this.$nextTick(() => { // TODO have to do next tick because of the same bug that causes flashing when shrinking; remove this whenever I fix that
-            const size = this.$refs.scene.$el.getBoundingClientRect();
+            const size = (this.$refs.scene as Vue).$el.getBoundingClientRect();
             this.handleResize({width: size.width, height: size.height});
         });
     },
 
     methods: {
-        expandViewport(view) {
+        expandViewport(view: ViewType) {
             console.log('QuadViewport expanding', view);
             if (this.expandedView) {
                 console.log(`un-expanding ${view}`);
@@ -147,35 +157,41 @@ export default {
             }
 
             // Make sure scalars see the new canvas size so they can draw correctly
-            ['top', 'free', 'front', 'side'].forEach(view => this.$refs[`viewport_${view}`].updateCanvasSize());
+            [ViewType.TOP, ViewType.FREE, ViewType.FRONT, ViewType.SIDE].forEach(view => (this.$refs[`viewport_${view}`] as InstanceType<typeof Viewport>).updateCanvasSize());
         },
 
-        isHidden(view) {
+        isHidden(view: ViewType) {
             /* console.log('checking', view, 'for hidden', (this.expandedView !== null && this.expandedView !== view)); */
             return (this.expandedView !== null && this.expandedView !== view);
         },
 
-        isExpanded(view) {
+        isExpanded(view: ViewType) {
             /* console.log('checking', view, 'for expanded', this.expandedView === view); */
             return this.expandedView === view;
         },
 
-        handleResize({width, height}) {
-            // HACK: Viewports don't render anything when they have sub-pixel widths, so force integer sizes
+        handleResize({width, height}: Size) {
+            // HACK: Viewports do not render anything when they have sub-pixel widths, so force integer sizes
             // TODO something causes flashing when shrinking
-            ['top', 'front'].forEach(view => {
-                const viewport = this.$refs[`viewport_${view}`].$el;
+            [ViewType.TOP, ViewType.FRONT].forEach(view => {
+                const viewport = (this.$refs[`viewport_${view}`] as Vue).$el;
                 const parent = viewport.parentElement;
+                if (parent == null) {
+                    throw new Error('Parent element is null');
+                }
                 parent.style.width = `${Math.ceil(width / 2)}px`;
             });
-            ['free', 'side'].forEach(view => {
-                const viewport = this.$refs[`viewport_${view}`].$el;
+            [ViewType.FREE, ViewType.SIDE].forEach(view => {
+                const viewport = (this.$refs[`viewport_${view}`] as Vue).$el;
                 const parent = viewport.parentElement;
+                if (parent == null) {
+                    throw new Error('Parent element is null');
+                }
                 parent.style.width = `${Math.floor(width / 2)}px`;
             });
         },
     },
-};
+});
 </script>
 
 <style scoped>
