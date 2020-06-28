@@ -2,25 +2,38 @@ import _ from 'lodash';
 import { vec3, mat4 } from 'gl-matrix';
 import Rete from 'rete';
 
-import sockets from './sockets';
-import util, { s } from './operation_util';
+import { SocketType, sockets } from './sockets';
+import util, { s, InputSocketCompatibilityMap, BinaryInputToOutputSocketMap } from './operation_util';
 import { WarningControl, CalculationError } from './WarningControl';
 import { BinaryOperationNodeType } from './node_util';
+import type { NodeEditor } from 'rete/types/editor';
+import type { Input } from 'rete/types/input';
+import type { Node } from 'rete/types/node';
 
-class BinaryOperation {
-    static title = null;
-    static symbol = null;
+type InputTypesPair = [Set<SocketType>, Set<SocketType>];
+type CalculationInput = { value: any, type: string };
+
+export class BinaryOperation implements BinaryOperation {
+    static title: string | null = null;
+    static symbol: string | null = null;
     // TODO these should be "allowed" instead of "default"; when updating types, intersect with this, and remove connection if result is empty
     static defaultLhsSockets = s.anything;
     static defaultRhsSockets = s.anything;
     static defaultOutputSockets = s.anything;
+    static lhsToRhsTypeMap: InputSocketCompatibilityMap | null = null;
+    static rhsToLhsTypeMap: InputSocketCompatibilityMap | null = null;
+    static inputToOutputTypeMap: BinaryInputToOutputSocketMap | null = null;
 
-    static getOutputName() {
+    static getOutputName(): string {
         console.assert(this.symbol != null);
         return `A ${this.symbol} B`;
     }
 
-    static setupSockets(editor, node) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
+        throw new Error('calculate not implemented');
+    }
+
+    static setupSockets(editor: NodeEditor, node: Node) {
         node.addInput(new Rete.Input('lhs', 'A', sockets[util.socketTypesToCompoundSocket(this.defaultLhsSockets)]));
         node.addInput(new Rete.Input('rhs', 'B', sockets[util.socketTypesToCompoundSocket(this.defaultRhsSockets)]));
 
@@ -29,7 +42,7 @@ class BinaryOperation {
         node.addOutput(new Rete.Output('result', this.getOutputName(), sockets[util.socketTypesToCompoundSocket(this.defaultOutputSockets)]));
     }
 
-    static getNewSocketTypesFromInputs(lhsInput, rhsInput) {
+    static getNewSocketTypesFromInputs(lhsInput: Input, rhsInput: Input): InputTypesPair {
         // console.log(`TEST getNewSocketTypesFromInputs ${editorNode.name}"`);
 
         // TODO this still isn't great.  _getNewSocketTypesFromInput should always filter down, then
@@ -56,9 +69,12 @@ class BinaryOperation {
         return [newLhsSocketTypes, newRhsSocketTypes];
     }
 
-    static updateInputSocketTypes(editor, editorNode) {
+    static updateInputSocketTypes(editor: NodeEditor, editorNode: Node) {
         const lhs = editorNode.inputs.get('lhs');
         const rhs = editorNode.inputs.get('rhs');
+        if (lhs == null || rhs == null) {
+            throw new Error(`Input was null: ${lhs} ${rhs}`);
+        }
         const [newLhsTypes, newRhsTypes] = this.getNewSocketTypesFromInputs(lhs, rhs);
 
         util.updateIoType(lhs, newLhsTypes);
@@ -69,19 +85,24 @@ class BinaryOperation {
         util.removeInputConnectionsIfIncompatible(editor, rhs);
     }
 
-    static updateOutputSocketTypes(editor, editorNode) {
+    static updateOutputSocketTypes(editor: NodeEditor, editorNode: Node) {
         if (!this.inputToOutputTypeMap) {
             // console.log(`TEST updateOutputSocketTypes input to output type map is null, returning early (${editorNode.name})`);
             return;
         }
 
-        const lhsTypes = util.getSocketTypes(editorNode.inputs.get('lhs').socket);
-        const rhsTypes = util.getSocketTypes(editorNode.inputs.get('rhs').socket);
+        const lhs = editorNode.inputs.get('lhs');
+        const rhs = editorNode.inputs.get('rhs');
+        if (lhs == null || rhs == null) {
+            throw new Error(`Input was null: ${lhs} ${rhs}`);
+        }
+        const lhsTypes = util.getSocketTypes(lhs.socket);
+        const rhsTypes = util.getSocketTypes(rhs.socket);
 
         // console.log(`TEST updateOutputSocketTypes ${editorNode.name}`);
         const expectedOutputTypes = this.getExpectedOutputTypes(lhsTypes, rhsTypes);
         // console.log('TEST updateOutputSocketTypes expectedOutputTypes =', expectedOutputTypes);
-        if (expectedOutputTypes.has(util.invalid)) {
+        if (expectedOutputTypes.has(SocketType.INVALID)) {
             throw new Error(`Cannot update output socket for "${editorNode.name}", input combination ("${lhsTypes}" and "${rhsTypes}") is invalid`);
         } else if (_.isEqual(expectedOutputTypes, s.ignore)) {
             // console.log(`TEST updateOutputSocketTypes expected output for "${editorNode.name}" is 'ignore', skipping (from "${lhsTypes}" "${rhsTypes}")`);
@@ -89,15 +110,21 @@ class BinaryOperation {
         }
         // console.log(`TEST updateOutputSocketTypes updating output for "${editorNode.name}" to`, expectedOutputTypes, '" (from "', lhsTypes, '" "', rhsTypes, ')');
         const output = editorNode.outputs.get('result');
+        if (output == null) {
+            throw new Error('Output "result" not found');
+        }
         util.updateIoType(output, expectedOutputTypes); // TODO can check if update required for efficiency
 
         // If this output changed to a type that is no longer compatible with some of its connections, remove those connections
         util.removeOutputConnectionsIfIncompatible(editor, output);
     }
 
-    static getExpectedOutputTypes(lhsTypeList, rhsTypeList) {
+    static getExpectedOutputTypes(lhsTypeList: Set<SocketType>, rhsTypeList: Set<SocketType>): Set<SocketType> {
         // console.log(`TEST getExpectedOutputTypes "${lhsTypeList}" "${rhsTypeList}"`);
-        const allExpectedTypes = new Set();
+        if (this.inputToOutputTypeMap == null) {
+            throw new Error('inputToOutputTypeMap was not defined');
+        }
+        const allExpectedTypes = new Set<SocketType>();
         for (const lhs of lhsTypeList) {
             for (const rhs of rhsTypeList) {
                 // console.log(`TEST getExpectedOutputTypes lhs "${lhs}" rhs "${rhs}"`);
@@ -112,14 +139,14 @@ class BinaryOperation {
 
         // console.log(allExpectedTypes);
         if (_.isEqual(allExpectedTypes, s.invalid)) {
-            throw new Error('Invalid type combination', allExpectedTypes, `(from "${lhsTypeList}" "${rhsTypeList}")`);
+            throw new Error(`Invalid type combination ${allExpectedTypes} (from "${lhsTypeList}" "${rhsTypeList}")`);
         } else {
-            allExpectedTypes.delete(util.invalid);
+            allExpectedTypes.delete(SocketType.INVALID);
         }
         if (_.isEqual(allExpectedTypes, s.ignore)) {
             return s.ignore;
         } else {
-            allExpectedTypes.delete(util.ignore);
+            allExpectedTypes.delete(SocketType.IGNORE);
         }
         // console.log(allExpectedTypes);
 
@@ -141,7 +168,7 @@ class AddOperation extends BinaryOperation {
         'matrix':   { 'scalar': s.invalid, 'vector': s.invalid, 'matrix': s.matrix  },
     };
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         // console.log('AddOperation', lhs, rhs);
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
             return [lhs.value[0] + rhs.value[0]];
@@ -152,7 +179,7 @@ class AddOperation extends BinaryOperation {
             const out = mat4.create();
             return mat4.add(out, lhs.value, rhs.value);
         }
-        throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+        throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
     }
 }
 
@@ -170,7 +197,7 @@ class SubtractOperation extends BinaryOperation {
         'matrix':   { 'scalar': s.invalid, 'vector': s.invalid, 'matrix': s.matrix  },
     };
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         // console.log(lhs, rhs);
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
             return [lhs.value[0] - rhs.value[0]];
@@ -181,7 +208,7 @@ class SubtractOperation extends BinaryOperation {
             const out = mat4.create();
             return mat4.subtract(out, lhs.value, rhs.value);
         }
-        throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+        throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
     }
 }
 
@@ -198,7 +225,7 @@ class MultiplyOperation extends BinaryOperation {
         'matrix':   { 'scalar': s.matrix,   'vector': s.vector,  'matrix': s.matrix  },
     };
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         // TODO how to clean this up and/or assert that all paths are covered?
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
             return [lhs.value[0] * rhs.value[0]];
@@ -229,7 +256,7 @@ class MultiplyOperation extends BinaryOperation {
             mat4.multiply(out, lhsT, rhsT);
             return mat4.transpose(out, out);
         }
-        throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+        throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
     }
 }
 
@@ -250,7 +277,7 @@ class DivideOperation extends BinaryOperation {
         'matrix':   { 'scalar': s.matrix,   'vector': s.invalid, 'matrix': s.invalid },
     };
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (rhs.type === 'scalar') {
             if (rhs.value[0] === 0) {
                 throw new CalculationError('Division by zero');
@@ -265,7 +292,7 @@ class DivideOperation extends BinaryOperation {
                 return mat4.multiplyScalar(out, lhs.value, 1.0 / rhs.value[0]);
             }
         }
-        throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+        throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
     }
 }
 
@@ -281,9 +308,9 @@ class DotOperation extends BinaryOperation {
     static rhsToLhsTypeMap = null;
     static inputToOutputTypeMap = null;
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         return [vec3.dot(lhs.value, rhs.value)];
     }
@@ -301,9 +328,9 @@ class CrossOperation extends BinaryOperation {
     static rhsToLhsTypeMap = null;
     static inputToOutputTypeMap = null;
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         const out = vec3.create();
         return vec3.cross(out, lhs.value, rhs.value);
@@ -322,13 +349,13 @@ class AngleOperation extends BinaryOperation {
     static rhsToLhsTypeMap = null;
     static inputToOutputTypeMap = null;
 
-    static getOutputName() {
+    static getOutputName(): string {
         return `${this.symbol}AB`;
     }
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         return [vec3.angle(lhs.value, rhs.value)];
     }
@@ -346,13 +373,13 @@ class ProjectionOperation extends BinaryOperation {
     static rhsToLhsTypeMap = null;
     static inputToOutputTypeMap = null;
 
-    static getOutputName() {
+    static getOutputName(): string {
         return `proj<sub> B </sub>A`;
     }
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error(this.title, 'unsupported input types', lhs.type, rhs.type);
+            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         const num = vec3.dot(lhs.value, rhs.value);
         const den = vec3.dot(rhs.value, rhs.value);
@@ -374,13 +401,13 @@ class ExponentOperation extends BinaryOperation {
     static rhsToLhsTypeMap = null;
     static inputToOutputTypeMap = null;
 
-    static getOutputName() {
+    static getOutputName(): string {
         return 'A<sup>B</sup>';
     }
 
-    static calculate(lhs, rhs) {
+    static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'scalar' || rhs.type !== 'scalar') {
-            throw new Error(`${this.title} unsupported input types`, lhs.type, rhs.type);
+            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         return [Math.pow(lhs.value, rhs.value)];
     }
