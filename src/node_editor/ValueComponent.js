@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import NodeRenderer from './NodeRenderer';
 import Rete from 'rete';
 import sockets from './sockets';
 import { ValueControl } from './ValueControl';
@@ -13,7 +12,6 @@ export class ValueComponent extends Rete.Component {
         // TODO   not sure of the best design since render plugin is entirely separate from components
         super(nodeType); // Note that the node name affects the element class as well as the node title
         this.nodeType = nodeType;
-        this.data.component = NodeRenderer;
     }
 
     builder(node) {

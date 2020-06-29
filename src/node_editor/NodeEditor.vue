@@ -83,6 +83,7 @@ import _ from 'lodash';
 import Rete from 'rete';
 import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
+import NodeRenderer from './NodeRenderer.vue';
 // import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { EventBus } from '../EventBus';
 import * as settings from '../settings';
@@ -637,6 +638,7 @@ export default {
             options: {
                 vuetify,
             },
+            component: NodeRenderer,
         });
         console.log('NodeEditor mounted, plugins list:', this.editor.plugins);
         console.log('NodeEditor mounted, events:', this.editor.events);

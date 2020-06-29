@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import Rete from 'rete';
 
-import NodeRenderer from './NodeRenderer.vue';
 import * as nodeUtil from './node_util';
 import { CalculationError, WarningControl } from './WarningControl';
 import history from '../history';
@@ -22,7 +21,6 @@ export default class BinaryOperationComponent extends Rete.Component {
         }
         super(operation.title);
         this.operation = operation;
-        this.data.component = NodeRenderer;
     }
 
     async builder(node: Node): Promise<Node> {
