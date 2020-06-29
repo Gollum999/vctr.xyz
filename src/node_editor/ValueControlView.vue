@@ -16,15 +16,20 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue, { PropType } from 'vue';
 import _ from 'lodash';
 import history from '../history';
 import { FieldChangeAction } from '../history_actions';
 import { ValueNodeType } from './node_util';
 
-const DEFAULT_SCALAR_WRAPPER = Object.freeze([{val: 1}]);
-const DEFAULT_VECTOR_WRAPPER = Object.freeze([{val: 1}, {val: 1}, {val: 1}]);
-const DEFAULT_MATRIX_WRAPPER = Object.freeze([
+type ValueItemWrapper = { val: number };
+type ValueWrapper = Array<ValueItemWrapper>;
+type DefaultValueWrapper = readonly ValueItemWrapper[];
+
+const DEFAULT_SCALAR_WRAPPER: DefaultValueWrapper = Object.freeze([{val: 1}]);
+const DEFAULT_VECTOR_WRAPPER: DefaultValueWrapper = Object.freeze([{val: 1}, {val: 1}, {val: 1}]);
+const DEFAULT_MATRIX_WRAPPER: DefaultValueWrapper = Object.freeze([
     {val: 1}, {val: 0}, {val: 0}, {val: 0},
     {val: 0}, {val: 1}, {val: 0}, {val: 0},
     {val: 0}, {val: 0}, {val: 1}, {val: 0},
@@ -37,27 +42,27 @@ const EXPECTED_SIZE = {
     [ValueNodeType.MATRIX]: 16,
 };
 
-function wrapperToArray(wrapper) {
+function wrapperToArray(wrapper: ValueWrapper): Array<number> {
     return wrapper.map(axis => axis.val);
 }
 
-function arrayToWrapper(array) {
+function arrayToWrapper(array: Array<number>): ValueWrapper {
     return array.map(i => { return {val: parseFloat(i.toFixed(3))}; }); // TODO could add a component that stores the raw value and only rounds in the display layer
 }
 
-export default {
+export default Vue.extend({
     props: {
         getData:       { type: Function, required: true },
         putData:       { type: Function, required: true },
         emitter:       { type: Object,   required: true }, // injected by Rete
         dataKey:       { type: String,   required: true }, // injected by Rete
         rowIdx:        { type: Number,   required: true }, // used to position control within parent grid
-        nodeType:      { type: String,   required: true, validator: value => Object.values(ValueNodeType).includes(value) },
+        nodeType:      { type: String as PropType<ValueNodeType>, required: true, validator: value => Object.values(ValueNodeType).includes(value) },
     },
 
     data() {
         // To make everything properly reactive, must use proxy array instead of raw vec3/mat4, and must wrap array elements in objects
-        // Scalars don't actually need this, but just follow the pattern for consistency
+        // Scalars do not actually need this, but just follow the pattern for consistency
         const defaultValues = {
             [ValueNodeType.SCALAR]: DEFAULT_SCALAR_WRAPPER,
             [ValueNodeType.VECTOR]: DEFAULT_VECTOR_WRAPPER,
@@ -72,7 +77,7 @@ export default {
 
     watch: {
         values: {
-            handler: function (newVal, oldVal) {
+            handler: function (newVal: ValueWrapper, oldVal: ValueWrapper) {
                 /* console.log('ValueControlView value watcher, calling putData', this.dataKey, this.values, newVal, oldVal); */
                 if (this.dataKey) {
                     /* console.log('ValueControlView putData key:', this.dataKey, 'values:', this.values, wrapperToArray(this.values)); */
@@ -85,7 +90,7 @@ export default {
     },
 
     methods: {
-        setValue(value) {
+        setValue(value: Array<number>) {
             // console.log('ValueControlView setValue', value);
             // TODO repeat this check for other types
             if (_.isNil(value) || value.length !== EXPECTED_SIZE[this.nodeType]) {
@@ -97,7 +102,7 @@ export default {
             }
         },
 
-        onInput(newValue, idx) {
+        onInput(newValue: string, idx: number) {
             /* console.log('ValueControlView onInput old values:', this.values); */
             const newValues = this.values.map(i => ({...i})); // Make sure to deep copy the wrappers
             newValues[idx].val = parseFloat(newValue);
@@ -114,7 +119,7 @@ export default {
             this.emitter.trigger('process');
         },
 
-        onCopy(event) {
+        onCopy(event: ClipboardEvent) {
             const valueArray = wrapperToArray(this.values);
             const text = (() => {
                 switch (this.nodeType) {
@@ -124,14 +129,20 @@ export default {
                 };
             })();
             console.log('ValueControlView onCopy', event, valueArray, 'setting clipboard to "', text, '"');
+            if (event.clipboardData == null) {
+                throw new Error('Clipboard data was null');
+            }
             event.clipboardData.setData('text', text);
         },
 
-        onPaste(event) {
+        onPaste(event: ClipboardEvent) {
             if (this.readOnly) {
                 return;
             }
             console.log(`ValueControlView onPaste`, event);
+            if (event.clipboardData == null) {
+                throw new Error('Clipboard data was null');
+            }
             const text = event.clipboardData.getData('text');
             const split = text.replace(/[[\]{}()]/g, '').split(/[ ,;]+/);
             if (split.length !== EXPECTED_SIZE[this.nodeType]) {
@@ -152,7 +163,7 @@ export default {
         this.setValue(data);
         // console.log('ValueControlView mounted, set this.values to ', this.values);
     },
-};
+});
 </script>
 
 <style scoped>
