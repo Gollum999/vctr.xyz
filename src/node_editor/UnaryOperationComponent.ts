@@ -3,26 +3,34 @@ import Rete from 'rete';
 
 import NodeRenderer from './NodeRenderer.vue';
 import * as nodeUtil from './node_util';
-import { CalculationError } from './WarningControl';
+import { CalculationError, WarningControl } from './WarningControl';
 import history from '../history';
 import { MultiAction, RemoveAllNodeOutputConnectionsAction } from '../history_actions';
+import type { UnaryOperation } from './UnaryOperation';
+import type { Node } from 'rete/types/node';
+import type { Inputs as DataInputs, Outputs as DataOutputs, Node as DataNode } from 'rete/types/core/data';
 
 export default class UnaryOperationComponent extends Rete.Component {
-    constructor(operation) {
+    private readonly operation: typeof UnaryOperation;
+
+    constructor(operation: typeof UnaryOperation) {
         // Note that the Rete engine does some node lookups by name, so each node type must have a unique name.
         // This is especially important in here where I give the component some state; if the name is shared anywhere it will look up
         //   the wrong worker() function during engine processing
+        if (operation.title == null) {
+            throw new Error(`Operation title was null: ${operation}`);
+        }
         super(operation.title);
         this.operation = operation;
         this.data.component = NodeRenderer;
     }
 
-    builder(node) {
+    async builder(node: Node): Promise<Node> {
         this.operation.setupSockets(this.editor, node);
         return node;
     }
 
-    worker(engineNode, inputs, outputs) {
+    worker(engineNode: DataNode, inputs: DataInputs, outputs: DataOutputs): void {
         const inputValue = nodeUtil.getInputValue('input', inputs, engineNode.data);
         // console.log('UnaryOperationComponent worker', this.operation, inputValue);
         if (_.isNil(inputValue)) {
@@ -31,7 +39,7 @@ export default class UnaryOperationComponent extends Rete.Component {
 
         // Bit of a hack; probably more correct to put something in node.data, or maybe  look at the type of the node on the other
         // side of the input connection
-        function determineType(val) {
+        function determineType(val: Array<number>): string {
             switch (val.length) {
             case 1:  return 'scalar';
             case 3:  return 'vector';
@@ -42,13 +50,14 @@ export default class UnaryOperationComponent extends Rete.Component {
 
         // console.log(inputValue);
         const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
+        const warningControl = editorNode.controls.get('warning') as WarningControl;
         let result;
         try {
             result = this.operation.calculate({type: determineType(inputValue), value: inputValue});
-            editorNode.controls.get('warning').setWarning('');
+            warningControl.setWarning('');
         } catch (e) {
             if (e instanceof CalculationError) {
-                editorNode.controls.get('warning').setWarning(e.message);
+                warningControl.setWarning(e.message);
                 if (Array.from(editorNode.outputs.values()).some(io => io.connections.length)) {
                     const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
                     history.addAndDo(action);
