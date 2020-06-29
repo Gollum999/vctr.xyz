@@ -2,65 +2,88 @@ import _ from 'lodash';
 import { vec3, mat4 } from 'gl-matrix';
 import Rete from 'rete';
 
-import sockets from './sockets';
-import util, { s } from './operation_util';
+import { SocketType, sockets } from './sockets';
+import util, { s, UnaryInputToOutputSocketMap } from './operation_util';
 import { WarningControl, CalculationError } from './WarningControl';
 import { UnaryOperationNodeType } from './node_util';
+import type { NodeEditor } from 'rete/types/editor';
+import type { Input } from 'rete/types/input';
+import type { Node } from 'rete/types/node';
 
-class UnaryOperation {
-    static title = null;
+type CalculationInput = { value: any, type: string };
+
+export class UnaryOperation {
+    static title: string | null = null;
     // TODO these should be "allowed" instead of "default"; when updating types, intersect with this, and remove connection if result is empty
     static defaultInputSockets = s.anything;
     static defaultOutputSockets = s.anything;
+    static inputToOutputTypeMap: UnaryInputToOutputSocketMap | null = null;
 
-    static getInputName() {
+    static getInputName(): string {
         return 'X';
     }
 
-    static getOutputName() {
+    static getOutputName(): string {
         throw new Error('Not implemented');
     }
 
-    static setupSockets(editor, node) {
+    static calculate(input: CalculationInput): any {
+        throw new Error('calculate not implemented');
+    }
+
+    static setupSockets(editor: NodeEditor, node: Node) {
         node.addInput(new Rete.Input('input', this.getInputName(), sockets[util.socketTypesToCompoundSocket(this.defaultInputSockets)]));
         node.addControl(new WarningControl(editor, 'warning', 1));
         // TODO change socket names for consistency?
         node.addOutput(new Rete.Output('output', this.getOutputName(), sockets[util.socketTypesToCompoundSocket(this.defaultOutputSockets)]));
     }
 
-    static getNewSocketTypesFromInputs(input) {
+    static getNewSocketTypesFromInputs(input: Input): Set<SocketType> {
         const typesFromInputConnection = util.getInputTypes(input);
         const typesFromInputSocket = util.getSocketTypes(input.socket);
 
         return util.getNewSocketTypesFromInput(typesFromInputConnection, typesFromInputSocket, this.defaultInputSockets);
     }
 
-    static updateInputSocketTypes(editor, editorNode) {
+    static updateInputSocketTypes(editor: NodeEditor, editorNode: Node) {
         const input = editorNode.inputs.get('input');
+        if (input == null) {
+            throw new Error(`Input was null: ${input}`);
+        }
         const newInputTypes = this.getNewSocketTypesFromInputs(input);
 
         util.updateIoType(input, newInputTypes);
     }
 
-    static updateOutputSocketTypes(editor, editorNode) {
+    static updateOutputSocketTypes(editor: NodeEditor, editorNode: Node) {
         if (!this.inputToOutputTypeMap) {
             // console.log(`TEST updateOutputSocketTypes input to output type map is null, returning early (${editorNode.name})`);
             return;
         }
 
-        const inputTypes = util.getSocketTypes(editorNode.inputs.get('input').socket);
+        const input = editorNode.inputs.get('input');
+        if (input == null) {
+            throw new Error(`Input "input" not found`);
+        }
+        const inputTypes = util.getSocketTypes(input.socket);
 
         // console.log(`TEST updateOutputSocketTypes ${editorNode.name}`);
         const output = editorNode.outputs.get('output');
+        if (output == null) {
+            throw new Error('Output "output" not found');
+        }
         util.updateIoType(output, this.getExpectedOutputTypes(inputTypes));
 
         // If this output changed to a type that is no longer compatible with some of its connections, remove those connections
         util.removeOutputConnectionsIfIncompatible(editor, output);
     }
 
-    static getExpectedOutputTypes(inputTypeList) {
+    static getExpectedOutputTypes(inputTypeList: Set<SocketType>): Set<SocketType> {
         // console.log(`TEST getExpectedOutputTypes "${inputTypeList}"`);
-        const allExpectedTypes = new Set();
+        if (this.inputToOutputTypeMap == null) {
+            throw new Error('inputToOutputTypeMap was not defined');
+        }
+        const allExpectedTypes = new Set<SocketType>();
         for (const inputType of inputTypeList) {
             // console.log(`TEST getExpectedOutputTypes inputType "${inputType}"`);
             const expectedOutputTypeList = this.inputToOutputTypeMap[inputType];
@@ -73,14 +96,14 @@ class UnaryOperation {
 
         // console.log(allExpectedTypes);
         if (_.isEqual(allExpectedTypes, s.invalid)) {
-            throw new Error('Invalid type combination', allExpectedTypes, `(from "${inputTypeList}")`);
+            throw new Error(`Invalid type combination ${allExpectedTypes} (from "${inputTypeList}")`);
         } else {
-            allExpectedTypes.delete(util.invalid);
+            allExpectedTypes.delete(SocketType.INVALID);
         }
         if (_.isEqual(allExpectedTypes, s.ignore)) {
             return s.ignore;
         } else {
-            allExpectedTypes.delete(util.ignore);
+            allExpectedTypes.delete(SocketType.IGNORE);
         }
         // console.log(allExpectedTypes);
 
@@ -93,7 +116,7 @@ class LengthOperation extends UnaryOperation {
     static defaultInputSockets = s.vector;
     static defaultOutputSockets = s.scalar;
 
-    static getOutputName() {
+    static getOutputName(): string {
         return '|X|';
     }
     // Only vector -> scalar supported
@@ -103,11 +126,11 @@ class LengthOperation extends UnaryOperation {
         'matrix': s.invalid,
     };
 
-    static calculate(input) {
+    static calculate(input: CalculationInput): any {
         if (input.type === 'vector') {
             return [vec3.length(input.value)];
         }
-        throw new Error(`${this.title} unsupported input type`, input.type);
+        throw new Error(`${this.title} unsupported input type ${input.type}`);
     }
 }
 
@@ -117,7 +140,7 @@ class InvertOperation extends UnaryOperation {
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.matrix;
 
-    static getOutputName() {
+    static getOutputName(): string {
         return 'X⁻¹';
     }
     // Only matrix -> matrix supported
@@ -127,7 +150,7 @@ class InvertOperation extends UnaryOperation {
         'matrix': s.matrix,
     };
 
-    static calculate(input) {
+    static calculate(input: CalculationInput): any {
         if (input.type === 'matrix') {
             const out = mat4.create();
             const result = mat4.invert(out, input.value);
@@ -136,7 +159,7 @@ class InvertOperation extends UnaryOperation {
             }
             return result;
         }
-        throw new Error(`${this.title} unsupported input type`, input.type);
+        throw new Error(`${this.title} unsupported input type ${input.type}`);
     }
 }
 
@@ -145,7 +168,7 @@ class NormalizeOperation extends UnaryOperation {
     static defaultInputSockets = s.vector;
     static defaultOutputSockets = s.vector;
 
-    static getOutputName() {
+    static getOutputName(): string {
         return 'norm(X)';
     }
     // Only vector -> vector supported
@@ -155,12 +178,12 @@ class NormalizeOperation extends UnaryOperation {
         'matrix': s.invalid,
     };
 
-    static calculate(input) {
+    static calculate(input: CalculationInput): any {
         if (input.type === 'vector') {
             const out = vec3.create();
             return vec3.normalize(out, input.value);
         }
-        throw new Error(`${this.title} unsupported input type`, input.type);
+        throw new Error(`${this.title} unsupported input type ${input.type}`);
     }
 }
 
@@ -169,7 +192,7 @@ class TransposeOperation extends UnaryOperation {
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.matrix;
 
-    static getOutputName() {
+    static getOutputName(): string {
         return 'Xᵀ';
     }
     // Only matrix -> matrix supported
@@ -179,12 +202,12 @@ class TransposeOperation extends UnaryOperation {
         'matrix': s.matrix,
     };
 
-    static calculate(input) {
+    static calculate(input: CalculationInput): any {
         if (input.type === 'matrix') {
             const out = mat4.create();
             return mat4.transpose(out, input.value);
         }
-        throw new Error(`${this.title} unsupported input type`, input.type);
+        throw new Error(`${this.title} unsupported input type ${input.type}`);
     }
 }
 
@@ -193,7 +216,7 @@ class DeterminantOperation extends UnaryOperation {
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.scalar;
 
-    static getOutputName() {
+    static getOutputName(): string {
         return '|X|';
     }
     // Only matrix -> scalar supported
@@ -203,11 +226,11 @@ class DeterminantOperation extends UnaryOperation {
         'matrix': s.scalar,
     };
 
-    static calculate(input) {
+    static calculate(input: CalculationInput): any {
         if (input.type === 'matrix') {
             return [mat4.determinant(input.value)];
         }
-        throw new Error(`${this.title} unsupported input type`, input.type);
+        throw new Error(`${this.title} unsupported input type ${input.type}`);
     }
 }
 
