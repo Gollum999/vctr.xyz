@@ -140,8 +140,7 @@ export default Vue.extend({
         });
 
         this.$nextTick(() => { // TODO have to do next tick because of the same bug that causes flashing when shrinking; remove this whenever I fix that
-            const size = (this.$refs.scene as Vue).$el.getBoundingClientRect();
-            this.handleResize({width: size.width, height: size.height});
+            this.forceHandleResize();
         });
     },
 
@@ -158,6 +157,9 @@ export default Vue.extend({
 
             // Make sure scalars see the new canvas size so they can draw correctly
             [ViewType.TOP, ViewType.FREE, ViewType.FRONT, ViewType.SIDE].forEach(view => (this.$refs[`viewport_${view}`] as InstanceType<typeof Viewport>).updateCanvasSize());
+
+            // HACK: Force width to be recalculated when expanding
+            this.forceHandleResize();
         },
 
         isHidden(view: ViewType) {
@@ -170,16 +172,26 @@ export default Vue.extend({
             return this.expandedView === view;
         },
 
+        forceHandleResize() {
+            const size = (this.$refs.scene as Vue).$el.getBoundingClientRect();
+            this.handleResize({width: size.width, height: size.height});
+        },
+
         handleResize({width, height}: Size) {
             // HACK: Viewports do not render anything when they have sub-pixel widths, so force integer sizes
             // TODO something causes flashing when shrinking
+            console.log('resizing viewports...');
             [ViewType.TOP, ViewType.FRONT].forEach(view => {
                 const viewport = (this.$refs[`viewport_${view}`] as Vue).$el;
                 const parent = viewport.parentElement;
                 if (parent == null) {
                     throw new Error('Parent element is null');
                 }
-                parent.style.width = `${Math.ceil(width / 2)}px`;
+                if (this.isExpanded(view)) {
+                    parent.style.width = '100%';
+                } else if (!this.isHidden(view)) {
+                    parent.style.width = `${Math.ceil(width / 2)}px`;
+                }
             });
             [ViewType.FREE, ViewType.SIDE].forEach(view => {
                 const viewport = (this.$refs[`viewport_${view}`] as Vue).$el;
@@ -187,7 +199,11 @@ export default Vue.extend({
                 if (parent == null) {
                     throw new Error('Parent element is null');
                 }
-                parent.style.width = `${Math.floor(width / 2)}px`;
+                if (this.isExpanded(view)) {
+                    parent.style.width = '100%';
+                } else if (!this.isHidden(view)) {
+                    parent.style.width = `${Math.floor(width / 2)}px`;
+                }
             });
         },
     },
