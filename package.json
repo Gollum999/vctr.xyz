@@ -38,6 +38,7 @@
     "vuetify": "^2.0.2"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-optional-chaining": "^7.10.4",
     "@types/jest": "^23.1.4",
     "@types/three": "^0.103.2",
     "@vue/cli-plugin-babel": "^3.5.0",
