@@ -13,7 +13,7 @@ import type { Node } from 'rete/types/node';
 type InputTypesPair = [Set<SocketType>, Set<SocketType>];
 type CalculationInput = { value: any, type: string };
 
-export class BinaryOperation implements BinaryOperation {
+export class BinaryOperation {
     static title: string | null = null;
     static symbol: string | null = null;
     // TODO these should be "allowed" instead of "default"; when updating types, intersect with this, and remove connection if result is empty
@@ -154,7 +154,7 @@ export class BinaryOperation implements BinaryOperation {
     }
 }
 
-class AddOperation extends BinaryOperation {
+export class AddOperation extends BinaryOperation {
     static title = 'Add';
     static symbol = '+';
 
@@ -183,7 +183,7 @@ class AddOperation extends BinaryOperation {
     }
 }
 
-class SubtractOperation extends BinaryOperation {
+export class SubtractOperation extends BinaryOperation {
     static title = 'Subtract';
     static symbol = '-';
 
@@ -212,7 +212,7 @@ class SubtractOperation extends BinaryOperation {
     }
 }
 
-class MultiplyOperation extends BinaryOperation {
+export class MultiplyOperation extends BinaryOperation {
     static title = 'Multiply';
     static symbol = '*';
 
@@ -260,7 +260,7 @@ class MultiplyOperation extends BinaryOperation {
     }
 }
 
-class DivideOperation extends BinaryOperation {
+export class DivideOperation extends BinaryOperation {
     static title = 'Divide';
     static symbol = '/';
     static defaultLhsSockets = s.anything;
@@ -296,7 +296,7 @@ class DivideOperation extends BinaryOperation {
     }
 }
 
-class DotOperation extends BinaryOperation {
+export class DotOperation extends BinaryOperation {
     static title = 'Dot Product';
     static symbol = '·';
     static defaultLhsSockets = s.vector;
@@ -316,7 +316,7 @@ class DotOperation extends BinaryOperation {
     }
 }
 
-class CrossOperation extends BinaryOperation {
+export class CrossOperation extends BinaryOperation {
     static title = 'Cross Product';
     static symbol = '×';
     static defaultLhsSockets = s.vector;
@@ -337,7 +337,7 @@ class CrossOperation extends BinaryOperation {
     }
 }
 
-class AngleOperation extends BinaryOperation {
+export class AngleOperation extends BinaryOperation {
     static title = 'Angle';
     static symbol = '∠';
     static defaultLhsSockets = s.vector;
@@ -361,7 +361,7 @@ class AngleOperation extends BinaryOperation {
     }
 }
 
-class ProjectionOperation extends BinaryOperation {
+export class ProjectionOperation extends BinaryOperation {
     static title = 'Projection';
     static symbol = null;
     static defaultLhsSockets = s.vector;
@@ -389,7 +389,7 @@ class ProjectionOperation extends BinaryOperation {
     }
 }
 
-class ExponentOperation extends BinaryOperation {
+export class ExponentOperation extends BinaryOperation {
     static title = 'Exponent';
     static symbol = null;
     static defaultLhsSockets = s.scalar;
@@ -413,7 +413,7 @@ class ExponentOperation extends BinaryOperation {
     }
 }
 
-export default {
+export const allBinaryOperations = Object.freeze({
     [BinaryOperationNodeType.ADD]:           AddOperation,
     [BinaryOperationNodeType.SUBTRACT]:      SubtractOperation,
     [BinaryOperationNodeType.MULTIPLY]:      MultiplyOperation,
@@ -423,4 +423,4 @@ export default {
     [BinaryOperationNodeType.ANGLE]:         AngleOperation,
     [BinaryOperationNodeType.PROJECTION]:    ProjectionOperation,
     [BinaryOperationNodeType.EXPONENT]:      ExponentOperation,
-};
+});

@@ -78,9 +78,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import _ from 'lodash';
 import Rete from 'rete';
+import type { Engine } from 'rete/types/engine';
+import type { NodeEditor } from 'rete/types/editor';
+import type { Node } from 'rete/types/node';
+import type { Node as DataNode } from 'rete/types/core/data';
+import type { NodeView } from 'rete/types/view/node';
 import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import NodeRenderer from './NodeRenderer.vue';
@@ -90,19 +96,46 @@ import * as settings from '../settings';
 import * as util from '../util';
 import history from '../history';
 import * as actions from '../history_actions';
-import { GraphTraveler, BasicOperationNodeType, AdvancedOperationNodeType, NodeType } from './node_util';
+import {
+    GraphTraveler, BasicOperationNodeType, AdvancedOperationNodeType, UnaryOperationNodeType, BinaryOperationNodeType,
+    ValueNodeType, NodeType,
+} from './node_util';
 import Rect from './Rect';
-import UnaryOperation from './UnaryOperation';
-import BinaryOperation from './BinaryOperation';
+import * as unary from './UnaryOperation';
+import * as binary from './BinaryOperation';
 import NodeFactory from './node_factory';
 import vuetify from '../plugins/vuetify';
 
-function getOperation(nodeName) {
-    return UnaryOperation[nodeName] || BinaryOperation[nodeName];
+type Operation = typeof unary.UnaryOperation | typeof binary.BinaryOperation;
+
+interface SerializedNode {
+    type: string,
+    data: object,
+    posOffset: [number, number],
+}
+
+function getOperation(nodeName: string): Operation {
+    switch (nodeName) {
+    case UnaryOperationNodeType.LENGTH:         return unary.LengthOperation;
+    case UnaryOperationNodeType.INVERT:         return unary.InvertOperation;
+    case UnaryOperationNodeType.NORMALIZE:      return unary.NormalizeOperation;
+    case UnaryOperationNodeType.TRANSPOSE:      return unary.TransposeOperation;
+    case UnaryOperationNodeType.DETERMINANT:    return unary.DeterminantOperation;
+    case BinaryOperationNodeType.ADD:           return binary.AddOperation;
+    case BinaryOperationNodeType.SUBTRACT:      return binary.SubtractOperation;
+    case BinaryOperationNodeType.MULTIPLY:      return binary.MultiplyOperation;
+    case BinaryOperationNodeType.DIVIDE:        return binary.DivideOperation;
+    case BinaryOperationNodeType.DOT_PRODUCT:   return binary.DotOperation;
+    case BinaryOperationNodeType.CROSS_PRODUCT: return binary.CrossOperation;
+    case BinaryOperationNodeType.ANGLE:         return binary.AngleOperation;
+    case BinaryOperationNodeType.PROJECTION:    return binary.ProjectionOperation;
+    case BinaryOperationNodeType.EXPONENT:      return binary.ExponentOperation;
+    default: throw new Error(`Could not find operation "${nodeName}"`);
+    }
 }
 
 // Engine updates have to happen *before* this because they set up the data we iterate over
-function updateAllSockets(engine, editor) {
+function updateAllSockets(engine: Engine, editor: NodeEditor) {
     const graphTraveler = new GraphTraveler(engine, editor);
     graphTraveler.applyToAllNodes((engineNode, editorNode) => {
         // console.log('updateAllSockets', editorNode, engineNode);
@@ -110,14 +143,16 @@ function updateAllSockets(engine, editor) {
         // console.log(outputs);
         // console.log(editorNode.inputs);
         // console.log(editorNode.outputs);
-        const operation = getOperation(engineNode.name);
-        if (!_.isNil(operation)) {
-            _updateOperationSockets(editor, engineNode, editorNode, operation);
+        if (!Object.values(ValueNodeType).includes(engineNode.name as ValueNodeType)) {
+            const operation = getOperation(engineNode.name);
+            if (!_.isNil(operation)) {
+                _updateOperationSockets(editor, engineNode, editorNode, operation);
+            }
         }
     });
 }
 
-function _updateOperationSockets(editor, engineNode, editorNode, operation) {
+function _updateOperationSockets(editor: NodeEditor, engineNode: DataNode, editorNode: Node, operation: Operation) {
     const inputArray = Array.from(editorNode.inputs);
     // console.log(inputArray);
 
@@ -136,7 +171,7 @@ function _updateOperationSockets(editor, engineNode, editorNode, operation) {
             return false;
         }
         const connection = input.connections[0];
-        // TODO doesn't account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
+        // TODO does not account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
         // TODO checking by socket name is overlay aggressive; could instead check for type subset
         return connection.input.socket.name !== connection.output.socket.name;
     }));
@@ -154,7 +189,7 @@ function _updateOperationSockets(editor, engineNode, editorNode, operation) {
     operation.updateOutputSocketTypes(editor, editorNode);
 }
 
-export default {
+export default Vue.extend({
     name: 'NodeEditor',
     data() {
         return {
@@ -165,12 +200,13 @@ export default {
             settings: settings.nodeEditorSettings,
             history: history, // For checking whether to disable undo/redo buttons // TODO is it better to do this or add a computed property?
 
-            lastNodePosition: null,
+            lastNodePosition: null as [number, number] | null,
             newNodesShouldBeCentered: true,
 
-            container: null,
-            editor: null,
-            engine: null,
+            nodeFactory: null! as NodeFactory,
+            container: null! as HTMLElement,
+            editor: null! as NodeEditor,
+            engine: null! as Engine,
 
             currentlyHandlingHistoryAction: false,
             showingAdvancedRenderControls: true,
@@ -227,9 +263,12 @@ export default {
             this.editor.on('connectionremoved', c => history.add(new actions.RemoveConnectionAction(this.editor, c)));
         },
 
-        addAndRepositionNode(node) {
+        addAndRepositionNode(node: Node) {
             this.editor.addNode(node);
             const nodeView = this.editor.view.nodes.get(node);
+            if (nodeView == null) {
+                throw new Error(`Could not find view for node ${node}`);
+            }
 
             node.position = this.getNewNodePos(node, nodeView);
             console.log('Added node at position', node.position);
@@ -240,20 +279,23 @@ export default {
             nodeView.update();
 
             this.newNodesShouldBeCentered = false;
-            this.lastNodePosition = node.position.slice();
+            this.lastNodePosition = [...node.position];
         },
 
-        async addNode(nodeType) {
+        async addNode(nodeType: string) {
             console.log(`Add node (type ${nodeType})`);
             this.addAndRepositionNode(await this.nodeFactory.createNode(nodeType));
         },
 
-        getNewNodePos(node, nodeView) {
+        getNewNodePos(node: Node, nodeView: NodeView): [number, number] {
             // TODO really need a simple vector class
             const editorX = this.editor.view.area.transform.x;
             const editorY = this.editor.view.area.transform.y;
-            const nodeEditorWidth = this.editor.view.container.parentElement.parentElement.clientWidth;
-            const nodeEditorHeight = this.editor.view.container.parentElement.parentElement.clientHeight;
+            const nodeEditorWidth = this.editor.view.container.parentElement?.parentElement?.clientWidth;
+            const nodeEditorHeight = this.editor.view.container.parentElement?.parentElement?.clientHeight;
+            if (nodeEditorWidth == null || nodeEditorHeight == null) {
+                throw new Error(`Failed to find node editor width/height (${nodeEditorWidth}, ${nodeEditorHeight})`);
+            }
             const editorScale = this.editor.view.area.transform.k;
             const nodeWidth = nodeView.el.offsetWidth;
             const nodeHeight = nodeView.el.offsetHeight;
@@ -264,6 +306,9 @@ export default {
                 const desiredPosY = ((nodeEditorCenterY - editorY) / editorScale) - nodeHeight / 2;
                 return [desiredPosX, desiredPosY];
             } else {
+                if (this.lastNodePosition == null) {
+                    throw new Error('lastNodePosition was null');
+                }
                 const nodeOffset = 30;
                 const wrapMargin = 30;
                 const editorViewRect = new Rect({
@@ -306,7 +351,7 @@ export default {
                 // HACK: Disable new history items from being added for the whole tick; the default behavior only disables it
                 //       while undo() is on the call stack, but since we may add new history items via watchers, the history
                 //       will be re-enabled by that point
-                // TODO: Does that just mean that I shouldn't use watchers with fields that could trigger history?
+                // TODO: Does that just mean that I should not use watchers with fields that could trigger history?
                 this.$nextTick(() => {
                     history.enable();
                 });
@@ -325,7 +370,7 @@ export default {
             // });
         },
 
-        serializeNode(node, originPos) {
+        serializeNode(node: Node, originPos: [number, number]): SerializedNode {
             return {
                 type: node.name,
                 data: node.data,
@@ -333,14 +378,20 @@ export default {
             };
         },
 
-        onCut(event) {
+        onCut(event: ClipboardEvent) {
             console.log('NodeEditor.onCut', event);
+            if (event.clipboardData == null) {
+                throw new Error('Clipboard data was null');
+            }
             this.onCopy(event);
             this.deleteSelectedNodes();
         },
 
-        onCopy(event) {
+        onCopy(event: ClipboardEvent) {
             console.log('NodeEditor.onCopy', event, this.editor.selected);
+            if (event.clipboardData == null) {
+                throw new Error('Clipboard data was null');
+            }
             if (this.editor.selected.list.length) {
                 const originPos = this.editor.selected.list[0].position; // TODO I think best would be to find the node closest to center of selected
                 // const nodeRects = this.editor.selected.list.map(node => {
@@ -354,8 +405,11 @@ export default {
             }
         },
 
-        async onPaste(event) {
+        async onPaste(event: ClipboardEvent) {
             console.log('NodeEditor.onPaste', event);
+            if (event.clipboardData == null) {
+                throw new Error('Clipboard data was null');
+            }
             const nodes = JSON.parse(event.clipboardData.getData('application/json'));
             console.log(nodes);
             let rootPosition = null;
@@ -400,8 +454,11 @@ export default {
             viewRect.grow(padding);
 
             const [editorMidpointX, editorMidpointY] = viewRect.midpoint(); // In editor space, not screen space
-            const nodeEditorWidth = this.editor.view.container.parentElement.parentElement.clientWidth;
-            const nodeEditorHeight = this.editor.view.container.parentElement.parentElement.clientHeight;
+            const nodeEditorWidth = this.editor.view.container.parentElement?.parentElement?.clientWidth;
+            const nodeEditorHeight = this.editor.view.container.parentElement?.parentElement?.clientHeight;
+            if (nodeEditorWidth == null || nodeEditorHeight == null) {
+                throw new Error(`Failed to find node editor width/height (${nodeEditorWidth}, ${nodeEditorHeight})`);
+            }
             const widthRatio = nodeEditorWidth / viewRect.width();
             const heightRatio = nodeEditorHeight / viewRect.height();
             const scale = util.clamp(Math.min(widthRatio, heightRatio), this.minZoom, this.maxZoom); // Determine how far we should zoom in/out to fit everything
@@ -431,13 +488,13 @@ export default {
             }
         },
 
-        async loadNodes() {
+        async loadNodes(): Promise<void> {
             // const savedEditorJson = null;
-            const savedEditorJson = JSON.parse(window.localStorage.getItem('node_editor'));
+            const savedEditorJson = window.localStorage.getItem('node_editor');
 
             if (savedEditorJson) {
                 console.log('LOADING:', savedEditorJson);
-                const success = await this.editor.fromJSON(savedEditorJson);
+                const success = await this.editor.fromJSON(JSON.parse(savedEditorJson));
                 console.log('LOADED:', this.editor);
                 if (!success) {
                     console.log('Could not load from local storage, creating demo nodes instead');
@@ -449,7 +506,7 @@ export default {
             }
         },
 
-        async createDemoNodes() {
+        async createDemoNodes(): Promise<void> {
             const [scalarLhs, scalarRhs, scalarAdd, scalarOut, vecLhs, vecRhs, vecAdd, vecOut] = await Promise.all([
                 // TODO color stuff is still pretty gross
                 // TODO need a single enum for all node types
@@ -480,12 +537,12 @@ export default {
             this.editor.addNode(vecAdd);
             this.editor.addNode(vecOut);
 
-            this.editor.connect(scalarLhs.outputs.get('value'), scalarAdd.inputs.get('lhs'));
-            this.editor.connect(scalarRhs.outputs.get('value'), scalarAdd.inputs.get('rhs'));
-            this.editor.connect(scalarAdd.outputs.get('result'), scalarOut.inputs.get('value'));
-            this.editor.connect(vecLhs.outputs.get('value'), vecAdd.inputs.get('lhs'));
-            this.editor.connect(vecRhs.outputs.get('value'), vecAdd.inputs.get('rhs'));
-            this.editor.connect(vecAdd.outputs.get('result'), vecOut.inputs.get('value'));
+            this.editor.connect(scalarLhs.outputs.get('value')!, scalarAdd.inputs.get('lhs')!);
+            this.editor.connect(scalarRhs.outputs.get('value')!, scalarAdd.inputs.get('rhs')!);
+            this.editor.connect(scalarAdd.outputs.get('result')!, scalarOut.inputs.get('value')!);
+            this.editor.connect(vecLhs.outputs.get('value')!, vecAdd.inputs.get('lhs')!);
+            this.editor.connect(vecRhs.outputs.get('value')!, vecAdd.inputs.get('rhs')!);
+            this.editor.connect(vecAdd.outputs.get('result')!, vecOut.inputs.get('value')!);
         },
 
         saveState() {
@@ -494,12 +551,12 @@ export default {
             window.localStorage.setItem('node_editor_view_transform', JSON.stringify(this.editor.view.area.transform));
         },
 
-        async loadState() {
+        async loadState(): Promise<void> {
             console.log('Loading node editor from local storage');
 
-            const viewTransform = JSON.parse(window.localStorage.getItem('node_editor_view_transform'));
+            const viewTransform = window.localStorage.getItem('node_editor_view_transform');
             if (viewTransform) {
-                this.editor.view.area.transform = viewTransform;
+                this.editor.view.area.transform = JSON.parse(viewTransform);
                 this.editor.view.area.update();
             }
 
@@ -507,7 +564,7 @@ export default {
         },
 
         postLoad() {
-            // Don't set up undo/redo callbacks until after finished loading to prevent user from undoing load
+            // Do not set up undo/redo callbacks until after finished loading to prevent user from undoing load
             this.setUpBasicHistoryActions();
 
             document.addEventListener('keydown', e => {
@@ -543,21 +600,25 @@ export default {
                 return (this.minZoom <= zoom && zoom <= this.maxZoom);
             });
 
-            this.editor.on('translated zoomed', () => {
+            this.editor.on(['translated', 'zoomed'], () => {
                 this.newNodesShouldBeCentered = true;
             });
 
             this.editor.on('connectionpick', io => {
                 const isOutput = io instanceof Rete.Output;
+                if (io.node == null) {
+                    throw new Error('IO had no associated node');
+                }
                 const disabled = io.node.data['disabled'] || false;
                 return !(isOutput && disabled);
             });
 
-            this.engine.on('error', ({message, data}) => {
+            // TODO this is supposed to take {message, data}, but I think the type from the interface is wrong?
+            this.engine.on('error', (message) => {
                 const msg = `Error in Rete engine: ${message}`;
                 alert(msg);
                 console.error(msg);
-                console.info(data);
+                // console.info(data);
             });
 
             // this.engine.on('warn', (exc) => {
@@ -566,7 +627,7 @@ export default {
             // });
         },
 
-        async handleEngineProcess() {
+        async handleEngineProcess(): Promise<void> {
             console.log('NodeEditor handleEngineProcess', this.editor.toJSON());
             await this.engine.abort(); // Stop old job if running // TODO this is not syncronized with other invocations of handleEngineProcess
             await this.engine.process(this.editor.toJSON());
@@ -582,7 +643,7 @@ export default {
             updateAllSockets(this.engine, this.editor);
         },
 
-        addOrRemoveAdvancedControls(add) {
+        addOrRemoveAdvancedControls(add: boolean) {
             console.log('adding or removing advanced render controls', add);
             const actionStack = [];
             const graphTraveler = new GraphTraveler(this.engine, this.editor);
@@ -594,7 +655,7 @@ export default {
                         actionStack.push(renderControlsAction);
                     } else {
                         // Reset origin
-                        // TODO probably should be bundled in with RemoveAdvancedRenderControlsAction, but it's convenient to
+                        // TODO probably should be bundled in with RemoveAdvancedRenderControlsAction, but it is convenient to
                         //      use FieldChangeAction (which I could still do inside of RemoveAdvancedRenderControlsAction)
                         const resetOriginAction = new actions.FieldChangeAction(engineNode.data['pos'], [0, 0, 0], val => {
                             engineNode.data['pos'] = val;
@@ -630,7 +691,10 @@ export default {
 
         this.nodeFactory = new NodeFactory();
 
-        this.container = document.getElementById('rete');
+        this.container = document.getElementById('rete')!;
+        if (this.container == null) {
+            throw new Error('No container element with id "rete"?');
+        }
         this.editor = new Rete.NodeEditor(this.version, this.container);
 
         this.editor.use(ConnectionPlugin);
@@ -651,7 +715,7 @@ export default {
             this.editor.view.resize();
         });
 
-        EventBus.$on('show-advanced-controls-toggled', val => {
+        EventBus.$on('show-advanced-controls-toggled', (val: boolean) => {
             this.addOrRemoveAdvancedControls(val);
         });
 
@@ -663,7 +727,7 @@ export default {
         this.editor.on('nodecreated', node => {
             // TODO why am I doing this to every node instead of only the one that was just created?
             Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
-                nodeView.addEventListener('contextmenu', event => {
+                nodeView.addEventListener('contextmenu', (event: MouseEvent) => {
                     event.preventDefault();
                     event.stopPropagation();
                     this.contextMenuPos = { x: event.clientX, y: event.clientY };
@@ -677,13 +741,13 @@ export default {
 
             this.postLoad();
 
-            // Don't trigger any of these events until after the initial load is done
-            // TODO still not perfect, doesn't prevent multiple changes from user getting queued up; is there something like Java's 'synchronized' keyword?
-            this.editor.on('process nodecreated noderemoved connectioncreated connectionremoved', this.handleEngineProcess);
+            // Do not trigger any of these events until after the initial load is done
+            // TODO still not perfect, does not prevent multiple changes from user getting queued up; is there something like Javas 'synchronized' keyword?
+            this.editor.on(['process', 'nodecreated', 'noderemoved', 'connectioncreated', 'connectionremoved'], this.handleEngineProcess);
             await this.handleEngineProcess(); // Process at least once to make sure the viewports are updated // TODO figure out where this really belongs; the order of events here is not very clear
 
             // Engine updates should come first because it effects the node data that we iterate over
-            this.editor.on('connectioncreated connectionremoved', this.handleConnectionChanged);
+            this.editor.on(['connectioncreated', 'connectionremoved'], this.handleConnectionChanged);
             this.handleConnectionChanged(); // Run once to set up socket types
         })();
 
@@ -716,7 +780,7 @@ export default {
             this.editor.view.resize();
         });
     },
-};
+});
 </script>
 
 <style lang="sass" scoped>

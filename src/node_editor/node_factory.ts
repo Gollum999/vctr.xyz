@@ -1,22 +1,22 @@
 import * as settings from '../settings';
 import * as util from '../util';
 import * as allComponents from './components';
-import UnaryOperation from './UnaryOperation';
-import BinaryOperation from './BinaryOperation';
+import { allUnaryOperations } from './UnaryOperation';
+import { allBinaryOperations } from './BinaryOperation';
 import { ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType } from './node_util';
 import { Component } from 'rete/types/component';
 import { Node } from 'rete/types/node';
 
 export default class NodeFactory {
-    private readonly components: { [key: string]: Component };
+    public readonly components: { [key: string]: Component };
     private readonly settings: settings.SettingsStore<settings.NodeEditorSettings>;
 
     constructor() {
         console.log(ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType);
         this.components = Object.freeze({
             ...Object.fromEntries(Object.values(ValueNodeType).map(nodeType => [nodeType, new allComponents.ValueComponent(nodeType)])),
-            ...Object.fromEntries(Object.values(UnaryOperationNodeType).map(nodeType => [nodeType, new allComponents.UnaryOperationComponent(UnaryOperation[nodeType])])),
-            ...Object.fromEntries(Object.values(BinaryOperationNodeType).map(nodeType => [nodeType, new allComponents.BinaryOperationComponent(BinaryOperation[nodeType])])),
+            ...Object.fromEntries(Object.values(UnaryOperationNodeType).map(nodeType => [nodeType, new allComponents.UnaryOperationComponent(allUnaryOperations[nodeType])])),
+            ...Object.fromEntries(Object.values(BinaryOperationNodeType).map(nodeType => [nodeType, new allComponents.BinaryOperationComponent(allBinaryOperations[nodeType])])),
         });
         console.log('NodeFactory', this.components);
         this.settings = settings.nodeEditorSettings;

@@ -111,7 +111,7 @@ export class UnaryOperation {
     }
 }
 
-class LengthOperation extends UnaryOperation {
+export class LengthOperation extends UnaryOperation {
     static title = 'Length';
     static defaultInputSockets = s.vector;
     static defaultOutputSockets = s.scalar;
@@ -135,7 +135,7 @@ class LengthOperation extends UnaryOperation {
 }
 
 // TODO use this for unary "-" for vectors, or maybe 1/v?
-class InvertOperation extends UnaryOperation {
+export class InvertOperation extends UnaryOperation {
     static title = 'Invert';
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.matrix;
@@ -163,7 +163,7 @@ class InvertOperation extends UnaryOperation {
     }
 }
 
-class NormalizeOperation extends UnaryOperation {
+export class NormalizeOperation extends UnaryOperation {
     static title = 'Normalize';
     static defaultInputSockets = s.vector;
     static defaultOutputSockets = s.vector;
@@ -187,7 +187,7 @@ class NormalizeOperation extends UnaryOperation {
     }
 }
 
-class TransposeOperation extends UnaryOperation {
+export class TransposeOperation extends UnaryOperation {
     static title = 'Transpose';
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.matrix;
@@ -211,7 +211,7 @@ class TransposeOperation extends UnaryOperation {
     }
 }
 
-class DeterminantOperation extends UnaryOperation {
+export class DeterminantOperation extends UnaryOperation {
     static title = 'Determinant';
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.scalar;
@@ -234,10 +234,10 @@ class DeterminantOperation extends UnaryOperation {
     }
 }
 
-export default {
+export const allUnaryOperations = Object.freeze({
     [UnaryOperationNodeType.LENGTH]:      LengthOperation,
     [UnaryOperationNodeType.INVERT]:      InvertOperation,
     [UnaryOperationNodeType.NORMALIZE]:   NormalizeOperation,
     [UnaryOperationNodeType.TRANSPOSE]:   TransposeOperation,
     [UnaryOperationNodeType.DETERMINANT]: DeterminantOperation,
-};
+});
