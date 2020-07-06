@@ -171,19 +171,20 @@ export default Vue.extend({
         (this.$refs[`grid-${this.view}`] as any).inst.layers.set(this.VIEW_VALUES[this.view].layer);
 
         // TODO maybe move camera + controls to component
+        if (this.view !== 'free') {
+            camera.zoom = 10;
+        }
         this.controls = new CameraControls(camera, (this.$refs.renderer as any).inst.domElement);
         this.controls.draggingDampingFactor = 0.3;
         this.controls.dampingFactor = 0.3; // Damping after drag finished
         if (this.view === 'free') {
-            this.controls.minDistance = 2;
-            this.controls.maxDistance = 100;
+            this.controls.minDistance = 2; // How far we can zoom *in*
+            this.controls.maxDistance = 50; // How far we can zoom *out*
             this.controls.maxPolarAngle = Math.PI / 2;
         } else {
             // TODO Get allow left click drag too?  (Will require modification of CameraControls I think...)
-            camera.zoom = 10;
-            this.controls.minZoom = 2;
-            this.controls.maxZoom = 100;
-            this.controls.dollySpeed = -1; // TODO ortho zoom is inverted for some reason?
+            this.controls.minZoom = 5; // How far we can zoom *out*
+            this.controls.maxZoom = 115; // How far we can zoom *in*
             this.controls.azimuthRotateSpeed = 0; // No rotation
             this.controls.polarRotateSpeed = 0; // No rotation
         }
