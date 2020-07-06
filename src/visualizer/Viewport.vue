@@ -188,6 +188,9 @@ export default Vue.extend({
             this.controls.azimuthRotateSpeed = 0; // No rotation
             this.controls.polarRotateSpeed = 0; // No rotation
         }
+
+        this.loadCameraState();
+
         this.anim();
 
         // For some reason on Firefox, the iframe inside VglRenderer does not get an initial 'resize' callback after it loads;
@@ -208,7 +211,7 @@ export default Vue.extend({
         }
 
         // TODO need to re-render when expanding, or somehow maintain state
-        EventBus.$on('node_engine_processed', this.updateScalars);
+        EventBus.$on('node_engine_processed', this.onNodeEngineProcessed);
 
         this.$nextTick(() => {
             this.updateCanvasSize();
@@ -218,6 +221,31 @@ export default Vue.extend({
     },
 
     methods: {
+        onNodeEngineProcessed(editorJson: { [key: string]: any }): void {
+            this.saveCameraState();
+            this.updateScalars(editorJson);
+        },
+
+        saveCameraState() {
+            if (this.controls == null) {
+                throw new Error('Viewport controls were null');
+            }
+            // TODO perspective camera does not save zoom
+            // console.log(`Saving ${this.view} camera state to browser-local storage`, this.controls.toJSON());
+            window.localStorage.setItem(`camera_${this.view}`, this.controls.toJSON());
+        },
+
+        loadCameraState() {
+            if (this.controls == null) {
+                throw new Error('Viewport controls were null');
+            }
+            // console.log(`Loading ${this.view} camera state from browser-local storage`);
+            const cameraJson = window.localStorage.getItem(`camera_${this.view}`);
+            if (cameraJson) {
+                this.controls.fromJSON(cameraJson);
+            }
+        },
+
         updateScalars(editorJson: { [key: string]: any }): void {
             /* console.log('Viewport re-drawing scalars'); */
             this.scalars = [];
@@ -261,6 +289,7 @@ export default Vue.extend({
             requestAnimationFrame(this.anim);
             if (updated) {
                 this.render();
+                this.saveCameraState();
             }
         },
 
