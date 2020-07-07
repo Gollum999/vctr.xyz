@@ -821,7 +821,7 @@ export default Vue.extend({
   display: block
   height: 100%
   min-height: 100vh
-  border: 2px solid #bbbbbb
+  border: 2px solid #616161
 .split
   overflow-y: hidden
 .v-application.theme--light
@@ -833,5 +833,5 @@ export default Vue.extend({
   .v-icon
     fill: white
   .rete
-    background-color: #696969 // hehe
+    background-color: #424242
 </style>

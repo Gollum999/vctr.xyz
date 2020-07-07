@@ -218,7 +218,7 @@ export default Vue.extend({
 .viewport-container {
     display: inline-block;
     box-sizing: border-box;
-    border: 2px solid #bbbbbb;
+    border: 2px solid #616161;
     width: 50%;
     height: 50%;
     line-height: initial;

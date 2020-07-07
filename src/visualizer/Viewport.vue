@@ -322,7 +322,7 @@ export default Vue.extend({
     top: 0.2em;
     color: white;
 }
-.viewport-expand-icon {
+.v-icon.viewport-expand-icon {
     position: absolute;
     right: 0.2em;
     bottom: 0.2em;

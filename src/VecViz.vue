@@ -21,7 +21,7 @@
     </v-dialog>
   </div>
 
-  <Split direction="vertical" :gutterSize="8" @onDragStart="onDragStart" @onDrag="onDrag" @onDragEnd="onDragEnd">
+  <Split direction="vertical" :gutterSize="4" @onDragStart="onDragStart" @onDrag="onDrag" @onDragEnd="onDragEnd">
     <SplitArea :size="50" :minSize="150">
       <QuadViewport />
     </SplitArea>
@@ -72,8 +72,8 @@ export default {
 
 <style scoped>
 .split {
-    border: 1px solid #bbbbbb;
-    border-bottom: 2px solid #bbbbbb; /* TODO this is a hack to put a bottom border despite NodeEditor's hidden overflow */
+    border: 1px solid #616161;
+    border-bottom: 2px solid #616161; /* TODO this is a hack to put a bottom border despite NodeEditor's hidden overflow */
 }
 .bottom-split {
     overflow-y: hidden;
@@ -126,6 +126,9 @@ export default {
 </style>
 
 <style>
+#app .gutter {
+    background-color: #616161;
+}
 .v-dialog__container !important {
     /* TODO below is a hack because v-dialog adds some extra space? and it's adding it in the style of the element... */
     display: none;
