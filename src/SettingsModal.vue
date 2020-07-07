@@ -16,11 +16,12 @@
 
       <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <v-tab-item>
-        <v-switch color="primary" v-model="viewportSettings.values.showAxis" label="Show axis" hide-details />
+        <v-subheader class="text--secondary">Common Settings</v-subheader>
+        <v-switch class="first-switch" color="primary" v-model="viewportSettings.values.showAxis" label="Show axis" hide-details />
         <v-switch color="primary" v-model="viewportSettings.values.showGrid" label="Show grid" hide-details />
 
-        <v-divider/>
-        <v-subheader>Vector Rendering</v-subheader>
+        <v-divider class="mt-4" />
+        <v-subheader class="mt-2 text--secondary">Vector Rendering</v-subheader>
         <v-slider step="0.1" min="0.0" max="1" label="Head Size" v-model.number="headSize"
                   @change="updateSetting('viewportSettings.values.vector.headSize', $event)">
           <template v-slot:append>
@@ -29,7 +30,7 @@
         </v-slider>
 
         <v-divider/>
-        <v-subheader>Matrix Rendering</v-subheader>
+        <v-subheader class="mt-2 text--secondary">Matrix Rendering</v-subheader>
         <!-- Keep a separate model for these so we get high precision for "live" updates, but only trigger watchers from specific events -->
         <v-slider step="0.1" min="0.1" max="1" label="Vector Scale" v-model.number="vectorScale"
                   @change="updateSetting('viewportSettings.values.matrix.vectorScale', $event)">
@@ -43,7 +44,7 @@
             {{fieldSize | formatSliderValue}}
           </template>
         </v-slider>
-        <v-slider step="0.1" min="0.1" :max="fieldDensityMax" label="Field Density" v-model.number="fieldDensity"
+        <v-slider step="0.1" min="0.1" :max="fieldDensityMax" label="Field Density" v-model.number="fieldDensity" hide-details
                   @change="updateSetting('viewportSettings.values.matrix.fieldDensity', $event)">
           <template v-slot:append>
             {{fieldDensity | formatSliderValue}}
@@ -61,7 +62,7 @@
       </v-tab-item>
 
       <v-tab-item>
-        <v-switch color="primary" v-model="nodeEditorSettings.values.useRandomColors" label="Use random colors" hide-details></v-switch>
+        <v-switch color="primary" v-model="nodeEditorSettings.values.useRandomColors" label="Use random colors" />
         <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
                               v-model="nodeEditorSettings.values.defaultScalarColor">
           Default scalar color
@@ -179,6 +180,9 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.v-input.v-input--switch.first-switch {
+    margin-top: 0;
+}
 .close-button {
     position: absolute;
     top: 0;
