@@ -35,7 +35,7 @@
     "vue-resize": "^0.5.0",
     "vue-router": "^3.0.1",
     "vue-split-panel": "^1.0.4",
-    "vuetify": "^2.0.2"
+    "vuetify": "^2.3.3"
   },
   "devDependencies": {
     "@babel/plugin-proposal-optional-chaining": "^7.10.4",
