@@ -703,6 +703,10 @@ export default Vue.extend({
 
         this.engine = new Rete.Engine(this.version);
 
+        EventBus.$on('save', () => {
+            this.saveState();
+        });
+
         EventBus.$on('split-resized', () => {
             this.editor.view.resize();
         });

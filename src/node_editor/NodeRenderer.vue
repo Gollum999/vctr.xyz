@@ -29,7 +29,7 @@ v-card.node(dark hover :class="[selected(), node.name.toLowerCase()] | kebab")
 <script>
 import mixin from '@/../node_modules/rete-vue-render-plugin/src/mixin';
 import Socket from '@/../node_modules/rete-vue-render-plugin/src/Socket.vue';
-// import '@/../node_modules/@material/card/mdc-card.scss';
+import { EventBus } from '../EventBus';
 import * as settings from '../settings';
 
 export default {
@@ -38,7 +38,7 @@ export default {
         return {
             advancedRenderControlsKey: 'pos', // TODO Remove this assumption
             settings: settings.nodeEditorSettings,
-            displayTitle: this.node.name,
+            displayTitle: this.node.data['display_title'] || this.node.name,
         };
     },
     methods: {
@@ -61,6 +61,8 @@ export default {
             },
             set(val) {
                 this.displayTitle = val;
+                this.node.data['display_title'] = val;
+                EventBus.$emit('save');
             },
         },
         filteredInputs() {
