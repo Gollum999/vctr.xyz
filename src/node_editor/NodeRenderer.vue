@@ -88,7 +88,7 @@ export default {
 // @import "@material/card/mdc-card.scss"
 
 // @import "../../node_modules/rete-vue-render-plugin/src/vars"
-$socket-size: 14px
+$socket-size: 12px
 $socket-margin: 4px
 $node-width: 100px
 
@@ -96,6 +96,9 @@ $node-width: 100px
   position: absolute
   margin: 0px
   min-height: initial
+  border: 0px
+  &:hover
+    border: 2px solid white
   &.output
     left: 100%
     transform: translate(-50%)
@@ -108,7 +111,6 @@ $node-width: 100px
   box-sizing: content-box
   position: relative
   user-select: none
-  // box-shadow:
   .node-body
     width: 100%
     display: inline-grid
@@ -158,6 +160,7 @@ $node-width: 100px
 $socket-color-scalar: #7777dd
 $socket-color-vector: #ff4444
 $socket-color-matrix: #44ffff
+$socket-size: 12px
 
 #app
   .node
@@ -189,12 +192,12 @@ $socket-color-matrix: #44ffff
       stroke-width: 3px
 
   .socket
-    width: 14px
-    height: 14px
+    width: $socket-size
+    height: $socket-size
     &.input
-      margin-left: -7px
+      margin-left: -$socket-size/2
     &.output
-      margin-right: -7px
+      margin-right: -$socket-size/2
     &.scalar-value
       background: $socket-color-scalar
     &.vector-value
