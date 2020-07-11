@@ -109,7 +109,7 @@
    - https://github.com/retejs/history-plugin/issues/2
      - [X] Need to re-work BasicOperationComponent to not change any state in
        worker().  Re-write functions to be pure, traverse graph myself.
-   - [ ] "Collapse" multiple similar actions (node value updates, cascading
+   - [X] "Collapse" multiple similar actions (node value updates, cascading
      socket type changes + connection changes, etc.)
    - [ ] Save undo/redo state between page loads?
    - [X] +Clear history stack on load to avoid being able to undo loading?+
@@ -127,35 +127,35 @@
    - [X] Togglable rendering, or maybe just alpha support
    - [X] Random output colors
    - [X] Hide some of these in a "show advanced render settings" option?
- - [ ] Custom node titles
-   - [ ] Render node name in viewport?
- - [ ] Custom paste handler
+ - [X] Custom node titles
+ - [ ] Render node name in viewport?
+ - [X] Custom paste handler
  - [ ] Slightly wider vector input (enough for 3 digits + decimal)
    - [ ] Configurable?
- - [ ] Truncate input display values
+ - [X] Truncate input display values
  - [ ] Condense everything a bit more if possible
 ** Node types
- - [ ] Render scalar values
-   - [ ] As circle
-     - [ ] Update on horizontal resize, or figure out how to write in such a way that viewport size doesn't matter
+ - [-] Render scalar values
+   - [X] As circle
+     - [X] Update on horizontal resize, or figure out how to write in such a way that viewport size doesn't matter
        - Can I somehow use the camera's current matrices?
    - [ ] As vector?
  - [-] Render matrices?
    - [ ] grid w/ transform?
    - [X] vector field?
 *** Matrix support
- - [ ] New matrix icon?
+ - [X] New matrix icon?
 ** Plugins
- - [[https://rete.js.org/#/docs/plugins/keyboard][Keyboard plugin]]
+ - [ ] [[https://rete.js.org/#/docs/plugins/keyboard][Keyboard plugin]]
    - Delete hotkey
    - Could I modify this to get copy-paste?
- - [[https://rete.js.org/#/docs/plugins/area][Area plugin]]
+ - [ ] [[https://rete.js.org/#/docs/plugins/area][Area plugin]]
    - I think this just gives view recentering like I do manually, but it also gives zoom/translate bounds on the canvas
- - [[https://rete.js.org/#/docs/plugins/code][Code plugin]]
+ - [ ] [[https://rete.js.org/#/docs/plugins/code][Code plugin]]
    - Generate JS from node editor (can I go the other way too?)
- - [[https://rete.js.org/#/docs/plugins/minimap][Minimap plugin]]
- - [[https://rete.js.org/#/docs/plugins/auto-arrange][Auto-arrange plugin]]
+ - [ ] [[https://rete.js.org/#/docs/plugins/minimap][Minimap plugin]]
+ - [ ] [[https://rete.js.org/#/docs/plugins/auto-arrange][Auto-arrange plugin]]
    - Tried using this and it didn't seem to work...
- - [[https://rete.js.org/#/docs/plugins/history][History plugin]]
+ - [X] [[https://rete.js.org/#/docs/plugins/history][History plugin]]
    - Undo/redo support!
 * Hosting/ads/etc

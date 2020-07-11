@@ -509,7 +509,6 @@ export default Vue.extend({
         async createDemoNodes(): Promise<void> {
             const [scalarLhs, scalarRhs, scalarAdd, scalarOut, vecLhs, vecRhs, vecAdd, vecOut] = await Promise.all([
                 // TODO color stuff is still pretty gross
-                // TODO need a single enum for all node types
                 this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [5], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
                 this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [4], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
                 this.nodeFactory.createNode(NodeType.ADD),
