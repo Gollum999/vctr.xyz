@@ -507,41 +507,34 @@ export default Vue.extend({
         },
 
         async createDemoNodes(): Promise<void> {
-            const [scalarLhs, scalarRhs, scalarAdd, scalarOut, vecLhs, vecRhs, vecAdd, vecOut] = await Promise.all([
+            const [vecLhs, vecRhs, add, vecSum, length, scalarLen] = await Promise.all([
                 // TODO color stuff is still pretty gross
-                this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [5], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
-                this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [4], 'pos': [0, 0, 0], 'color': { color: '#ff7f00', visible: true } }),
-                this.nodeFactory.createNode(NodeType.ADD),
-                this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [0], 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultScalarColor, visible: true } }),
-                this.nodeFactory.createNode(NodeType.VECTOR, { 'value': [3, 2, 1], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
-                this.nodeFactory.createNode(NodeType.VECTOR, { 'value': [2, 2, 2], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
+                this.nodeFactory.createNode(NodeType.VECTOR, { 'value': [3, 2, 0], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
+                this.nodeFactory.createNode(NodeType.VECTOR, { 'value': [-1, 2, 0], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
                 this.nodeFactory.createNode(NodeType.ADD),
                 this.nodeFactory.createNode(NodeType.VECTOR, { 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultVectorColor, visible: true } }),
+                this.nodeFactory.createNode(NodeType.LENGTH),
+                this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [0], 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultScalarColor, visible: true } }),
             ]);
-            scalarLhs.position = [20, 80];
-            scalarRhs.position = [20, 190];
-            scalarAdd.position = [180, 120];
-            scalarOut.position = [300, 120];
-            vecLhs.position = [460, 80];
-            vecRhs.position = [460, 240];
-            vecAdd.position = [730, 160];
-            vecOut.position = [860, 140];
+            vecLhs.position = [30, 80];
+            vecRhs.position = [30, 240];
+            add.position = [320, 150];
+            vecSum.position = [490, 70];
+            length.position = [550, 250];
+            scalarLen.position = [740, 250];
 
-            this.editor.addNode(scalarLhs);
-            this.editor.addNode(scalarRhs);
-            this.editor.addNode(scalarAdd);
-            this.editor.addNode(scalarOut);
             this.editor.addNode(vecLhs);
             this.editor.addNode(vecRhs);
-            this.editor.addNode(vecAdd);
-            this.editor.addNode(vecOut);
+            this.editor.addNode(add);
+            this.editor.addNode(vecSum);
+            this.editor.addNode(length);
+            this.editor.addNode(scalarLen);
 
-            this.editor.connect(scalarLhs.outputs.get('value')!, scalarAdd.inputs.get('lhs')!);
-            this.editor.connect(scalarRhs.outputs.get('value')!, scalarAdd.inputs.get('rhs')!);
-            this.editor.connect(scalarAdd.outputs.get('result')!, scalarOut.inputs.get('value')!);
-            this.editor.connect(vecLhs.outputs.get('value')!, vecAdd.inputs.get('lhs')!);
-            this.editor.connect(vecRhs.outputs.get('value')!, vecAdd.inputs.get('rhs')!);
-            this.editor.connect(vecAdd.outputs.get('result')!, vecOut.inputs.get('value')!);
+            this.editor.connect(vecLhs.outputs.get('value')!, add.inputs.get('lhs')!);
+            this.editor.connect(vecRhs.outputs.get('value')!, add.inputs.get('rhs')!);
+            this.editor.connect(add.outputs.get('result')!, vecSum.inputs.get('value')!);
+            this.editor.connect(vecSum.outputs.get('value')!, length.inputs.get('input')!);
+            this.editor.connect(length.outputs.get('output')!, scalarLen.inputs.get('value')!);
         },
 
         saveState() {
