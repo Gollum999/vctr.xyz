@@ -509,12 +509,31 @@ export default Vue.extend({
         async createDemoNodes(): Promise<void> {
             const [vecLhs, vecRhs, add, vecSum, length, scalarLen] = await Promise.all([
                 // TODO color stuff is still pretty gross
-                this.nodeFactory.createNode(NodeType.VECTOR, { 'value': [3, 2, 0], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
-                this.nodeFactory.createNode(NodeType.VECTOR, { 'value': [-1, 2, 0], 'pos': [0, 0, 0], 'color': { color: '#00ffff', visible: true } }),
+                this.nodeFactory.createNode(NodeType.VECTOR, {
+                    'value': [3, 2, 0],
+                    'pos': [0, 0, 0],
+                    'color': { color: '#00ffff', visible: true },
+                    'display_title': 'Vector 1',
+                }),
+                this.nodeFactory.createNode(NodeType.VECTOR, {
+                    'value': [-1, 2, 0],
+                    'pos': [0, 0, 0],
+                    'color': { color: '#00ffff', visible: true },
+                    'display_title': 'Vector 2',
+                }),
                 this.nodeFactory.createNode(NodeType.ADD),
-                this.nodeFactory.createNode(NodeType.VECTOR, { 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultVectorColor, visible: true } }),
+                this.nodeFactory.createNode(NodeType.VECTOR, {
+                    'pos': [0, 0, 0],
+                    'color': { color: this.settings.values.defaultVectorColor, visible: true },
+                    'display_title': 'Sum',
+                }),
                 this.nodeFactory.createNode(NodeType.LENGTH),
-                this.nodeFactory.createNode(NodeType.SCALAR, { 'value': [0], 'pos': [0, 0, 0], 'color': { color: this.settings.values.defaultScalarColor, visible: true } }),
+                this.nodeFactory.createNode(NodeType.SCALAR, {
+                    'value': [0],
+                    'pos': [0, 0, 0],
+                    'color': { color: this.settings.values.defaultScalarColor, visible: true },
+                    'display_title': 'Output',
+                }),
             ]);
             vecLhs.position = [30, 80];
             vecRhs.position = [30, 240];
