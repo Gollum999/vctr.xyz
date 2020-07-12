@@ -91,8 +91,8 @@ export default Vue.extend({
                 top: {
                     layer: 1,
                     initialCameraPos: new THREE.Spherical(20, 0, 0),
-                    gridSize: 200,
-                    gridDivisions: 200,
+                    gridSize: 20,
+                    gridDivisions: 20,
                     gridRotation: '0 0 0 XYZ',
                 },
                 free: {
@@ -105,15 +105,15 @@ export default Vue.extend({
                 front: {
                     layer: 3,
                     initialCameraPos: new THREE.Spherical(20, Math.PI / 2.0, 0),
-                    gridSize: 200,
-                    gridDivisions: 200,
+                    gridSize: 20,
+                    gridDivisions: 20,
                     gridRotation: `${Math.PI / 2} 0 0 XYZ`,
                 },
                 side: {
                     layer: 4,
                     initialCameraPos: new THREE.Spherical(20, Math.PI / 2.0, Math.PI / 2.0),
-                    gridSize: 200,
-                    gridDivisions: 200,
+                    gridSize: 20,
+                    gridDivisions: 20,
                     gridRotation: `0 0 ${Math.PI / 2} XYZ`,
                 },
             } as { [key: string]: ViewConfig },
