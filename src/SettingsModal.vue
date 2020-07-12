@@ -93,20 +93,10 @@ import ColorPickerSetting from './ColorPickerSetting.vue';
 import * as util from './util';
 
 const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too much
-const ALL_SETTINGS_KEYS = new Set([ // TODO Can I get this dynamically?
-    'viewportSettings.values.showAxis',
-    'viewportSettings.values.showGrid',
-    'viewportSettings.values.scalar.renderStyle',
-    'viewportSettings.values.vector.headSize',
-    'viewportSettings.values.matrix.colorStyle',
-    'viewportSettings.values.matrix.vectorScale',
-    'viewportSettings.values.matrix.fieldSize',
-    'viewportSettings.values.matrix.fieldDensity',
-    'nodeEditorSettings.values.useRandomColors',
-    'nodeEditorSettings.values.defaultScalarColor',
-    'nodeEditorSettings.values.defaultVectorColor',
-    'nodeEditorSettings.values.defaultMatrixColor',
-]);
+const ALL_SETTINGS_KEYS = new Set(Object.keys(util.flattenKeys({
+    viewportSettings: settingsUtil.viewportSettings,
+    nodeEditorSettings: settingsUtil.nodeEditorSettings,
+})).filter(key => key.includes('.values.')));
 const IGNORE_SETTINGS_KEYS = new Set([
 ]);
 const HANDLE_HISTORY_SETTINGS_KEYS = util.difference(ALL_SETTINGS_KEYS, IGNORE_SETTINGS_KEYS);
@@ -136,8 +126,8 @@ export default Vue.extend({
         },
     },
     watch: {
-        ...Object.fromEntries([...HANDLE_HISTORY_SETTINGS_KEYS].map(function (this: any, key: string) { // TODO not sure what type to give 'this'
-            const handler = (newVal: any, oldVal: any) => {
+        ...Object.fromEntries([...HANDLE_HISTORY_SETTINGS_KEYS].map(function (this: any, key: string) {
+            const handler = function (this: any, newVal: any, oldVal: any) {
                 this.nodeEditorSettings.save();
                 this.viewportSettings.save();
             };
