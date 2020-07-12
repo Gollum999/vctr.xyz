@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export function clamp(num: number, min: number, max: number): number {
     return Math.min(Math.max(num, min), max);
 }
@@ -126,4 +128,11 @@ export function difference<T>(setA: Iterable<T>, setB: Iterable<T>): Set<T> {
         _difference.delete(elem);
     }
     return _difference;
+}
+
+// Stolen from https://github.com/lodash/lodash/issues/2240#issuecomment-418820848
+export function flattenKeys(obj: any, path: Array<string> = []): {[path: string]: any} {
+    return !_.isObject(obj)
+        ? { [path.join('.')]: obj }
+        : _.reduce(obj, (cum, next, key) => _.merge(cum, flattenKeys(next, [...path, key])), {});
 }
