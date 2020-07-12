@@ -69,15 +69,15 @@
         <v-switch color="primary" v-model="nodeEditorSettings.values.useRandomColors" label="Use random colors" />
         <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
                               v-model="nodeEditorSettings.values.defaultScalarColor">
-          Default scalar color
+          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Default scalar color</span>
         </color-picker-setting>
         <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
                               v-model="nodeEditorSettings.values.defaultVectorColor">
-          Default vector color
+          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Default vector color</span>
         </color-picker-setting>
         <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
                               v-model="nodeEditorSettings.values.defaultMatrixColor">
-          Default matrix color
+          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Default matrix color</span>
         </color-picker-setting>
       </v-tab-item>
 
