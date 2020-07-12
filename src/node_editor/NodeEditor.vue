@@ -638,9 +638,9 @@ export default Vue.extend({
             // });
         },
 
-        async handleEngineProcess(): Promise<void> {
-            console.log('NodeEditor handleEngineProcess', this.editor.toJSON());
-            await this.engine.abort(); // Stop old job if running // TODO this is not syncronized with other invocations of handleEngineProcess
+        async triggerEngineProcess(): Promise<void> {
+            console.log('NodeEditor triggerEngineProcess', this.editor.toJSON());
+            await this.engine.abort(); // Stop old job if running // TODO this is not syncronized with other invocations of triggerEngineProcess
             await this.engine.process(this.editor.toJSON());
 
             // TODO should I save during more events?
@@ -758,8 +758,8 @@ export default Vue.extend({
 
             // Do not trigger any of these events until after the initial load is done
             // TODO still not perfect, does not prevent multiple changes from user getting queued up; is there something like Javas 'synchronized' keyword?
-            this.editor.on(['process', 'nodecreated', 'noderemoved', 'connectioncreated', 'connectionremoved'], this.handleEngineProcess);
-            await this.handleEngineProcess(); // Process at least once to make sure the viewports are updated // TODO figure out where this really belongs; the order of events here is not very clear
+            this.editor.on(['process', 'nodecreated', 'noderemoved', 'connectioncreated', 'connectionremoved'], this.triggerEngineProcess);
+            await this.triggerEngineProcess(); // Process at least once to make sure the viewports are updated // TODO figure out where this really belongs; the order of events here is not very clear
 
             // Engine updates should come first because it effects the node data that we iterate over
             this.editor.on(['connectioncreated', 'connectionremoved'], this.handleConnectionChanged);
