@@ -14,7 +14,7 @@ const defaultViewportSettings = {
     showAxis: true,
     showGrid: true,
     scalar: {
-        renderStyle: ScalarRenderStyle.SPHERE,
+        renderStyle: ScalarRenderStyle.CIRCLE,
     },
     vector: {
         headSize: 0.5,
