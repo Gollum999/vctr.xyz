@@ -151,12 +151,7 @@ export default Vue.extend({
         'settings.values.showAxis': function (newVal, oldVal) { this.render(); }, // TODO ortho viewports do not immediately re-render
         'settings.values.showGrid': function (newVal, oldVal) {
             // Putting the vgl-grid-helper in a v-if causes its layers to be reset each time, so this is easier
-            if (newVal) {
-                (this.$refs[`grid-${this.view}`] as any).inst.layers.set(this.VIEW_VALUES[this.view].layer);
-            } else {
-                (this.$refs[`grid-${this.view}`] as any).inst.layers.set(HIDDEN_LAYER);
-            }
-            this.render();
+            this.updateGridVisibility(newVal);
         },
     },
 
@@ -168,7 +163,7 @@ export default Vue.extend({
         camera.layers.enable(this.VIEW_VALUES[this.view].layer);
         camera.layers.disable(HIDDEN_LAYER); // Reserve layer 31 for hiding things
 
-        (this.$refs[`grid-${this.view}`] as any).inst.layers.set(this.VIEW_VALUES[this.view].layer);
+        this.updateGridVisibility(this.settings.values.showGrid);
 
         // TODO maybe move camera + controls to component
         if (this.view !== 'free') {
@@ -269,6 +264,15 @@ export default Vue.extend({
                 x: this.lastViewportSize.width,
                 y: this.lastViewportSize.height,
             };
+            this.render();
+        },
+
+        updateGridVisibility(visible: boolean) {
+            if (visible) {
+                (this.$refs[`grid-${this.view}`] as any).inst.layers.set(this.VIEW_VALUES[this.view].layer);
+            } else {
+                (this.$refs[`grid-${this.view}`] as any).inst.layers.set(HIDDEN_LAYER);
+            }
             this.render();
         },
 
