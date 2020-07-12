@@ -18,7 +18,7 @@
             :key="`scalar-${view}-${idx}`"
             :scalarKey="`scalar-${view}-${idx}`"
             :layer="VIEW_VALUES[view].layer"
-            display-type="circle"
+            :display-type="settings.values.scalar.renderStyle"
             :value="s.value"
             :color="s.color"
             :pos="s.pos"

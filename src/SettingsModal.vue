@@ -21,6 +21,10 @@
         <v-switch color="primary" v-model="viewportSettings.values.showGrid" label="Show grid" hide-details />
 
         <v-divider class="mt-4" />
+        <v-subheader class="mt-2 text--secondary">Scalar Rendering</v-subheader>
+        <v-select :items="Object.values(ScalarRenderStyle)" v-model="viewportSettings.values.scalar.renderStyle" outlined hide-details />
+
+        <v-divider class="mt-4" />
         <v-subheader class="mt-2 text--secondary">Vector Rendering</v-subheader>
         <v-slider step="0.1" min="0.0" max="1" label="Head Size" v-model.number="headSize"
                   @change="updateSetting('viewportSettings.values.vector.headSize', $event)">
@@ -92,6 +96,7 @@ const MAX_VECTORS_PER_SIDE = 11; // Heuristic to prevent slowing things down too
 const ALL_SETTINGS_KEYS = new Set([ // TODO Can I get this dynamically?
     'viewportSettings.values.showAxis',
     'viewportSettings.values.showGrid',
+    'viewportSettings.values.scalar.renderStyle',
     'viewportSettings.values.vector.headSize',
     'viewportSettings.values.matrix.colorStyle',
     'viewportSettings.values.matrix.vectorScale',
@@ -116,6 +121,7 @@ export default Vue.extend({
         return {
             nodeEditorSettings: settingsUtil.nodeEditorSettings,
             viewportSettings: settingsUtil.viewportSettings,
+            ScalarRenderStyle: settingsUtil.ScalarRenderStyle,
 
             headSize: settingsUtil.viewportSettings.values.vector.headSize,
 

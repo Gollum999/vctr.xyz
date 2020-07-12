@@ -1,17 +1,23 @@
 <template>
 <div>
-  <div v-if="displayType === 'circle'">
-    <vgl-icosahedron-geometry :name="`scalar-geo-${this.scalarKey}`" :radius="geoRadius" detail="2" />
-    <!-- TODO is ref necessary? -->
-    <vgl-shader-material
-        :ref="`scalar-mat-${this.scalarKey}`"
-        :name="`scalar-mat-${this.scalarKey}`"
-        :uniforms="uniforms"
-        :vertex-shader="vertexShader"
-        :fragment-shader="fragmentShader"
-    />
-    <vgl-mesh :ref="`scalar-mesh-${this.scalarKey}`" :geometry="`scalar-geo-${this.scalarKey}`" :material="`scalar-mat-${this.scalarKey}`" />
-  </div>
+  <vgl-icosahedron-geometry :name="`scalar-geo-${this.scalarKey}`" :radius="geoRadius" detail="2" />
+  <vgl-mesh-basic-material
+      :ref="`scalar-mat-${this.scalarKey}-${ScalarRenderStyle.SPHERE}`"
+      :name="`scalar-mat-${this.scalarKey}-${ScalarRenderStyle.SPHERE}`"
+      :color="color"
+  />
+  <vgl-shader-material
+      :ref="`scalar-mat-${this.scalarKey}-${ScalarRenderStyle.CIRCLE}`"
+      :name="`scalar-mat-${this.scalarKey}-${ScalarRenderStyle.CIRCLE}`"
+      :uniforms="uniforms"
+      :vertex-shader="vertexShader"
+      :fragment-shader="fragmentShader"
+  />
+  <vgl-mesh
+      :ref="`scalar-mesh-${this.scalarKey}`"
+      :geometry="`scalar-geo-${this.scalarKey}`"
+      :material="`scalar-mat-${this.scalarKey}-${this.displayType}`"
+  />
 </div>
 </template>
 
@@ -19,12 +25,9 @@
 import Vue, { PropType } from 'vue';
 import * as util from '../util';
 import { vec3 } from 'gl-matrix';
+import { ScalarRenderStyle } from '../settings';
 
 type CanvasSize = { x: number, y: number };
-
-interface VglElement {
-    inst: any;
-}
 
 function colorObjToArray(color: util.Color): [number, number, number, number] {
     return [color.r / 256.0, color.g / 256.0, color.b / 256.0, 1.0]; // TODO can support alpha if I want
@@ -46,6 +49,7 @@ export default Vue.extend({
         numSegments:   { type: Number, default: 12.0 },
         segmentRatio:  { type: Number, default: 0.65 },
     },
+
     watch: {
         // For some reason, if 'uniforms' is a computed property, uniforms in shader do not seem to react to changes
         value(newVal: number, oldVal: number) {
@@ -78,21 +82,32 @@ export default Vue.extend({
             this.uniforms.canvasSize.value = [newVal.x, newVal.y];
         },
     },
+
     computed: {
         geoRadius(): number {
-            // TODO be careful of near plane clipping
-            // TODO a "billboard" plane is probably the better solution
-            /* console.log('calculating geo radius', this); */
-            const PADDING = 0.5; // A little bit extra to prevent clipping due to camera distortion at close distances // TODO also need to account for "chords" since sphere mesh is not a perfect circle
-            return this.value + this.lineThickness / 2.0 + PADDING;
+            if (this.displayType === ScalarRenderStyle.SPHERE) {
+                return this.value;
+            } else if (this.displayType === ScalarRenderStyle.CIRCLE) {
+                // TODO be careful of near plane clipping
+                // TODO also need to account for "chords" since sphere mesh is not a perfect circle
+                // TODO a "billboard" plane is probably the better solution
+                /* console.log('calculating geo radius', this); */
+                const PADDING = 0.5; // A little bit extra to prevent clipping due to camera distortion at close distances
+                return this.value + this.lineThickness / 2.0 + PADDING;
+            } else {
+                throw new Error(`Invalid displayType ${this.displayType}`);
+            }
         },
     },
+
     data() {
         const colorObj = util.hexToRgb(this.color);
         if (colorObj === null) {
             throw new Error('Color was null');
         }
         return {
+            ScalarRenderStyle,
+
             uniforms: {
                 radius:                         { value: this.value },
                 color:                          { value: colorObjToArray(colorObj) },
@@ -169,9 +184,11 @@ export default Vue.extend({
             `,
         };
     },
+
     mounted() {
-        /* console.log('Scalar mounted:', this.displayType, this.color, this.pos, this.value, this.circleStyle, this.layer); */
+        // console.log('Scalar mounted:', this.displayType, this.color, this.pos, this.value, this.layer, this.$refs);
         (this.$refs[`scalar-mesh-${this.scalarKey}`] as any).inst.layers.set(this.layer);
+        (this.$refs[`scalar-mat-${this.scalarKey}-${ScalarRenderStyle.SPHERE}`] as any).inst.wireframe = true;
     },
 });
 </script>

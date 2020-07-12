@@ -1,6 +1,11 @@
 import _ from 'lodash';
 
-export enum MATRIX_COLOR_STYLE {
+export enum ScalarRenderStyle {
+    CIRCLE = 'Circle',
+    SPHERE = 'Sphere',
+}
+
+export enum MatrixColorStyle {
     SOLID = 'solid',
     LENGTH = 'length',
 };
@@ -9,12 +14,13 @@ const defaultViewportSettings = {
     showAxis: true,
     showGrid: true,
     scalar: {
+        renderStyle: ScalarRenderStyle.SPHERE,
     },
     vector: {
         headSize: 0.5,
     },
     matrix: {
-        colorStyle: MATRIX_COLOR_STYLE.SOLID,
+        colorStyle: MatrixColorStyle.SOLID,
         vectorScale: 0.2,
         fieldSize: 8,
         fieldDensity: 0.5,
