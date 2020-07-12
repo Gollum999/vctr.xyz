@@ -30,7 +30,7 @@
     "three": "^0.110.0",
     "vue": "^2.6.6",
     "vue-class-component": "^7.2.3",
-    "vue-gl": "^0.15.0",
+    "vue-gl": "0.18.1",
     "vue-property-decorator": "^8.4.2",
     "vue-resize": "^0.5.0",
     "vue-router": "^3.0.1",
