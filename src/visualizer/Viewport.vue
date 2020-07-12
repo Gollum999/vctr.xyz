@@ -9,10 +9,6 @@
         color-center-line="#888888"
         color-grid="#444444"
     />
-    <!-- <div v-for="(s, idx) in scalars"
-         :key="`scalar-${idx}`">
-         {{idx}} {{s}} ({{s.color}} {{s.value}})
-         </div> -->
     <!-- TODO use node id for key here?  or hash?  any way to access :key from inside component so I don't have to duplicate? -->
     <Scalar v-for="(s, idx) in renderScalars"
             :key="`scalar-${view}-${idx}`"
@@ -148,7 +144,7 @@ export default Vue.extend({
     },
 
     watch: {
-        'settings.values.showAxis': function (newVal, oldVal) { this.render(); }, // TODO ortho viewports do not immediately re-render
+        'settings.values.showAxis': function (newVal, oldVal) { this.render(); }, // TODO ortho viewports do not immediately re-render even if I force it here
         'settings.values.showGrid': function (newVal, oldVal) {
             // Putting the vgl-grid-helper in a v-if causes its layers to be reset each time, so this is easier
             this.updateGridVisibility(newVal);
@@ -212,6 +208,7 @@ export default Vue.extend({
             this.updateCanvasSize();
         });
         EventBus.$on('split-resized', this.updateCanvasSize);
+        EventBus.$on('render', this.render);
         /* this.$on('expand-viewport', this.updateCanvasSize); // This needs to happen for all viewports when any expanded or collapsed */
     },
 
@@ -247,7 +244,7 @@ export default Vue.extend({
             // TODO may be a more ideomatic way to write this (filter?)
             for (const key in editorJson['nodes']) {
                 const node = editorJson['nodes'][key];
-                if (node.name === 'Scalar') { // TODO conditional rendering, probably add a "render" attribute to nodes and update this check
+                if (node.name === 'Scalar') {
                     this.scalars.push(new ScalarView(node.data.value[0], node.data.color.visible ? node.data.color.color : null, node.data.pos));
                     /* console.log('pushed scalar', this.scalars, node.data); */
                 }

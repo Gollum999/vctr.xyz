@@ -15,6 +15,7 @@ import type { Emitter } from 'rete/types/core/emitter';
 import type { EventsTypes as DefaultEvents } from 'rete/types/events';
 import type { EventsTypes as CoreEvents } from 'rete/types/core/events';
 
+import { EventBus } from '../EventBus';
 import { FieldChangeAction } from '../history_actions';
 import ColorPickerButton from '../ColorPickerButton.vue';
 import history from '../history';
@@ -60,7 +61,10 @@ export default Vue.extend({
             }
             // console.log('colorPicker visible changed, emitting history', newVal);
             history.add(new FieldChangeAction(oldVal, newVal, (visible) => { this.visible = visible; }));
-            this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
+
+            // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
+            //      but we *have* to process if we want to keep color/visible in data, since we look at data to determine how to render
+            this.emitter.trigger('process');
         },
         color: {
             deep: true,
@@ -72,7 +76,10 @@ export default Vue.extend({
                 if (this.dataKey) {
                     this.putData(this.dataKey, this.makeData(this.visible, newVal));
                 }
-                this.emitter.trigger('process'); // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
+
+                // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
+                //      but we *have* to process if we want to keep color/visible in data, since we look at data to determine how to render
+                this.emitter.trigger('process');
             },
         },
     },

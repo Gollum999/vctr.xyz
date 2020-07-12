@@ -117,6 +117,13 @@ export default Vue.extend({
         },
     },
 
+    watch: {
+        // TODO not sure why 'visible' changes for vectors/matrices do not render immediately
+        //      maybe something with the way Vue decides to render based on parent/child component reactivity
+        renderVectors(newVal, oldVal) { this.$nextTick(() => { EventBus.$emit('render'); }); },
+        renderMatrices(newVal, oldVal) { this.$nextTick(() => { EventBus.$emit('render'); }); },
+    },
+
     mounted() {
         // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
         /* this.$refs.scene.inst.background = new THREE.Color(0xffffff); */
