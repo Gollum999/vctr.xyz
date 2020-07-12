@@ -138,9 +138,9 @@ function getOperation(nodeName: string): Operation {
 function updateAllSockets(engine: Engine, editor: NodeEditor) {
     const graphTraveler = new GraphTraveler(engine, editor);
     graphTraveler.applyToAllNodes((engineNode, editorNode) => {
-        // console.log('updateAllSockets', editorNode, engineNode);
-        // console.log(inputs);
-        // console.log(outputs);
+        // console.log('updateAllSockets', editorNode, engineNode, editorNode.id);
+        // console.log(engineNode.inputs);
+        // console.log(engineNode.outputs);
         // console.log(editorNode.inputs);
         // console.log(editorNode.outputs);
         if (!Object.values(ValueNodeType).includes(engineNode.name as ValueNodeType)) {
@@ -640,7 +640,9 @@ export default Vue.extend({
 
         async triggerEngineProcess(): Promise<void> {
             console.log('NodeEditor triggerEngineProcess', this.editor.toJSON());
+            console.log('ABORTING');
             await this.engine.abort(); // Stop old job if running // TODO this is not syncronized with other invocations of triggerEngineProcess
+            console.log('PROCESSING');
             await this.engine.process(this.editor.toJSON());
 
             // TODO should I save during more events?
@@ -649,8 +651,10 @@ export default Vue.extend({
             EventBus.$emit('node_engine_processed', this.editor.toJSON());
         },
 
-        handleConnectionChanged() {
+        async handleConnectionChanged() {
             console.log('NodeEditor handleConnectionChanged');
+            // Engine updates must come first because it effects the node data that we iterate over
+            await this.triggerEngineProcess();
             updateAllSockets(this.engine, this.editor);
         },
 
@@ -758,10 +762,10 @@ export default Vue.extend({
 
             // Do not trigger any of these events until after the initial load is done
             // TODO still not perfect, does not prevent multiple changes from user getting queued up; is there something like Javas 'synchronized' keyword?
-            this.editor.on(['process', 'nodecreated', 'noderemoved', 'connectioncreated', 'connectionremoved'], this.triggerEngineProcess);
-            await this.triggerEngineProcess(); // Process at least once to make sure the viewports are updated // TODO figure out where this really belongs; the order of events here is not very clear
+            this.editor.on(['process', 'nodecreated', 'noderemoved'], this.triggerEngineProcess);
+            // TODO handleConnectionChanged also does this, so no need to do it twice
+            await this.triggerEngineProcess(); // Process at least once to make sure the viewports are updated
 
-            // Engine updates should come first because it effects the node data that we iterate over
             this.editor.on(['connectioncreated', 'connectionremoved'], this.handleConnectionChanged);
             this.handleConnectionChanged(); // Run once to set up socket types
         })();
