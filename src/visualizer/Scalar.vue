@@ -54,7 +54,7 @@ export default Vue.extend({
         // For some reason, if 'uniforms' is a computed property, uniforms in shader do not seem to react to changes
         value(newVal: number, oldVal: number) {
             /* console.log('value updated', oldVal, newVal); */
-            this.uniforms.radius.value = newVal;
+            this.uniforms.radius.value = Math.abs(newVal);
         },
         /* color: {
          *     deep: true,
@@ -86,14 +86,14 @@ export default Vue.extend({
     computed: {
         geoRadius(): number {
             if (this.displayType === ScalarRenderStyle.SPHERE) {
-                return this.value;
+                return Math.abs(this.value);
             } else if (this.displayType === ScalarRenderStyle.CIRCLE) {
                 // TODO be careful of near plane clipping
                 // TODO also need to account for "chords" since sphere mesh is not a perfect circle
                 // TODO a "billboard" plane is probably the better solution
                 /* console.log('calculating geo radius', this); */
                 const PADDING = 0.5; // A little bit extra to prevent clipping due to camera distortion at close distances
-                return this.value + this.lineThickness / 2.0 + PADDING;
+                return Math.abs(this.value) + this.lineThickness / 2.0 + PADDING;
             } else {
                 throw new Error(`Invalid displayType ${this.displayType}`);
             }
@@ -109,7 +109,7 @@ export default Vue.extend({
             ScalarRenderStyle,
 
             uniforms: {
-                radius:                         { value: this.value },
+                radius:                         { value: Math.abs(this.value) },
                 color:                          { value: colorObjToArray(colorObj) },
                 posOffset:                      { value: this.pos },
                 canvasSize:                     { value: [this.canvasSize.x, this.canvasSize.y] },
