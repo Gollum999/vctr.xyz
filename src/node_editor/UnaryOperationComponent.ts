@@ -59,6 +59,7 @@ export default class UnaryOperationComponent extends Rete.Component {
             if (e instanceof CalculationError) {
                 editorNode.data['disabled'] = true;
                 warningControl.setWarning(e.message);
+                this.editor.trigger('error', {message: e.message, data: editorNode});
                 if (Array.from(editorNode.outputs.values()).some(io => io.connections.length)) {
                     const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
                     history.addAndDo(action);

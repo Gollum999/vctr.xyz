@@ -637,23 +637,26 @@ export default Vue.extend({
                 return !(isOutput && disabled);
             });
 
-            // HACK: 'error' type declared as "string | Error", but that does not match the source code.  'any' is a workaround.
-            this.engine.on('error', ({message, data}: any) => {
-                const nodeDesc = (() => {
-                    const displayName = data?.data?.display_title;
-                    const defaultName = data?.name;
-                    const name = displayName || defaultName;
-                    return name ? ` in node "${name}"` : '';
-                })();
-                const msg = `${message}${nodeDesc}`;
-                console.error(msg);
-                this.errorText = msg;
-                this.showingError = true;
-            });
+            this.engine.on('error', this.handleReteError);
+            this.editor.on('error', this.handleReteError);
 
             this.engine.on('warn', (exc: string | Error) => {
                 console.warn('Warning from Rete engine:', exc);
             });
+        },
+
+        // HACK: 'error' type declared as "string | Error", but that does not match the source code.  'any' is a workaround.
+        handleReteError({message, data}: any) {
+            const nodeDesc = (() => {
+                const displayName = data?.data?.display_title;
+                const defaultName = data?.name;
+                const name = displayName || defaultName;
+                return name ? ` in node "${name}"` : '';
+            })();
+            const msg = `Error${nodeDesc}: ${message}`;
+            console.error(msg);
+            this.errorText = msg;
+            this.showingError = true;
         },
 
         async triggerEngineProcess(): Promise<void> {
