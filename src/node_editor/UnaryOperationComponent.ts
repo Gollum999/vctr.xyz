@@ -29,6 +29,10 @@ export default class UnaryOperationComponent extends Rete.Component {
     }
 
     worker(engineNode: DataNode, inputs: DataInputs, outputs: DataOutputs): void {
+        const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
+        const warningControl = editorNode.controls.get('warning') as WarningControl;
+        warningControl.setWarning('');
+
         const inputValue = nodeUtil.getInputValue('input', inputs, engineNode.data);
         // console.log('UnaryOperationComponent worker', this.operation, inputValue);
         if (_.isNil(inputValue)) {
@@ -47,12 +51,9 @@ export default class UnaryOperationComponent extends Rete.Component {
         }
 
         // console.log(inputValue);
-        const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
-        const warningControl = editorNode.controls.get('warning') as WarningControl;
         let result;
         try {
             result = this.operation.calculate({type: determineType(inputValue), value: inputValue});
-            warningControl.setWarning('');
         } catch (e) {
             if (e instanceof CalculationError) {
                 warningControl.setWarning(e.message);

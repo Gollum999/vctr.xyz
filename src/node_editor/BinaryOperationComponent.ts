@@ -29,6 +29,14 @@ export default class BinaryOperationComponent extends Rete.Component {
     }
 
     worker(engineNode: DataNode, inputs: DataInputs, outputs: DataOutputs): void {
+        const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
+        const warningControl = editorNode.controls.get('warning') as WarningControl;
+        editorNode.data['disabled'] = false;
+        if (warningControl == null) {
+            throw new Error('WarningControl was null');
+        }
+        warningControl.setWarning('');
+
         const lhsValue = nodeUtil.getInputValue('lhs', inputs, engineNode.data);
         const rhsValue = nodeUtil.getInputValue('rhs', inputs, engineNode.data);
         if (_.isNil(lhsValue) || _.isNil(rhsValue)) {
@@ -47,19 +55,12 @@ export default class BinaryOperationComponent extends Rete.Component {
         }
 
         // console.log(lhsValue, rhsValue);
-        const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
-        const warningControl = editorNode.controls.get('warning') as WarningControl;
         let result;
         try {
             result = this.operation.calculate(
                 {type: determineType(lhsValue), value: lhsValue},
                 {type: determineType(rhsValue), value: rhsValue},
             );
-            editorNode.data['disabled'] = false;
-            if (warningControl == null) {
-                throw new Error('WarningControl was null');
-            }
-            warningControl.setWarning('');
         } catch (e) {
             if (e instanceof CalculationError) {
                 editorNode.data['disabled'] = true;
