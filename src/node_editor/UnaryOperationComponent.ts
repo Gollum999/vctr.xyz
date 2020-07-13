@@ -31,6 +31,7 @@ export default class UnaryOperationComponent extends Rete.Component {
     worker(engineNode: DataNode, inputs: DataInputs, outputs: DataOutputs): void {
         const editorNode = nodeUtil.getEditorNode(this.editor, engineNode);
         const warningControl = editorNode.controls.get('warning') as WarningControl;
+        editorNode.data['disabled'] = false;
         warningControl.setWarning('');
 
         const inputValue = nodeUtil.getInputValue('input', inputs, engineNode.data);
@@ -56,6 +57,7 @@ export default class UnaryOperationComponent extends Rete.Component {
             result = this.operation.calculate({type: determineType(inputValue), value: inputValue});
         } catch (e) {
             if (e instanceof CalculationError) {
+                editorNode.data['disabled'] = true;
                 warningControl.setWarning(e.message);
                 if (Array.from(editorNode.outputs.values()).some(io => io.connections.length)) {
                     const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
