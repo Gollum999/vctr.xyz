@@ -74,6 +74,16 @@
           <v-list-item @click="deleteSelectedNodes">Delete</v-list-item>
         </v-list>
       </v-menu>
+
+      <v-snackbar top color="error" timeout="6000" v-model="showingError">
+        {{errorText}}
+        <template v-slot:action="{ showErr }">
+          <v-btn text fab small class="close-button" @click="showingError = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </template>
+      </v-snackbar>
+
     </div>
   </div>
 </template>
@@ -217,6 +227,9 @@ export default Vue.extend({
 
             showContextMenu: false,
             contextMenuPos: { x: 0, y: 0 },
+
+            showingError: false,
+            errorText: '',
         };
     },
 
@@ -624,18 +637,23 @@ export default Vue.extend({
                 return !(isOutput && disabled);
             });
 
-            // TODO this is supposed to take {message, data}, but I think the type from the interface is wrong?
-            this.engine.on('error', (message) => {
-                const msg = `Error in Rete engine: ${message}`;
-                alert(msg);
+            // HACK: 'error' type declared as "string | Error", but that does not match the source code.  'any' is a workaround.
+            this.engine.on('error', ({message, data}: any) => {
+                const nodeDesc = (() => {
+                    const displayName = data?.data?.display_title;
+                    const defaultName = data?.name;
+                    const name = displayName || defaultName;
+                    return name ? ` in node "${name}"` : '';
+                })();
+                const msg = `${message}${nodeDesc}`;
                 console.error(msg);
-                // console.info(data);
+                this.errorText = msg;
+                this.showingError = true;
             });
 
-            // this.engine.on('warn', (exc) => {
-            //     console.warn(`Warning from Rete engine`);
-            //     console.warn(exc);
-            // });
+            this.engine.on('warn', (exc: string | Error) => {
+                console.warn('Warning from Rete engine:', exc);
+            });
         },
 
         async triggerEngineProcess(): Promise<void> {
@@ -853,4 +871,6 @@ export default Vue.extend({
     fill: white
   .rete
     background-color: #424242
+#app .close-button
+  margin-right: 0
 </style>
