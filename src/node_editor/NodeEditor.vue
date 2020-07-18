@@ -661,10 +661,17 @@ export default Vue.extend({
 
         async triggerEngineProcess(): Promise<void> {
             console.log('NodeEditor triggerEngineProcess', this.editor.toJSON());
-            console.log('ABORTING');
-            await this.engine.abort(); // Stop old job if running // TODO this is not syncronized with other invocations of triggerEngineProcess
-            console.log('PROCESSING');
-            await this.engine.process(this.editor.toJSON());
+
+            this.showingError = false;
+
+            // Make sure both promises get scheduled next to each other, so there is no chance for another 'process' to get
+            // ordered after the 'abort' below (which can happen if there are multiple 'triggerEngineProcess'es scheduled
+            // and we 'await' the below functions individually)
+            // This prevents warning logs from Rete.
+            await Promise.all([
+                this.engine.abort(), // Stop old job if running
+                this.engine.process(this.editor.toJSON()),
+            ]);
 
             // TODO should I save during more events?
             this.saveState();
