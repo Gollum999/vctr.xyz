@@ -54,4 +54,7 @@ body .color-picker-popup {
     max-height: initial;
     z-index: 1000; /* vue-js-modal uses z-index 999 */
 }
+#app .v-color-picker input {
+    color: white; /* TODO bug in Vuetify for v-color-picker dark theme? */
+}
 </style>
