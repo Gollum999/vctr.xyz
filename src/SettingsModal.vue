@@ -26,10 +26,10 @@
 
         <v-divider class="mt-4" />
         <v-subheader class="mt-2 text--secondary">Vector Rendering</v-subheader>
-        <v-slider step="0.1" min="0.0" max="1" label="Head Size" v-model.number="headSize"
+        <v-slider step="0.1" min="0.0" max="1" label="Head Size" v-model.number="vectorHeadSize"
                   @change="updateSetting('viewportSettings.values.vector.headSize', $event)">
           <template v-slot:append>
-            {{headSize | formatSliderValue}}
+            {{vectorHeadSize | formatSliderValue}}
           </template>
         </v-slider>
 
@@ -48,10 +48,16 @@
             {{fieldSize | formatSliderValue}}
           </template>
         </v-slider>
-        <v-slider step="0.1" min="0.1" :max="fieldDensityMax" label="Field Density" v-model.number="fieldDensity" hide-details
+        <v-slider step="0.1" min="0.1" :max="fieldDensityMax" label="Field Density" v-model.number="fieldDensity"
                   @change="updateSetting('viewportSettings.values.matrix.fieldDensity', $event)">
           <template v-slot:append>
             {{fieldDensity | formatSliderValue}}
+          </template>
+        </v-slider>
+        <v-slider step="0.1" min="0.0" max="1" label="Vector Head Size" v-model.number="matrixHeadSize" hide-details
+                  @change="updateSetting('viewportSettings.values.matrix.headSize', $event)">
+          <template v-slot:append>
+            {{matrixHeadSize | formatSliderValue}}
           </template>
         </v-slider>
       </v-tab-item>
@@ -106,11 +112,12 @@ export default Vue.extend({
             viewportSettings: settingsUtil.viewportSettings,
             ScalarRenderStyle: settingsUtil.ScalarRenderStyle,
 
-            headSize: settingsUtil.viewportSettings.values.vector.headSize,
+            vectorHeadSize: settingsUtil.viewportSettings.values.vector.headSize,
 
             vectorScale: settingsUtil.viewportSettings.values.matrix.vectorScale,
             fieldSize: settingsUtil.viewportSettings.values.matrix.fieldSize,
             fieldDensity: settingsUtil.viewportSettings.values.matrix.fieldDensity,
+            matrixHeadSize: settingsUtil.viewportSettings.values.matrix.headSize,
         };
     },
     filters: {

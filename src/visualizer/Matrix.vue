@@ -8,8 +8,8 @@
                       :dir="`${v.value[0]} ${v.value[1]} ${v.value[2]}`"
                       :color="color"
                       :length="`${vec3.length(v.value) * vectorScale}`"
-                      :head-length="0.15"
-                      :head-width="0.15"
+                      :head-length="settings.values.matrix.headSize"
+                      :head-width="settings.values.matrix.headSize"
     />
   </div>
 </div>
@@ -18,6 +18,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 import { mat4, vec3 } from 'gl-matrix';
+import * as settings from '../settings';
 
 class FieldVector {
     constructor(public value: vec3, public pos: vec3) {
@@ -40,6 +41,7 @@ export default Vue.extend({
     },
     data() {
         return {
+            settings: settings.viewportSettings,
             vec3: vec3,
         };
     },

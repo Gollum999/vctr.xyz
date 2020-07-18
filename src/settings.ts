@@ -24,7 +24,7 @@ const defaultViewportSettings = {
         vectorScale: 0.2,
         fieldSize: 8,
         fieldDensity: 0.5,
-        // showVectorHeads: true, // TODO adjustable size?
+        headSize: 0.2,
     },
 };
 
