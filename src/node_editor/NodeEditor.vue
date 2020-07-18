@@ -105,7 +105,7 @@ import history from '../history';
 import * as actions from '../history_actions';
 import {
     GraphTraveler, BasicOperationNodeType, AdvancedOperationNodeType, UnaryOperationNodeType, BinaryOperationNodeType,
-    ValueNodeType, NodeType,
+    ValueNodeType, NodeType, ADVANCED_RENDER_CONTROLS_KEY,
 } from './node_util';
 import Rect from './Rect';
 import * as unary from './UnaryOperation';
@@ -481,26 +481,26 @@ export default Vue.extend({
             const [vecLhs, vecRhs, add, vecSum, length, scalarLen] = await Promise.all([
                 this.nodeFactory.createNode(NodeType.VECTOR, {
                     'value': [3, 2, 0],
-                    'pos': [0, 0, 0],
+                    [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
                     'color': { color: '#00ffff', visible: true },
                     'display_title': 'Vector 1',
                 }),
                 this.nodeFactory.createNode(NodeType.VECTOR, {
                     'value': [-1, 2, 0],
-                    'pos': [0, 0, 0],
+                    [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
                     'color': { color: '#00ffff', visible: true },
                     'display_title': 'Vector 2',
                 }),
                 this.nodeFactory.createNode(NodeType.ADD),
                 this.nodeFactory.createNode(NodeType.VECTOR, {
-                    'pos': [0, 0, 0],
+                    [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
                     'color': { color: this.settings.values.defaultVectorColor, visible: true },
                     'display_title': 'Sum',
                 }),
                 this.nodeFactory.createNode(NodeType.LENGTH),
                 this.nodeFactory.createNode(NodeType.SCALAR, {
                     'value': [0],
-                    'pos': [0, 0, 0],
+                    [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
                     'color': { color: this.settings.values.defaultScalarColor, visible: true },
                     'display_title': 'Output',
                 }),
@@ -644,24 +644,24 @@ export default Vue.extend({
             const actionStack = [];
             const graphTraveler = new GraphTraveler(this.engine, this.editor);
             graphTraveler.applyToAllNodes((engineNode, editorNode) => {
-                if (editorNode.inputs.has('pos')) { // TODO make this more generic
+                if (editorNode.inputs.has(ADVANCED_RENDER_CONTROLS_KEY)) {
                     console.log('NodeEditor advanced render controls handler', engineNode, editorNode);
                     if (add) {
-                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, editorNode);
+                        const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, editorNode, ADVANCED_RENDER_CONTROLS_KEY);
                         actionStack.push(renderControlsAction);
                     } else {
                         // Reset origin
                         // TODO probably should be bundled in with RemoveAdvancedRenderControlsAction, but it is convenient to
                         //      use FieldChangeAction (which I could still do inside of RemoveAdvancedRenderControlsAction)
-                        const resetOriginAction = new actions.FieldChangeAction(engineNode.data['pos'], [0, 0, 0], val => {
-                            engineNode.data['pos'] = val;
-                            // Make sure 'pos' changes are processed
+                        const resetOriginAction = new actions.FieldChangeAction(engineNode.data[ADVANCED_RENDER_CONTROLS_KEY], [0, 0, 0], val => {
+                            engineNode.data[ADVANCED_RENDER_CONTROLS_KEY] = val;
+                            // Make sure changes are processed
                             this.editor.trigger('process'); // TODO I could maybe go through vue component to make sure this happens automatically
                         });
                         actionStack.push(resetOriginAction);
 
                         // console.log('Pushing RemoveAdvancedRenderControlsAction', this.editor, engineNode);
-                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, editorNode);
+                        const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, editorNode, ADVANCED_RENDER_CONTROLS_KEY);
                         actionStack.push(renderControlsAction);
                     }
                 }

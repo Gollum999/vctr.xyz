@@ -3,7 +3,7 @@ import * as util from '../util';
 import * as allComponents from './components';
 import { allUnaryOperations } from './UnaryOperation';
 import { allBinaryOperations } from './BinaryOperation';
-import { ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType } from './node_util';
+import { ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType, ADVANCED_RENDER_CONTROLS_KEY } from './node_util';
 import { Component } from 'rete/types/component';
 import { Node } from 'rete/types/node';
 
@@ -51,12 +51,12 @@ export default class NodeFactory {
             case ValueNodeType.SCALAR: return {
                 'color': { color: this.getNewNodeColor(ValueNodeType.SCALAR), visible: false },
                 'value': [1],
-                'pos': [0, 0, 0],
+                [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
             };
             case ValueNodeType.VECTOR: return {
                 'color': { color: this.getNewNodeColor(ValueNodeType.VECTOR), visible: true },
                 'value': [1, 1, 1],
-                'pos': [0, 0, 0],
+                [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
             };
             case ValueNodeType.MATRIX: return {
                 'color': { color: this.getNewNodeColor(ValueNodeType.MATRIX), visible: false },
@@ -66,7 +66,7 @@ export default class NodeFactory {
                     0, 0, 1, 0,
                     0, 0, 0, 1,
                 ],
-                'pos': [0, 0, 0],
+                [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
             };
             }
             return undefined;

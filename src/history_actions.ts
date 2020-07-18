@@ -208,12 +208,14 @@ export class RemoveAllNodesAction extends Action {
 class AdvancedRenderControlsActionHelper {
     private readonly editor: NodeEditor;
     private readonly node: Node;
+    private readonly inputName: string;
     private connectionActions: Array<RemoveConnectionAction>;
 
-    constructor(editor: NodeEditor, node: Node) {
+    constructor(editor: NodeEditor, node: Node, inputName: string) {
         console.log('AdvancedRenderControlsActionHelper constructor', node.id);
         this.editor = editor;
         this.node = node;
+        this.inputName = inputName;
         this.connectionActions = [];
     }
     add() {
@@ -229,12 +231,12 @@ class AdvancedRenderControlsActionHelper {
         console.log('AdvancedRenderControlsActionHelper remove from node:', this.node.id, this.node);
 
         // Remove all connections
-        const input = this.node.inputs.get('pos'); // TODO make this more generic
+        const input = this.node.inputs.get(this.inputName);
         if (input == null) {
-            throw new Error(`Could not find 'pos' input for node ${this.node.id}`);
+            throw new Error(`Could not find '${this.inputName}' input for node ${this.node.id}`);
         }
         if (input.connections == null) {
-            throw new Error(`Could not find connections for 'pos' for node ${this.node.id}`);
+            throw new Error(`Could not find connections for '${this.inputName}' for node ${this.node.id}`);
         }
         input.connections.map(conn => {
             const removeConnectionAction = new RemoveConnectionAction(this.editor, conn);
@@ -247,9 +249,9 @@ class AdvancedRenderControlsActionHelper {
 export class AddAdvancedRenderControlsAction extends Action {
     private readonly helper: AdvancedRenderControlsActionHelper;
 
-    constructor(editor: NodeEditor, node: Node) {
+    constructor(editor: NodeEditor, node: Node, inputName: string) {
         super();
-        this.helper = new AdvancedRenderControlsActionHelper(editor, node);
+        this.helper = new AdvancedRenderControlsActionHelper(editor, node, inputName);
     }
     undo() { this.helper.remove(); }
     redo() { this.helper.add(); }
@@ -258,9 +260,9 @@ export class AddAdvancedRenderControlsAction extends Action {
 export class RemoveAdvancedRenderControlsAction extends Action {
     private readonly helper: AdvancedRenderControlsActionHelper;
 
-    constructor(editor: NodeEditor, node: Node) {
+    constructor(editor: NodeEditor, node: Node, inputName: string) {
         super();
-        this.helper = new AdvancedRenderControlsActionHelper(editor, node);
+        this.helper = new AdvancedRenderControlsActionHelper(editor, node, inputName);
     }
     undo() { this.helper.add(); }
     redo() { this.helper.remove(); }

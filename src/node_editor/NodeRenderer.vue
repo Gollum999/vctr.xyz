@@ -26,12 +26,12 @@ import mixin from '@/../node_modules/rete-vue-render-plugin/src/mixin';
 import Socket from '@/../node_modules/rete-vue-render-plugin/src/Socket.vue';
 import { EventBus } from '../EventBus';
 import * as settings from '../settings';
+import { ADVANCED_RENDER_CONTROLS_KEY } from './node_util';
 
 export default {
     mixins: [mixin],
     data() {
         return {
-            advancedRenderControlsKey: 'pos', // TODO Remove this assumption
             settings: settings.nodeEditorSettings,
             displayTitle: this.node.data['display_title'] || this.node.name,
         };
@@ -61,10 +61,10 @@ export default {
             },
         },
         filteredInputs() {
-            return this.inputs().filter(input => input.key !== this.advancedRenderControlsKey || this.settings.values.showAdvancedRenderSettings);
+            return this.inputs().filter(input => input.key !== ADVANCED_RENDER_CONTROLS_KEY || this.settings.values.showAdvancedRenderSettings);
         },
         filteredControls() {
-            return this.controls().filter(control => control.key !== this.advancedRenderControlsKey || this.settings.values.showAdvancedRenderSettings);
+            return this.controls().filter(control => control.key !== ADVANCED_RENDER_CONTROLS_KEY || this.settings.values.showAdvancedRenderSettings);
         },
     },
 };

@@ -59,6 +59,8 @@ export const AdvancedOperationNodeType = Object.freeze(new Set([
 ]));
 // TODO assert that all values covered above?
 
+export const ADVANCED_RENDER_CONTROLS_KEY = 'pos';
+
 export function getEditorNode(editor: NodeEditor, engineNode: DataNode): Node {
     const node = editor.nodes.find(n => n.id === engineNode.id);
     if (node == null) {

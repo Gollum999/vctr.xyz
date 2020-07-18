@@ -24,18 +24,19 @@ export class ValueComponent extends Rete.Component {
             [nodeUtil.ValueNodeType.MATRIX]: sockets.matrix,
         } as {[key: string]: Socket})[this.nodeType];
 
-        node.addInput(new Rete.Input('value', 'Value', socket));
-        // rete-vue-render-plugin is the only thing that relies on socket being non-null, and I have my own NodeRenderer
-        node.addInput(new Rete.Input('color_label', 'Color', (null as any)));
-        // If this key changes, NodeRenderer must also change // TODO remove this assumption
-        node.addInput(new Rete.Input('pos', 'Position', sockets.vector));
-
         if (this.nodeType === nodeUtil.ValueNodeType.VECTOR || this.nodeType === nodeUtil.ValueNodeType.MATRIX) {
             node.addControl(new AxesLabelControl(this.nodeType, this.editor, 'label', -999));
         }
+
+        node.addInput(new Rete.Input('value', 'Value', socket));
         node.addControl(new ValueControl(this.nodeType, this.editor, 'value', 1));
+
+        // rete-vue-render-plugin is the only thing that relies on socket being non-null, and I have my own NodeRenderer
+        node.addInput(new Rete.Input('color_label', 'Color', (null as any)));
         node.addControl(new ColorControl(this.editor, 'color', 2));
-        node.addControl(new ValueControl(nodeUtil.ValueNodeType.VECTOR, this.editor, 'pos', 3));
+
+        node.addInput(new Rete.Input(nodeUtil.ADVANCED_RENDER_CONTROLS_KEY, 'Position', sockets.vector));
+        node.addControl(new ValueControl(nodeUtil.ValueNodeType.VECTOR, this.editor, nodeUtil.ADVANCED_RENDER_CONTROLS_KEY, 3));
 
         node.addOutput(new Rete.Output('value', 'Value', socket));
 
@@ -71,13 +72,13 @@ export class ValueComponent extends Rete.Component {
             valueControl.setReadOnly(false);
         }
 
-        const posControl = editorNode.controls.get('pos') as ValueControl;
+        const posControl = editorNode.controls.get(nodeUtil.ADVANCED_RENDER_CONTROLS_KEY) as ValueControl;
         if (_.isNil(posControl)) {
             throw new Error('Could not find "pos" control');
         }
         if (!_.isNil(posControl.vueContext)) { // Bit of a hack, could hold a reference to the global settings
-            if (nodeUtil.hasInput(inputs, 'pos')) {
-                const inputPos = nodeUtil.getInputValue('pos', inputs, node.data);
+            if (nodeUtil.hasInput(inputs, nodeUtil.ADVANCED_RENDER_CONTROLS_KEY)) {
+                const inputPos = nodeUtil.getInputValue(nodeUtil.ADVANCED_RENDER_CONTROLS_KEY, inputs, node.data);
                 node.data.pos = inputPos.slice(); // Make a copy to avoid sharing the same object between nodes
                 posControl.setValue(inputPos);
                 posControl.setReadOnly(true);
