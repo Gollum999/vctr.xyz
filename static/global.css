@@ -1,4 +1,5 @@
 html {
+    overflow-x: auto; /* Allow scroll if window is too narrow -- something was changing this to 'hidden' */
     overflow-y: auto; /* Fix useless scrollbar -- something was changing this to 'scroll' */
 }
 
