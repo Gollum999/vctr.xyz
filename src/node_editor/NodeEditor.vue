@@ -75,7 +75,7 @@
         </v-list>
       </v-menu>
 
-      <v-snackbar top color="error" timeout="6000" v-model="showingError">
+      <v-snackbar top color="error" timeout="-1" v-model="showingError">
         {{errorText}}
         <template v-slot:action="{ showErr }">
           <v-btn text fab small class="close-button" @click="showingError = false">
