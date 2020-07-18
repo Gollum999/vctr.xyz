@@ -796,8 +796,6 @@ export default Vue.extend({
     .buttons-group
       display: inline-block
       width: 33%
-      &:first-child
-        margin-left: 8px
       &.left
         text-align: left
       &.center
@@ -805,10 +803,10 @@ export default Vue.extend({
       &.right
         text-align: right
     button.v-btn
-      pointer-events: auto
-      // &:first-of-type
-      //   margin-left: 8px
       margin-right: 8px
+      &:first-child
+        margin-left: 8px
+      pointer-events: auto
       .v-icon
         // For my custom icons
         height: 24px
