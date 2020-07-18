@@ -27,7 +27,7 @@
         <v-divider class="mt-4" />
         <v-subheader class="mt-2 text--secondary">Vector Rendering</v-subheader>
         <v-slider step="0.1" min="0.0" max="1" label="Head Size" v-model.number="vectorHeadSize"
-                  @change="updateSetting('viewportSettings.values.vector.headSize', $event)">
+                  @change="updateViewportSetting('vector.headSize', $event)">
           <template v-slot:append>
             {{vectorHeadSize | formatSliderValue}}
           </template>
@@ -37,25 +37,25 @@
         <v-subheader class="mt-2 text--secondary">Matrix Rendering</v-subheader>
         <!-- Keep a separate model for these so we get high precision for "live" updates, but only trigger watchers from specific events -->
         <v-slider step="0.1" min="0.1" max="1" label="Vector Scale" v-model.number="vectorScale"
-                  @change="updateSetting('viewportSettings.values.matrix.vectorScale', $event)">
+                  @change="updateViewportSetting('matrix.vectorScale', $event)">
           <template v-slot:append>
             {{vectorScale | formatSliderValue}}
           </template>
         </v-slider>
         <v-slider step="0.1" min="1" :max="fieldSizeMax" label="Field Size" v-model.number="fieldSize"
-                  @change="updateSetting('viewportSettings.values.matrix.fieldSize', $event)">
+                  @change="updateViewportSetting('matrix.fieldSize', $event)">
           <template v-slot:append>
             {{fieldSize | formatSliderValue}}
           </template>
         </v-slider>
         <v-slider step="0.1" min="0.1" :max="fieldDensityMax" label="Field Density" v-model.number="fieldDensity"
-                  @change="updateSetting('viewportSettings.values.matrix.fieldDensity', $event)">
+                  @change="updateViewportSetting('matrix.fieldDensity', $event)">
           <template v-slot:append>
             {{fieldDensity | formatSliderValue}}
           </template>
         </v-slider>
         <v-slider step="0.1" min="0.0" max="1" label="Vector Head Size" v-model.number="matrixHeadSize" hide-details
-                  @change="updateSetting('viewportSettings.values.matrix.headSize', $event)">
+                  @change="updateViewportSetting('matrix.headSize', $event)">
           <template v-slot:append>
             {{matrixHeadSize | formatSliderValue}}
           </template>
@@ -159,17 +159,6 @@ export default Vue.extend({
         updateViewportSetting(key: string, value: any) {
             console.log('SettingsModal updating viewportSetting', key, value);
             this.viewportSettings.update(key, value);
-        },
-        updateSetting(key: string, value: any) {
-            // TODO clean this up
-            const trimmed = key.split('.').slice(2).join('.');
-            if (key.startsWith('viewportSettings')) {
-                this.updateViewportSetting(trimmed, value);
-            } else if (key.startsWith('nodeEditorSettings')) {
-                this.updateNodeEditorSetting(trimmed, value);
-            } else {
-                throw new Error(`Invalid settings key ${key}`);
-            }
         },
     },
 });
