@@ -1,4 +1,4 @@
-import { Action } from './history_actions';
+import { Action, MultiAction } from './history_actions';
 
 // Copied and modified from rete-history-plugin
 export class History {
@@ -89,9 +89,7 @@ export class History {
         this.enable();
     }
 
-    // Caller's responsibility to wrap in MultiAction to avoid circular dependency.
-    // TODO better way to write this to include the MultiAction?
-    squashTopActions(count: number): Array<Action> {
+    squashTopActions(count: number): void {
         console.assert(count >= 2, 'Not enough actions to squash');
         const actions = [];
         for (let i = 0; i < count; ++i) {
@@ -101,12 +99,12 @@ export class History {
             }
             actions.push(action);
         }
-        return actions.reverse();
+        this.add(new MultiAction(actions.reverse()));
     }
 
-    // Caller's responsibility to wrap in MultiAction to avoid circular dependency.  idx is inclusive.
-    squashTopActionsDownToIndex(idx: number): Array<Action> {
-        return this.squashTopActions(this.produced.length - idx);
+    // idx is inclusive
+    squashTopActionsDownToIndex(idx: number): void {
+        this.squashTopActions(this.produced.length - idx);
     }
 }
 

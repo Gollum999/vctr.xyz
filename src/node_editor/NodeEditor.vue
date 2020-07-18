@@ -316,7 +316,7 @@ export default Vue.extend({
                 this.editor.removeNode(node);
             });
             // Combine all resulting RemoveNodeActions and RemoveConnectionActions into a single action
-            history.add(new actions.MultiAction(history.squashTopActionsDownToIndex(lastHistoryIdx + 1)));
+            history.squashTopActionsDownToIndex(lastHistoryIdx + 1);
         },
 
         onUndo() {

@@ -63,7 +63,7 @@ export default class UnaryOperationComponent extends Rete.Component {
                 if (Array.from(editorNode.outputs.values()).some(io => io.connections.length)) {
                     const action = new RemoveAllNodeOutputConnectionsAction(this.editor, editorNode);
                     history.addAndDo(action);
-                    history.add(new MultiAction(history.squashTopActions(2))); // Squash the value change that caused this
+                    history.squashTopActions(2); // Squash the value change that caused this
                 }
             } else {
                 throw e;
