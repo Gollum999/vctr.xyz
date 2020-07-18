@@ -102,10 +102,6 @@ export default {
 .settings-button:hover {
     text-decoration: none;
 }
-.settings-dialog-container {
-    /* TODO this is a hack because v-dialog adds some extra space in the style of the element? */
-    display: none !important;
-}
 
 @media screen and (max-height: 920px) {
     .vec-viz { height: 800px; }
@@ -128,9 +124,5 @@ export default {
 <style>
 #app .gutter {
     background-color: #616161;
-}
-.v-dialog__container !important {
-    /* TODO below is a hack because v-dialog adds some extra space? and it's adding it in the style of the element... */
-    display: none;
 }
 </style>

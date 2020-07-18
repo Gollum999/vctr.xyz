@@ -43,9 +43,6 @@ export default Vue.extend({
 .v-label {
     line-height: 44px; /* TODO: Seems like there should be a better way to center things... */
 }
-.color-picker {
-    display: none; /* TODO this is creating extra vertical space for some reason */
-}
 .color-picker-option {
     text-align: left;
 }

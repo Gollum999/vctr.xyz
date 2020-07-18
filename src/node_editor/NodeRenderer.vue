@@ -144,7 +144,6 @@ $node-width: 100px
     // padding: $socket-margin $socket-size/2 + $socket-margin
     grid-column: controls
     display: contents
-    // margin: 0px 4px // TODO doesn't work because display: contents
   .output
     grid-column: outputs
   .output-title
@@ -172,10 +171,7 @@ $socket-size: 12px
         &:focus-within
           filter: brightness(120%)
       .v-input__slot
-        width: initial // TODO hack?  otherwise doesn't fit in my node
         padding: 0
-    .control
-      padding: 8px // TODO doesn't work because of display: contents
 
   .connection
     /* Fix display bug with connections */
