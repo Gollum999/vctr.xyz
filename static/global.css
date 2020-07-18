@@ -1,3 +1,7 @@
+html {
+    overflow-y: auto; /* Fix useless scrollbar -- something was changing this to 'scroll' */
+}
+
 #app {
     font-family: Ubuntu, Avenir, Helvetica, Arial, sans-serif;
     font-size: 12px;
@@ -6,4 +10,8 @@
     text-align: center;
     /* color: #2c3e50; */
     padding: 60px 60px 60px;
+}
+
+#app .v-application--wrap {
+    min-height: initial /* Wrapper is larger than its container? *//* TODO not sure why this is happening */
 }
