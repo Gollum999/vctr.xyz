@@ -5,8 +5,6 @@
 
     <div class="buttons-container">
       <div class="buttons-group left buttons-add-nodes">
-        <!-- <v-btn x-small type="button" title="test1" @click="test1">test1</v-btn> -->
-        <!-- <v-btn x-small type="button" title="test2" @click="test2">test2</v-btn> -->
         <v-btn fab x-small type="button" title="Add scalar" @click="addNode('Scalar')">
           <v-icon>$vuetify.icons.scalar</v-icon>
         </v-btn>
@@ -231,30 +229,6 @@ export default Vue.extend({
     },
 
     methods: {
-        test1() {
-            // this.editor.trigger('resetconnection'); // TODO testing
-            // console.log('test1 setting showAdvancedRenderSettings to ', !this.settings.values.showAdvancedRenderSettings);
-            // this.settings.update('showAdvancedRenderSettings', !this.settings.values.showAdvancedRenderSettings);
-            // const node = this.editor.nodes.find(node => node.name.startsWith('Vector'));
-            // if (!node) { throw new Error('could not find vector node to test with'); }
-            // const nodeView = this.editor.view.nodes.get(node);
-            // console.log('node', node);
-            // console.log('nodeView', nodeView);
-            // this.showingAdvancedRenderControls = !this.showingAdvancedRenderControls;
-            // console.log('now showing: ', this.showingAdvancedRenderControls);
-            // /* Vue.set(node, 'hideAdvancedRenderControls', !this.showingAdvancedRenderControls); */
-            // node.vueContext.showAdvancedRenderControls = this.showingAdvancedRenderControls;
-            // /* console.log('forcing update', node, node.vueContext); */
-            // /* node.vueContext.$forceUpdate(); */
-        },
-        test2() {
-            // const node1 = this.editor.nodes.find(node => node.id === 5);
-            // const node2 = this.editor.nodes.find(node => node.id === 6);
-            // const output = node1.outputs.get('value');
-            // const input = node2.inputs.get('pos');
-            // this.editor.connect(output, input);
-        },
-
         setUpBasicHistoryActions() {
             this.editor.on('nodecreated', node => history.add(new actions.AddNodeAction(this.editor, node)));
             this.editor.on('noderemoved', node => history.add(new actions.RemoveNodeAction(this.editor, node)));
