@@ -659,7 +659,7 @@ export default Vue.extend({
             this.showingError = true;
         },
 
-        async triggerEngineProcess(): Promise<void> {
+        async triggerEngineProcess(): Promise<boolean> {
             console.log('NodeEditor triggerEngineProcess', this.editor.toJSON());
 
             this.showingError = false;
@@ -668,22 +668,30 @@ export default Vue.extend({
             // ordered after the 'abort' below (which can happen if there are multiple 'triggerEngineProcess'es scheduled
             // and we 'await' the below functions individually)
             // This prevents warning logs from Rete.
-            await Promise.all([
+            const [_, status] = await Promise.all([
                 this.engine.abort(), // Stop old job if running
                 this.engine.process(this.editor.toJSON()),
             ]);
 
-            // TODO should I save during more events?
-            this.saveState();
+            if (status === 'success') {
+                // TODO should I save during more events?
+                this.saveState();
 
-            EventBus.$emit('node_engine_processed', this.editor.toJSON());
+                EventBus.$emit('node_engine_processed', this.editor.toJSON());
+                return true;
+            } else if (status === 'aborted' || status === undefined) {
+                return false;
+            } else {
+                throw new Error(`Unexpected result from Rete.Engine.process: ${status}`);
+            }
         },
 
         async handleConnectionChanged() {
             console.log('NodeEditor handleConnectionChanged');
             // Engine updates must come first because it effects the node data that we iterate over
-            await this.triggerEngineProcess();
-            updateAllSockets(this.engine, this.editor);
+            if (await this.triggerEngineProcess()) {
+                updateAllSockets(this.engine, this.editor);
+            }
         },
 
         addOrRemoveAdvancedControls(add: boolean) {
