@@ -59,14 +59,10 @@ export function hexToRgb(hex: string): Color | null {
     } : null;
 }
 
-export function randomInRange(min: number, max: number): number { // [min, max)
-    return (Math.random() * (max - min)) + min;
-}
-
 export function getRandomColor(): Color {
     const h: number = Math.random();
-    const s: number = randomInRange(0.4, 1.0);
-    const l: number = randomInRange(0.3, 0.7);
+    const s: number = _.random(0.4, 1.0);
+    const l: number = _.random(0.3, 0.7);
     return hslToRgb(h, s, l);
 }
 
@@ -96,7 +92,6 @@ export function intersects<T>(x: Set<T>, y: Set<T>): boolean {
     return Array.from(x).some(val => y.has(val));
 }
 
-// TODO lodash already supports a lot of these
 // What are the common elements between x and y?
 export function intersection<T>(x: Set<T>, y: Set<T>): Set<T> {
     return new Set([...x].filter(val => y.has(val)));
