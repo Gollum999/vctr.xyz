@@ -34,7 +34,7 @@ export class UnaryOperation {
     static setupSockets(editor: NodeEditor, node: Node) {
         node.addInput(new Rete.Input('input', this.getInputName(), sockets[util.socketTypesToCompoundSocket(this.defaultInputSockets)]));
         node.addControl(new WarningControl(editor, 'warning', 1));
-        // TODO change socket names for consistency?
+        // TODO change socket names for consistency?  define them as constants somewhere?
         node.addOutput(new Rete.Output('output', this.getOutputName(), sockets[util.socketTypesToCompoundSocket(this.defaultOutputSockets)]));
     }
 
@@ -134,7 +134,6 @@ export class LengthOperation extends UnaryOperation {
     }
 }
 
-// TODO use this for unary "-" for vectors, or maybe 1/v?
 export class InvertOperation extends UnaryOperation {
     static title = 'Invert';
     static defaultInputSockets = s.matrix;

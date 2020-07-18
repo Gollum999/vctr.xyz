@@ -61,15 +61,15 @@ import { EventBus } from '../EventBus';
 import { vec3, mat4 } from 'gl-matrix';
 
 class VectorView {
-    constructor(public value: vec3, public color: string, public pos: vec3) {
+    constructor(public value: vec3, public color: string | null, public pos: vec3) {
         this.value = value;
         this.color = color;
         this.pos = pos;
     }
 };
 
-class MatrixView { // TODO combine, move somewhere common?
-    constructor(public value: mat4, public color: string, public pos: vec3) {
+class MatrixView {
+    constructor(public value: mat4, public color: string | null, public pos: vec3) {
         this.value = value;
         this.color = color;
         this.pos = pos;
@@ -118,26 +118,21 @@ export default Vue.extend({
     },
 
     watch: {
-        // TODO not sure why 'visible' changes for vectors/matrices do not render immediately
-        //      maybe something with the way Vue decides to render based on parent/child component reactivity
+        // HACK: These fix 'visible' changes not immediately re-rendering
         renderVectors(newVal, oldVal) { this.$nextTick(() => { EventBus.$emit('render'); }); },
         renderMatrices(newVal, oldVal) { this.$nextTick(() => { EventBus.$emit('render'); }); },
     },
 
     mounted() {
-        // TODO not confident that this will always stick around (any reason the canvas might be destroyed and recreated?)
-        /* this.$refs.scene.inst.background = new THREE.Color(0xffffff); */
-
         EventBus.$on('node_engine_processed', (editorJson: { [key: string]: any }) => {
             console.log('QuadViewport handling process event');
             this.vectors = [];
             this.matrices = [];
-            // TODO may be a more ideomatic way to write this (filter?)
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
                 /* console.log('adding node', node, 'to be rendered'); */
                 if (node.name === 'Vector') {
-                    this.vectors.push(new VectorView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos)); // TODO need to figure out best practices for handling data in engine
+                    this.vectors.push(new VectorView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos));
                 } else if (node.name === 'Matrix') {
                     this.matrices.push(new MatrixView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos));
                 }

@@ -27,7 +27,7 @@ export default Vue.extend({
         };
     },
     watch: {
-        value(newVal: string, oldVal: string): void { // TODO is there a Vue shortcut for this?
+        value(newVal: string, oldVal: string): void { // TODO is there a Vue shortcut for forwarding things to/from child component in a wrapper like this?
             this.color = newVal;
         },
         color(newVal: string, oldVal: string): void {

@@ -108,34 +108,19 @@ export function getNewSocketTypeForOperationCompatibility(
     oppositeSocketTypes: Set<SocketType>,
     oppositeTypeToThisTypeMap: InputSocketCompatibilityMap,
 ): Set<SocketType> {
-    // if (!oppositeTypeToThisTypeMap) {
-    //     throw new Error('oppositeTypeToThisTypeMap was null', oppositeTypeToThisTypeMap); // TODO why am I letting this be null?
-    // }
-    // console.log(`TEST _getNewSocketTypeForOperationCompatibility ${input.node.name} ${input.name} (opposite ${oppositeInput.name})"`);
-
     const compatibleTypes = new Set<SocketType>();
-    for (const socketType of oppositeSocketTypes) {
+    for (const oppositeSocketType of oppositeSocketTypes) {
         // TODO this doesn't feel quite right... like it might choose socket types that are "too loose"
         // TODO maybe I need to explicitly list type mappings for hybrid types instead of auto-aggregating here
-        if (oppositeTypeToThisTypeMap[socketType]) {
-            // TODO variable names are hard
-            for (const otherSideCompatibleType of oppositeTypeToThisTypeMap[socketType]) {
+        if (oppositeTypeToThisTypeMap[oppositeSocketType]) {
+            for (const otherSideCompatibleType of oppositeTypeToThisTypeMap[oppositeSocketType]) {
                 compatibleTypes.add(otherSideCompatibleType);
             }
         }
     }
-    // console.log('oppositeSocketTypes:', oppositeSocketTypes, 'compatibleTypes:', compatibleTypes);
 
     if (!_.isEmpty(compatibleTypes)) {
-        // console.log(`_getNewSocketTypeForOperationCompatibility ${input.node.name} ${input.name}, current types:`, socketTypes, 'compat:', compatibleTypes);
-        // if (!_.isEmpty(input.connections)) {
-        //     // Sanity check that previous socket type updates kept everything compatible
-        //     console.log('TEST input has connection, verifying types are still compatible (types: "', socketTypes, '", compat: "', compatibleTypes, '"');
-        //     // TODO maybe removeInputConnectionsIfIncompatible should happen here?
-        //     // console.assert(util.isSubset(socketTypes, compatibleTypes), socketTypes, compatibleTypes);
-        // } else
         if (util.isSubset(socketTypes, compatibleTypes)) {
-            // console.log('TEST _getNewSocketTypeForOperationCompatibility updating', input.node.name, input.name, 'from', socketTypes, 'to', compatibleTypes);
             return socketTypes;
         } else {
             return compatibleTypes;
@@ -154,18 +139,11 @@ export function removeOutputConnectionsIfIncompatible(editor: NodeEditor, output
 }
 
 function _removeIoConnectionsIfIncompatible(editor: NodeEditor, io: IO, isInput: boolean): void {
-    // console.log('TEST _removeIoConnectionsIfIncompatible io:', io.name, 'isInput:', isInput, 'cxns empty:', _.isEmpty(io.connections));
     const socketTypes = getSocketTypes(io.socket);
     for (const connection of io.connections) {
         const typesFromInput = getSocketTypes(isInput ? connection.output.socket : connection.input.socket);
-        // console.log('connection:', connection);
-        // console.log('typesFromInput:', typesFromInput, 'socketTypes:', socketTypes);
         if (!util.intersects(socketTypes, typesFromInput)) {
-            // console.log(`TEST ${isInput ? 'input' : 'output'} connection incompatible, REMOVING`);
-            // console.log(socketTypes, typesFromInput, connection);
-            // TODO this puts itself into the undo history *after* the connection that triggered this, so undoing will fail since socket
-            //      type has changed.  Need to hijack the default 'connectioncreated' event or something
-            editor.removeConnection(connection); // TODO dangerous to call this while iterating over connections?
+            editor.removeConnection(connection);
         }
     }
 }

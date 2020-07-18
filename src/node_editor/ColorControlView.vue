@@ -63,7 +63,8 @@ export default Vue.extend({
             history.add(new FieldChangeAction(oldVal, newVal, (visible) => { this.visible = visible; }));
 
             // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
-            //      but we *have* to process if we want to keep color/visible in data, since we look at data to determine how to render
+            //      on the other hand, we *have* to process if we want to keep color/visible in data, since we look at data to determine how to render
+            //      maybe the best compromise would be to only process on blur/dialog close
             this.emitter.trigger('process');
         },
         color: {
@@ -78,7 +79,8 @@ export default Vue.extend({
                 }
 
                 // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
-                //      but we *have* to process if we want to keep color/visible in data, since we look at data to determine how to render
+                //      on the other hand, we *have* to process if we want to keep color/visible in data, since we look at data to determine how to render
+                //      maybe the best compromise would be to only process on blur/dialog close
                 this.emitter.trigger('process');
             },
         },

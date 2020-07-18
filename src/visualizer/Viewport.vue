@@ -9,7 +9,7 @@
         color-center-line="#888888"
         color-grid="#444444"
     />
-    <!-- TODO use node id for key here?  or hash?  any way to access :key from inside component so I don't have to duplicate? -->
+    <!-- TODO any way to access :key from inside component so I don't have to duplicate? -->
     <Scalar v-for="(s, idx) in renderScalars"
             :key="`scalar-${view}-${idx}`"
             :scalarKey="`scalar-${view}-${idx}`"
@@ -27,7 +27,6 @@
         <vgl-perspective-camera ref="camera" :name="view" :orbit-position="orbitPos" />
       </template>
       <template v-else>
-        <!-- TODO how to get zoom to fill viewport on window resize like perspective camera does? -->
         <vgl-orthographic-camera ref="camera" :name="view" :orbit-position="orbitPos" />
       </template>
     </vgl-renderer>
@@ -48,13 +47,14 @@ import { EventBus } from '../EventBus';
 import * as util from '../util';
 import type { vec3 } from 'gl-matrix';
 import type { VglScene } from 'vue-gl';
+import type { Node } from 'rete/types/core/data';
 
 CameraControls.install({ THREE: THREE });
 
 const HIDDEN_LAYER = 31;
 
 class ScalarView {
-    constructor(public value: number, public color: string, public pos: vec3) {
+    constructor(public value: number, public color: string | null, public pos: vec3) {
         this.value = value;
         this.color = color;
         this.pos = pos;
@@ -129,7 +129,7 @@ export default Vue.extend({
         orbitPos(): string {
             var result = this.VIEW_VALUES[this.view].initialCameraPos;
             /* console.log(`Setting orbitPos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`); */
-            return `${result.radius} ${result.phi} ${result.theta}`; // TODO can I avoid this string step?
+            return `${result.radius} ${result.phi} ${result.theta}`; // TODO use proper types from three.js instead of magic strings
         },
 
         renderScalars(): Array<ScalarView> {
@@ -173,7 +173,7 @@ export default Vue.extend({
             this.controls.maxDistance = 50; // How far we can zoom *out*
             this.controls.maxPolarAngle = Math.PI / 2;
         } else {
-            // TODO Get allow left click drag too?  (Will require modification of CameraControls I think...)
+            // TODO Allow left click drag too?  (Will require modification of CameraControls I think...)
             this.controls.minZoom = 5; // How far we can zoom *out*
             this.controls.maxZoom = 115; // How far we can zoom *in*
             this.controls.azimuthRotateSpeed = 0; // No rotation
@@ -186,7 +186,6 @@ export default Vue.extend({
 
         // For some reason on Firefox, the iframe inside VglRenderer does not get an initial 'resize' callback after it loads;
         //   fake one to get viewports to render with the correct size.
-        // TODO Maybe VglRenderer should be modified to do this
         for (const iframe of (this.$refs.renderer as Vue).$el.querySelectorAll('iframe')) {
             iframe.onload = () => {
                 if (iframe == null || iframe.contentWindow == null) {
@@ -201,7 +200,6 @@ export default Vue.extend({
             };
         }
 
-        // TODO need to re-render when expanding, or somehow maintain state
         EventBus.$on('node_engine_processed', this.onNodeEngineProcessed);
 
         this.$nextTick(() => {
@@ -240,15 +238,13 @@ export default Vue.extend({
 
         updateScalars(editorJson: { [key: string]: any }): void {
             /* console.log('Viewport re-drawing scalars'); */
-            this.scalars = [];
-            // TODO may be a more ideomatic way to write this (filter?)
-            for (const key in editorJson['nodes']) {
-                const node = editorJson['nodes'][key];
-                if (node.name === 'Scalar') {
-                    this.scalars.push(new ScalarView(node.data.value[0], node.data.color.visible ? node.data.color.color : null, node.data.pos));
-                    /* console.log('pushed scalar', this.scalars, node.data); */
-                }
-            }
+            this.scalars = Object.values(editorJson['nodes'] as Array<Node>)
+                .filter(node => node.name === 'Scalar')
+                .map(node => new ScalarView(
+                    node.data.value[0],
+                    node.data.color.visible ? node.data.color.color : null,
+                    node.data.pos,
+                ));
             /* console.log('Viewport rendering scalars:', this.scalars); */
         },
 
@@ -296,14 +292,12 @@ export default Vue.extend({
 
         render(): void {
             // console.log('render', this.$refs, this.$refs.renderer, this.$refs.camera, this.scene);
-            // TODO might be cleaner to emit a 'render' event
             if (!_.isNil(this.scene)) {
                 (this.$refs.renderer as any).inst.render((this.scene as any).inst, (this.$refs.camera as any).inst);
             }
         },
 
         expandThis(): void {
-            // TODO expanding viewport resets camera (I guess because they are seperate components?)
             console.log(`Expand viewport ${this.view}`);
             this.$emit('expand-viewport', this.view);
         },

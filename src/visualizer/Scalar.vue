@@ -30,7 +30,7 @@ import { ScalarRenderStyle } from '../settings';
 type CanvasSize = { x: number, y: number };
 
 function colorObjToArray(color: util.Color): [number, number, number, number] {
-    return [color.r / 256.0, color.g / 256.0, color.b / 256.0, 1.0]; // TODO can support alpha if I want
+    return [color.r / 256.0, color.g / 256.0, color.b / 256.0, 1.0]; // TODO do I want to support alpha?
 }
 
 export default Vue.extend({
@@ -38,8 +38,7 @@ export default Vue.extend({
         scalarKey:     { type: String, required: true },
         displayType:   { type: String, required: true },
         layer:         { type: Number, default: 0 },
-        pos:           { type: Array as unknown as PropType<vec3>, default: () => vec3.create() }, // TODO I think to support this I need to use a vgl "billboard"
-        // pos:           { default: () => vec3.create() }, // TODO I think to support this I need to use a vgl "billboard"
+        pos:           { type: Array as unknown as PropType<vec3>, default: () => vec3.create() },
 
         value:         { type: Number, required: true },
         color:         { type: String, default: '#000000' },
@@ -89,7 +88,7 @@ export default Vue.extend({
                 return Math.abs(this.value);
             } else if (this.displayType === ScalarRenderStyle.CIRCLE) {
                 // TODO be careful of near plane clipping
-                // TODO also need to account for "chords" since sphere mesh is not a perfect circle
+                // TODO also need to account for "chords" that can cause clipping since sphere mesh is not a perfect circle
                 // TODO a "billboard" plane is probably the better solution
                 /* console.log('calculating geo radius', this); */
                 const PADDING = 0.5; // A little bit extra to prevent clipping due to camera distortion at close distances
@@ -116,7 +115,7 @@ export default Vue.extend({
                 lineThickness:                  { value: this.lineThickness },
                 numSegments:                    { value: this.numSegments },
                 segmentRatio:                   { value: this.segmentRatio },
-                lineThicknessScaleWithDistance: { value: true }, // TODO broken
+                lineThicknessScaleWithDistance: { value: true }, // TODO broken if 'false'
             },
             vertexShader: `
                 uniform vec3 posOffset;
@@ -126,7 +125,7 @@ export default Vue.extend({
 
                 void main() {
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position + posOffset, 1.0);
-                    objectPos = projectionMatrix * modelViewMatrix * vec4(posOffset, 1.0); // TODO I can't remember the math here; can I drop the 0,0,0?
+                    objectPos = projectionMatrix * modelViewMatrix * vec4(posOffset, 1.0);
                     projMat = projectionMatrix;
                 }
             `,
@@ -143,11 +142,9 @@ export default Vue.extend({
                 uniform float segmentRatio;
                 uniform bool lineThicknessScaleWithDistance;
 
-                // TODO common place for these utility things? Call into JS Math module?
-                const float PI = 3.1415926536;
+                const float PI = ${Math.PI};
 
                 float calculateRadiusScreenSpace(float radiusWorld) {
-                    // TODO just pull out the one or two values that matter from the matrix
                     float radiusClipSpace = (projMat * vec4(radiusWorld, 0.0, 0.0, 1.0)).x; // Assumes a 1:1 pixel ratio
                     float radiusScreenSpace = radiusClipSpace / 2.0 * canvasSize.x;
                     return radiusScreenSpace;
@@ -162,7 +159,7 @@ export default Vue.extend({
                         innerRadius = calculateRadiusScreenSpace((radius - lineThickness / 2.0) / objectPos.w);
                         outerRadius = calculateRadiusScreenSpace((radius + lineThickness / 2.0) / objectPos.w);
                     } else {
-                        // TODO not quite right, and doesn't work with ortho
+                        // TODO not quite right, and does not work with ortho
                         innerRadius = calculateRadiusScreenSpace((radius / objectPos.w - lineThickness / 2.0));
                         outerRadius = calculateRadiusScreenSpace((radius / objectPos.w + lineThickness / 2.0));
                     }

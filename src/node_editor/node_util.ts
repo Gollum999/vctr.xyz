@@ -1,5 +1,4 @@
 import type { Input, Engine as NodeEngine, NodeEditor, Node } from 'rete';
-// import type { Node as DataNode } from '../../node_modules/rete/src/core/data'; // TODO best way to do this?
 import type { Input as DataInput, Output as DataOutput, Node as DataNode } from 'rete/types/core/data';
 import type { IOs } from 'rete/types/engine/component';
 
@@ -130,7 +129,6 @@ export class GraphTraveler {
         const reverseAdjacencyList = this._buildReverseAdjacencyList(nodes); // Map node ID -> [input node IDs]
 
         while (startNodes.length > 0) {
-            // TODO make sure I am using references everywhere here
             const current = startNodes.pop();
             if (current == null) {
                 throw new Error('Node was null');

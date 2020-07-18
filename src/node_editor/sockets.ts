@@ -23,7 +23,6 @@ export const sockets = Object.freeze({
     [CompoundSocketType.VECTOR]: new Rete.Socket('Vector value'),
     [CompoundSocketType.MATRIX]: new Rete.Socket('Matrix value'),
 
-    // TODO is there a cleaner way to do this?  If I ever need more value types, this is not extensible
     [CompoundSocketType.SCALAR_OR_VECTOR]: new Rete.Socket('Scalar or Vector'),
     [CompoundSocketType.SCALAR_OR_MATRIX]: new Rete.Socket('Scalar or Matrix'),
     [CompoundSocketType.VECTOR_OR_MATRIX]: new Rete.Socket('Vector or Matrix'),

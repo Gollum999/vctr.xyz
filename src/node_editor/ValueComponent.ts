@@ -11,8 +11,6 @@ import type { Inputs as DataInputs, Outputs as DataOutputs, Node as DataNode } f
 
 export class ValueComponent extends Rete.Component {
     constructor(private readonly nodeType: nodeUtil.ValueNodeType) {
-        // TODO should consider patching Rete to allow specifying extra attributes or something
-        // TODO   not sure of the best design since render plugin is entirely separate from components
         super(nodeType); // Note that the node name affects the element class as well as the node title
         this.nodeType = nodeType;
     }

@@ -1,4 +1,3 @@
-// TODO is there a library for this?
 export interface SimpleRect {
     top: number,
     left: number,

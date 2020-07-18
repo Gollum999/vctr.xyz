@@ -73,14 +73,14 @@ export default {
 <style scoped>
 .split {
     border: 1px solid #616161;
-    border-bottom: 2px solid #616161; /* TODO this is a hack to put a bottom border despite NodeEditor's hidden overflow */
+    border-bottom: 2px solid #616161; /* HACK: put a bottom border despite NodeEditor's hidden overflow */
 }
 .bottom-split {
     overflow-y: hidden;
 }
 .vec-viz {
     position: relative;
-    margin-left: auto; /* TODO why did I add this? */
+    margin-left: auto;
     margin-right: auto;
 }
 .top-settings-container {

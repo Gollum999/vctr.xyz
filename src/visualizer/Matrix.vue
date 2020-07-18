@@ -1,9 +1,7 @@
 <template>
 <div>
   <div v-if="displayType === 'vector-field'">
-    <!-- TODO is 'key' supposed to be globally unique, or just within component? -->
-    <!-- TODO if I stick with no arrow heads, is there a "line helper" or something that is more efficient? -->
-    <!-- TODO would it be more performant to calculate things like vector length and string versions inside `fieldVectors`? -->
+    <!-- TODO would it be more performant to calculate things like vector length and string versions inside of `fieldVectors`? -->
     <vgl-arrow-helper v-for="(v, idx) in fieldVectors"
                       :key="`matrix-field-vector-${idx}`"
                       :position="`${v.pos[0]} ${v.pos[1]} ${v.pos[2]}`"
@@ -38,7 +36,7 @@ export default Vue.extend({
 
         vectorScale:   { type: Number, default: 0.2 },
         density:       { type: Number, default: 0.5 },
-        fieldSize:     { type: Number, default: 7.0 }, // TODO should this be distance in world coords, or the total count of vectors per side?  if in world coords, should I use size of one direction or both combined?
+        fieldSize:     { type: Number, default: 7.0 },
     },
     data() {
         return {

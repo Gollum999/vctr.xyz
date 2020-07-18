@@ -1,6 +1,6 @@
 <template>
 <div :class="[nodeType.toLowerCase(), 'control-container']" :style="{'grid-row': rowIdx}">
-  <!-- TODO why is dark theme not applying to font color? -->
+  <!-- TODO why is dark theme not applying? -->
   <v-text-field
     v-for="(item, idx) in values" :key="`${nodeType}-value-${idx}`"
     solo
@@ -92,7 +92,6 @@ export default Vue.extend({
     methods: {
         setValue(value: Array<number>) {
             // console.log('ValueControlView setValue', value);
-            // TODO repeat this check for other types
             if (_.isNil(value) || value.length !== EXPECTED_SIZE[this.nodeType]) {
                 this.values = this.defaultValues.slice();
                 // console.log('ValueControlView setValue DEFAULT to', this.values);

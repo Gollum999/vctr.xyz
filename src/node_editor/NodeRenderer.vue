@@ -1,17 +1,12 @@
 <template lang="pug">
-// TODO may need to have manual control over class name
 // TODO why is dark theme not applying?
 v-card.node(dark hover :class="[selected(), node.name.toLowerCase()] | kebab")
-  // TODO change style on focus?
   v-text-field.node-title(dense hide-details flat solo v-model="title" @blur="onTitleBlur" @keyup.enter="$event.target.blur()" size="10")
   .debug-node-id {{node.id}}
 
   .node-body
     // Inputs
     // 0 indexed
-    // TODO there was some warning here about duplicate key 'vec', fixed by adding idx to key but I'm not entirely sure how that worked or whether that is correct
-    // .input(v-for='(input, idx) in filteredInputs' :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
-    // TODO I was originally mixing v-if with v-for because inputs() is not reactive, then I changed it... should I have?
     .input(v-for='(input, idx) in filteredInputs' :key="`input.key-${idx}`" :style="{'grid-row': idx + 1}")
       Socket(v-if="input.socket !== null" v-socket:input="input" type="input" :socket="input.socket")
       .input-title(v-show='!input.showControl()') {{input.name}}
@@ -170,7 +165,6 @@ $socket-size: 12px
       width: auto
       input
         font-size: 14px
-        // font-weight: bold // TODO doesn't look amazing, something weird with sub-pixel alignment in canvas?
         padding: 4px 0 4px
         text-align: center
       .v-input__control
@@ -207,7 +201,7 @@ $socket-size: 12px
     &.matrix-value
       background: $socket-color-matrix
     &.scalar-or-vector
-      background: #bb5d90 // TODO is there a more graceful way to have a "fallback" style?  media query?
+      background: #bb5d90
       background: linear-gradient(180deg, $socket-color-scalar 50%, $socket-color-vector 50%)
     &.scalar-or-matrix
       background: #5dbbee

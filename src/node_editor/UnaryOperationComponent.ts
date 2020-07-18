@@ -71,7 +71,6 @@ export default class UnaryOperationComponent extends Rete.Component {
         }
         if (result instanceof Float32Array) {
             // Float32Array serializes as an object instead of a regular array; force types to be consistent
-            // TODO how will this look for matrices?  should this be the receiving node's responsibility?
             result = Array.from(result);
         }
         // console.log('UnaryOperationComponent result:', result);

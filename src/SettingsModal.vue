@@ -1,5 +1,6 @@
 <template>
 <v-card>
+  <!-- TODO would be nice to be able to drag the settings window -->
   <v-card-title>
     <v-btn text fab small class="close-button" @click="close">
       <v-icon>close</v-icon>
@@ -14,7 +15,6 @@
       <v-tab>Viewport</v-tab>
       <v-tab>Node Editor</v-tab>
 
-      <!-- TODO The modal resizes when I change tabs, can I avoid that? -->
       <v-tab-item>
         <v-subheader class="text--secondary">Common Settings</v-subheader>
         <v-switch class="first-switch" color="primary" v-model="viewportSettings.values.showAxis" label="Show axis" hide-details />
@@ -54,18 +54,11 @@
             {{fieldDensity | formatSliderValue}}
           </template>
         </v-slider>
-        <!--
-        <md-field>
-          <md-select>
-            <!-\- TODO need to figure out how to group these responsibility -\->
-            <md-option>Solid</md-option>
-            <md-option>Length</md-option>
-          </md-select>
-        </md-field>
-        -->
       </v-tab-item>
 
+      <!-- TODO size jumps a bit after changing to this tab -->
       <v-tab-item>
+        <!-- TODO add settings to default 'visible' state per value type -->
         <v-switch color="primary" v-model="nodeEditorSettings.values.useRandomColors" label="Use random colors" />
         <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
                               v-model="nodeEditorSettings.values.defaultScalarColor">

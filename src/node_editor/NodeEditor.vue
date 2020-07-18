@@ -16,7 +16,6 @@
         <v-btn fab x-small type="button" title="Add matrix" @click="addNode('Matrix')">
           <v-icon>$vuetify.icons.matrix</v-icon>
         </v-btn>
-        <!-- TODO dosen't seem to support a "dense" mode like md-select does -->
         <v-menu open-on-hover :close-on-content-click="false">
           <template v-slot:activator="{ on: showMenu }">
             <v-btn fab x-small type="button" title="Add operation" v-on="showMenu">
@@ -181,12 +180,10 @@ function _updateOperationSockets(editor: NodeEditor, engineNode: DataNode, edito
             return false;
         }
         const connection = input.connections[0];
-        // TODO does not account for compatible sockets with different names, though I am not using those yet outside of 'Anything' sockets
-        // TODO checking by socket name is overlay aggressive; could instead check for type subset
+        // TODO checking by socket name is overly aggressive; could instead check for type subset
         return connection.input.socket.name !== connection.output.socket.name;
     }));
 
-    // const needsUpdate = hasDynamicInputSockets && (anyConnectionEmpty || anySocketTypeMismatch); // TODO dynamic also could just mean that the socket can go from 'anything' to input type
     const needsUpdateFromInputs = anyConnectionEmpty || anySocketTypeMismatch;
     // console.log('TEST', editorNode.name, 'needs input update?', needsUpdateFromInputs);
     if (needsUpdateFromInputs) {
@@ -208,7 +205,7 @@ export default Vue.extend({
 
             version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
             settings: settings.nodeEditorSettings,
-            history: history, // For checking whether to disable undo/redo buttons // TODO is it better to do this or add a computed property?
+            history, // For checking whether to disable undo/redo buttons // TODO is it better to do this or add a computed property?
 
             lastNodePosition: null as [number, number] | null,
             newNodesShouldBeCentered: true,
@@ -287,8 +284,6 @@ export default Vue.extend({
             console.log('Added node at position', node.position);
 
             // Normally addNode triggers this update, but since I updated the position *after* adding the node, I need to do it manually
-            // TODO: If this causes any performance issues, I can cache node sizes per type so we only need to manually update the first time
-            //       a certain type is created
             nodeView.update();
 
             this.newNodesShouldBeCentered = false;
@@ -301,7 +296,7 @@ export default Vue.extend({
         },
 
         getNewNodePos(node: Node, nodeView: NodeView): [number, number] {
-            // TODO really need a simple vector class
+            // This could be much cleaner if JS supported operator overloading for a clean Vector interface
             const editorX = this.editor.view.area.transform.x;
             const editorY = this.editor.view.area.transform.y;
             const nodeEditorWidth = this.editor.view.container.parentElement?.parentElement?.clientWidth;
@@ -346,19 +341,13 @@ export default Vue.extend({
             this.editor.selected.each(node => {
                 this.editor.removeNode(node);
             });
+            // Combine all resulting RemoveNodeActions and RemoveConnectionActions into a single action
             history.add(new actions.MultiAction(history.squashTopActionsDownToIndex(lastHistoryIdx + 1)));
         },
 
         onUndo() {
             console.log('UNDO');
             try {
-                // this.currentlyHandlingHistoryAction = true;
-                // /* console.log('before trigger undo', this.editor.plugins); */
-                // this.editor.trigger('undo'); // TODO sometimes a dragnodeaction is getting added when I click to change values
-                // /* console.log('after trigger undo', result); */
-                // this.$nextTick(() => {
-                //     this.currentlyHandlingHistoryAction = false;
-                // });
                 history.disable();
                 history.undo();
                 // HACK: Disable new history items from being added for the whole tick; the default behavior only disables it
@@ -407,11 +396,6 @@ export default Vue.extend({
             }
             if (this.editor.selected.list.length) {
                 const originPos = this.editor.selected.list[0].position; // TODO I think best would be to find the node closest to center of selected
-                // const nodeRects = this.editor.selected.list.map(node => {
-                //     return new Rect(node.position[1], node.position[0], node.position[0], node.position[1]);
-                // });
-                // const combined = nodeRects.reduce((combined, current) => { return combined.union(current); });
-                // const originPos = combined.midpoint();
                 event.clipboardData.setData('application/json', JSON.stringify(this.editor.selected.list.map(node => {
                     return this.serializeNode(node, originPos);
                 })));
@@ -521,7 +505,6 @@ export default Vue.extend({
 
         async createDemoNodes(): Promise<void> {
             const [vecLhs, vecRhs, add, vecSum, length, scalarLen] = await Promise.all([
-                // TODO color stuff is still pretty gross
                 this.nodeFactory.createNode(NodeType.VECTOR, {
                     'value': [3, 2, 0],
                     'pos': [0, 0, 0],
@@ -609,17 +592,6 @@ export default Vue.extend({
                 }
             });
 
-            // // TODO should at least name this event something different to avoid confusion
-            // EventBus.$on('addhistory', action => {
-            //     // Bit of a hack; prevent changes that happen as a result of undo/redo from themselves being added to the history stack
-            //     // (which would erase any potential redo-able actions)
-            //     // The History plugin already does something like this to prevent infinite recursion, but that only works within the same
-            //     // stack frame, whereas this works for the whole Vue tick (important when a watcher is the one adding the history)
-            //     if (!this.currentlyHandlingHistoryAction) {
-            //         this.editor.trigger('addhistory', action);
-            //     }
-            // });
-
             this.editor.on('zoom', ({transform, zoom, source}) => {
                 return (this.minZoom <= zoom && zoom <= this.maxZoom);
             });
@@ -674,7 +646,6 @@ export default Vue.extend({
             ]);
 
             if (status === 'success') {
-                // TODO should I save during more events?
                 this.saveState();
 
                 EventBus.$emit('node_engine_processed', this.editor.toJSON());
@@ -865,8 +836,10 @@ export default Vue.extend({
       //   margin-left: 8px
       margin-right: 8px
       .v-icon
+        // For my custom icons
         height: 24px
-        width: 24px // TODO v-icon "size" attribute doesn't set this?
+        width: 24px
+        // For builtin icons
         font-size: 24px
     position: absolute
     left: 5px
