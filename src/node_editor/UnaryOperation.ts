@@ -13,7 +13,6 @@ import type { Node } from 'rete/types/node';
 type CalculationInput = { value: any, type: string };
 
 export class UnaryOperation {
-    static title: string | null = null;
     // TODO these should be "allowed" instead of "default"; when updating types, intersect with this, and remove connection if result is empty
     static defaultInputSockets = s.anything;
     static defaultOutputSockets = s.anything;
@@ -112,7 +111,6 @@ export class UnaryOperation {
 }
 
 export class LengthOperation extends UnaryOperation {
-    static title = 'Length';
     static defaultInputSockets = s.vector;
     static defaultOutputSockets = s.scalar;
 
@@ -130,12 +128,11 @@ export class LengthOperation extends UnaryOperation {
         if (input.type === 'vector') {
             return [vec3.length(input.value)];
         }
-        throw new Error(`${this.title} unsupported input type ${input.type}`);
+        throw new Error(`${this.constructor.name} unsupported input type ${input.type}`);
     }
 }
 
 export class InvertOperation extends UnaryOperation {
-    static title = 'Invert';
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.matrix;
 
@@ -158,12 +155,11 @@ export class InvertOperation extends UnaryOperation {
             }
             return result;
         }
-        throw new Error(`${this.title} unsupported input type ${input.type}`);
+        throw new Error(`${this.constructor.name} unsupported input type ${input.type}`);
     }
 }
 
 export class NormalizeOperation extends UnaryOperation {
-    static title = 'Normalize';
     static defaultInputSockets = s.vector;
     static defaultOutputSockets = s.vector;
 
@@ -182,12 +178,11 @@ export class NormalizeOperation extends UnaryOperation {
             const out = vec3.create();
             return vec3.normalize(out, input.value);
         }
-        throw new Error(`${this.title} unsupported input type ${input.type}`);
+        throw new Error(`${this.constructor.name} unsupported input type ${input.type}`);
     }
 }
 
 export class TransposeOperation extends UnaryOperation {
-    static title = 'Transpose';
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.matrix;
 
@@ -206,12 +201,11 @@ export class TransposeOperation extends UnaryOperation {
             const out = mat4.create();
             return mat4.transpose(out, input.value);
         }
-        throw new Error(`${this.title} unsupported input type ${input.type}`);
+        throw new Error(`${this.constructor.name} unsupported input type ${input.type}`);
     }
 }
 
 export class DeterminantOperation extends UnaryOperation {
-    static title = 'Determinant';
     static defaultInputSockets = s.matrix;
     static defaultOutputSockets = s.scalar;
 
@@ -229,7 +223,7 @@ export class DeterminantOperation extends UnaryOperation {
         if (input.type === 'matrix') {
             return [mat4.determinant(input.value)];
         }
-        throw new Error(`${this.title} unsupported input type ${input.type}`);
+        throw new Error(`${this.constructor.name} unsupported input type ${input.type}`);
     }
 }
 

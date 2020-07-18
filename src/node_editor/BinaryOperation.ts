@@ -14,7 +14,6 @@ type InputTypesPair = [Set<SocketType>, Set<SocketType>];
 type CalculationInput = { value: any, type: string };
 
 export class BinaryOperation {
-    static title: string | null = null;
     static symbol: string | null = null;
     // TODO these should be "allowed" instead of "default"; when updating types, intersect with this, and remove connection if result is empty
     static defaultLhsSockets = s.anything;
@@ -155,7 +154,6 @@ export class BinaryOperation {
 }
 
 export class AddOperation extends BinaryOperation {
-    static title = 'Add';
     static symbol = '+';
 
     // Input and output socket types must always be in sync
@@ -179,12 +177,11 @@ export class AddOperation extends BinaryOperation {
             const out = mat4.create();
             return mat4.add(out, lhs.value, rhs.value);
         }
-        throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+        throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
     }
 }
 
 export class SubtractOperation extends BinaryOperation {
-    static title = 'Subtract';
     static symbol = '-';
 
     // Input and output socket types must always be in sync
@@ -208,12 +205,11 @@ export class SubtractOperation extends BinaryOperation {
             const out = mat4.create();
             return mat4.subtract(out, lhs.value, rhs.value);
         }
-        throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+        throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
     }
 }
 
 export class MultiplyOperation extends BinaryOperation {
-    static title = 'Multiply';
     static symbol = '*';
 
     static lhsToRhsTypeMap = { 'scalar': s.anything, 'vector': s.scalar,         'matrix': s.anything       };
@@ -256,12 +252,11 @@ export class MultiplyOperation extends BinaryOperation {
             mat4.multiply(out, lhsT, rhsT);
             return mat4.transpose(out, out);
         }
-        throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+        throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
     }
 }
 
 export class DivideOperation extends BinaryOperation {
-    static title = 'Divide';
     static symbol = '/';
     static defaultLhsSockets = s.anything;
     static defaultRhsSockets = s.scalar;
@@ -292,12 +287,11 @@ export class DivideOperation extends BinaryOperation {
                 return mat4.multiplyScalar(out, lhs.value, 1.0 / rhs.value[0]);
             }
         }
-        throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+        throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
     }
 }
 
 export class DotOperation extends BinaryOperation {
-    static title = 'Dot Product';
     static symbol = '·';
     static defaultLhsSockets = s.vector;
     static defaultRhsSockets = s.vector;
@@ -310,14 +304,13 @@ export class DotOperation extends BinaryOperation {
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+            throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         return [vec3.dot(lhs.value, rhs.value)];
     }
 }
 
 export class CrossOperation extends BinaryOperation {
-    static title = 'Cross Product';
     static symbol = '×';
     static defaultLhsSockets = s.vector;
     static defaultRhsSockets = s.vector;
@@ -330,7 +323,7 @@ export class CrossOperation extends BinaryOperation {
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+            throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         const out = vec3.create();
         return vec3.cross(out, lhs.value, rhs.value);
@@ -338,7 +331,6 @@ export class CrossOperation extends BinaryOperation {
 }
 
 export class AngleOperation extends BinaryOperation {
-    static title = 'Angle';
     static symbol = '∠';
     static defaultLhsSockets = s.vector;
     static defaultRhsSockets = s.vector;
@@ -355,14 +347,13 @@ export class AngleOperation extends BinaryOperation {
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+            throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         return [vec3.angle(lhs.value, rhs.value)];
     }
 }
 
 export class ProjectionOperation extends BinaryOperation {
-    static title = 'Projection';
     static symbol = null;
     static defaultLhsSockets = s.vector;
     static defaultRhsSockets = s.vector;
@@ -379,7 +370,7 @@ export class ProjectionOperation extends BinaryOperation {
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'vector' || rhs.type !== 'vector') {
-            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+            throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         const num = vec3.dot(lhs.value, rhs.value);
         const den = vec3.dot(rhs.value, rhs.value);
@@ -390,7 +381,6 @@ export class ProjectionOperation extends BinaryOperation {
 }
 
 export class ExponentOperation extends BinaryOperation {
-    static title = 'Exponent';
     static symbol = null;
     static defaultLhsSockets = s.scalar;
     static defaultRhsSockets = s.scalar;
@@ -407,7 +397,7 @@ export class ExponentOperation extends BinaryOperation {
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
         if (lhs.type !== 'scalar' || rhs.type !== 'scalar') {
-            throw new Error(`${this.title} unsupported input types ${lhs.type}, ${rhs.type}`);
+            throw new Error(`${this.constructor.name} unsupported input types ${lhs.type}, ${rhs.type}`);
         }
         return [Math.pow(lhs.value, rhs.value)];
     }

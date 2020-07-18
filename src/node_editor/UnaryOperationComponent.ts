@@ -5,22 +5,16 @@ import * as nodeUtil from './node_util';
 import { CalculationError, WarningControl } from './WarningControl';
 import history from '../history';
 import { MultiAction, RemoveAllNodeOutputConnectionsAction } from '../history_actions';
-import type { UnaryOperation } from './UnaryOperation';
+import { UnaryOperation, allUnaryOperations } from './UnaryOperation';
 import type { Node } from 'rete/types/node';
 import type { Inputs as DataInputs, Outputs as DataOutputs, Node as DataNode } from 'rete/types/core/data';
 
 export default class UnaryOperationComponent extends Rete.Component {
     private readonly operation: typeof UnaryOperation;
 
-    constructor(operation: typeof UnaryOperation) {
-        // Note that the Rete engine does some node lookups by name, so each node type must have a unique name.
-        // This is especially important in here where I give the component some state; if the name is shared anywhere it will look up
-        //   the wrong worker() function during engine processing
-        if (operation.title == null) {
-            throw new Error(`Operation title was null: ${operation}`);
-        }
-        super(operation.title);
-        this.operation = operation;
+    constructor(nodeType: nodeUtil.UnaryOperationNodeType) {
+        super(nodeType);
+        this.operation = allUnaryOperations[nodeType];
     }
 
     async builder(node: Node): Promise<Node> {

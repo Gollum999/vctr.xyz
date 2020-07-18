@@ -1,8 +1,6 @@
 import * as settings from '../settings';
 import * as util from '../util';
 import * as allComponents from './components';
-import { allUnaryOperations } from './UnaryOperation';
-import { allBinaryOperations } from './BinaryOperation';
 import { ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType, ADVANCED_RENDER_CONTROLS_KEY } from './node_util';
 import { Component } from 'rete/types/component';
 import { Node } from 'rete/types/node';
@@ -15,8 +13,8 @@ export default class NodeFactory {
         console.log(ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType);
         this.components = Object.freeze({
             ...Object.fromEntries(Object.values(ValueNodeType).map(nodeType => [nodeType, new allComponents.ValueComponent(nodeType)])),
-            ...Object.fromEntries(Object.values(UnaryOperationNodeType).map(nodeType => [nodeType, new allComponents.UnaryOperationComponent(allUnaryOperations[nodeType])])),
-            ...Object.fromEntries(Object.values(BinaryOperationNodeType).map(nodeType => [nodeType, new allComponents.BinaryOperationComponent(allBinaryOperations[nodeType])])),
+            ...Object.fromEntries(Object.values(UnaryOperationNodeType).map(nodeType => [nodeType, new allComponents.UnaryOperationComponent(nodeType)])),
+            ...Object.fromEntries(Object.values(BinaryOperationNodeType).map(nodeType => [nodeType, new allComponents.BinaryOperationComponent(nodeType)])),
         });
         console.log('NodeFactory', this.components);
         this.settings = settings.nodeEditorSettings;

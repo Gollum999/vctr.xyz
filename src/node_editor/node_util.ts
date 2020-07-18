@@ -2,7 +2,9 @@ import type { Input, Engine as NodeEngine, NodeEditor, Node } from 'rete';
 import type { Input as DataInput, Output as DataOutput, Node as DataNode } from 'rete/types/core/data';
 import type { IOs } from 'rete/types/engine/component';
 
-// TODO these match node titles, so probably don't need to re-specify in unary/binaryoperation
+// Note that the Rete engine does some node lookups by name, so each node type must have a unique name.
+// This is especially important in here where I give the component some state; if the name is shared anywhere it will look up
+//   the wrong worker() function during engine processing
 /* eslint-disable no-multi-spaces */
 export enum ValueNodeType {
     SCALAR        = 'Scalar',

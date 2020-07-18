@@ -5,22 +5,16 @@ import * as nodeUtil from './node_util';
 import { CalculationError, WarningControl } from './WarningControl';
 import history from '../history';
 import { MultiAction, RemoveAllNodeOutputConnectionsAction } from '../history_actions';
-import type { BinaryOperation } from './BinaryOperation';
+import { BinaryOperation, allBinaryOperations } from './BinaryOperation';
 import type { Node } from 'rete/types/node';
 import type { Inputs as DataInputs, Outputs as DataOutputs, Node as DataNode } from 'rete/types/core/data';
 
 export default class BinaryOperationComponent extends Rete.Component {
     private readonly operation: typeof BinaryOperation;
 
-    constructor(operation: typeof BinaryOperation) {
-        // Note that the Rete engine does some node lookups by name, so each node type must have a unique name.
-        // This is especially important in here where I give the component some state; if the name is shared anywhere it will look up
-        //   the wrong worker() function during engine processing
-        if (operation.title == null) {
-            throw new Error(`Operation title was null: ${operation}`);
-        }
-        super(operation.title);
-        this.operation = operation;
+    constructor(nodeType: nodeUtil.BinaryOperationNodeType) {
+        super(nodeType);
+        this.operation = allBinaryOperations[nodeType];
     }
 
     async builder(node: Node): Promise<Node> {
@@ -77,7 +71,6 @@ export default class BinaryOperationComponent extends Rete.Component {
         }
         if (result instanceof Float32Array) {
             // Float32Array serializes as an object instead of a regular array; force types to be consistent
-            // TODO how will this look for matrices?  should this be the receiving node's responsibility?
             result = Array.from(result);
         }
         outputs['result'] = result;
