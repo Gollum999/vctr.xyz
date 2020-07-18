@@ -610,14 +610,11 @@ export default Vue.extend({
 
             this.showingError = false;
 
-            // Make sure both promises get scheduled next to each other, so there is no chance for another 'process' to get
-            // ordered after the 'abort' below (which can happen if there are multiple 'triggerEngineProcess'es scheduled
-            // and we 'await' the below functions individually)
-            // This prevents warning logs from Rete.
-            const [_, status] = await Promise.all([
-                this.engine.abort(), // Stop old job if running
-                this.engine.process(this.editor.toJSON()),
-            ]);
+            // Intentionally not awaiting 'abort'; make sure both promises get scheduled next to each other, so there is no
+            // chance for another 'process' to get ordered after the 'abort' below (which can happen if there are multiple
+            // 'triggerEngineProcess'es already scheduled and we 'await' the 'abort').  This prevents warning logs from Rete.
+            this.engine.abort(); // Stop old job if running
+            const status = await this.engine.process(this.editor.toJSON());
 
             if (status === 'success') {
                 this.saveState();

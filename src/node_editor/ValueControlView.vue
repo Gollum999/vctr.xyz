@@ -113,9 +113,6 @@ export default Vue.extend({
                 this.emitter.trigger('process');
             });
             history.addAndDo(action);
-
-            console.log('ValueControlView', this.nodeType, 'triggering engine process from onInput');
-            this.emitter.trigger('process');
         },
 
         onCopy(event: ClipboardEvent) {
