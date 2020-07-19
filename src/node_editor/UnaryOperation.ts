@@ -2,8 +2,8 @@ import _ from 'lodash';
 import { vec3, mat4 } from 'gl-matrix';
 import Rete from 'rete';
 
-import { SocketType, sockets } from './sockets';
-import util, { s, UnaryInputToOutputSocketMap } from './operation_util';
+import { SocketType, sockets, compoundSocket as s } from './sockets';
+import util, { UnaryInputToOutputSocketMap } from './operation_util';
 import { WarningControl, CalculationError } from './WarningControl';
 import { UnaryOperationNodeType } from './node_util';
 import type { NodeEditor } from 'rete/types/editor';
@@ -14,8 +14,8 @@ type CalculationInput = { value: any, type: string };
 
 export class UnaryOperation {
     // TODO these should be "allowed" instead of "default"; when updating types, intersect with this, and remove connection if result is empty
-    static defaultInputSockets = s.anything;
-    static defaultOutputSockets = s.anything;
+    static defaultInputSockets = s.ANYTHING;
+    static defaultOutputSockets = s.ANYTHING;
     static inputToOutputTypeMap: UnaryInputToOutputSocketMap | null = null;
 
     static getInputName(): string {
@@ -94,13 +94,13 @@ export class UnaryOperation {
         }
 
         // console.log(allExpectedTypes);
-        if (_.isEqual(allExpectedTypes, s.invalid)) {
+        if (_.isEqual(allExpectedTypes, s.INVALID)) {
             throw new Error(`Invalid type combination ${allExpectedTypes} (from "${inputTypeList}")`);
         } else {
             allExpectedTypes.delete(SocketType.INVALID);
         }
-        if (_.isEqual(allExpectedTypes, s.ignore)) {
-            return s.ignore;
+        if (_.isEqual(allExpectedTypes, s.IGNORE)) {
+            return s.IGNORE;
         } else {
             allExpectedTypes.delete(SocketType.IGNORE);
         }
@@ -111,17 +111,17 @@ export class UnaryOperation {
 }
 
 export class LengthOperation extends UnaryOperation {
-    static defaultInputSockets = s.vector;
-    static defaultOutputSockets = s.scalar;
+    static defaultInputSockets = s.VECTOR;
+    static defaultOutputSockets = s.SCALAR;
 
     static getOutputName(): string {
         return '|X|';
     }
     // Only vector -> scalar supported
     static inputToOutputTypeMap = {
-        'scalar': s.invalid,
-        'vector': s.scalar,
-        'matrix': s.invalid,
+        'scalar': s.INVALID,
+        'vector': s.SCALAR,
+        'matrix': s.INVALID,
     };
 
     static calculate(input: CalculationInput): any {
@@ -133,17 +133,17 @@ export class LengthOperation extends UnaryOperation {
 }
 
 export class InvertOperation extends UnaryOperation {
-    static defaultInputSockets = s.matrix;
-    static defaultOutputSockets = s.matrix;
+    static defaultInputSockets = s.MATRIX;
+    static defaultOutputSockets = s.MATRIX;
 
     static getOutputName(): string {
         return 'X⁻¹';
     }
     // Only matrix -> matrix supported
     static inputToOutputTypeMap = {
-        'scalar': s.invalid,
-        'vector': s.invalid,
-        'matrix': s.matrix,
+        'scalar': s.INVALID,
+        'vector': s.INVALID,
+        'matrix': s.MATRIX,
     };
 
     static calculate(input: CalculationInput): any {
@@ -160,17 +160,17 @@ export class InvertOperation extends UnaryOperation {
 }
 
 export class NormalizeOperation extends UnaryOperation {
-    static defaultInputSockets = s.vector;
-    static defaultOutputSockets = s.vector;
+    static defaultInputSockets = s.VECTOR;
+    static defaultOutputSockets = s.VECTOR;
 
     static getOutputName(): string {
         return 'norm(X)';
     }
     // Only vector -> vector supported
     static inputToOutputTypeMap = {
-        'scalar': s.invalid,
-        'vector': s.vector,
-        'matrix': s.invalid,
+        'scalar': s.INVALID,
+        'vector': s.VECTOR,
+        'matrix': s.INVALID,
     };
 
     static calculate(input: CalculationInput): any {
@@ -183,17 +183,17 @@ export class NormalizeOperation extends UnaryOperation {
 }
 
 export class TransposeOperation extends UnaryOperation {
-    static defaultInputSockets = s.matrix;
-    static defaultOutputSockets = s.matrix;
+    static defaultInputSockets = s.MATRIX;
+    static defaultOutputSockets = s.MATRIX;
 
     static getOutputName(): string {
         return 'Xᵀ';
     }
     // Only matrix -> matrix supported
     static inputToOutputTypeMap = {
-        'scalar': s.invalid,
-        'vector': s.invalid,
-        'matrix': s.matrix,
+        'scalar': s.INVALID,
+        'vector': s.INVALID,
+        'matrix': s.MATRIX,
     };
 
     static calculate(input: CalculationInput): any {
@@ -206,17 +206,17 @@ export class TransposeOperation extends UnaryOperation {
 }
 
 export class DeterminantOperation extends UnaryOperation {
-    static defaultInputSockets = s.matrix;
-    static defaultOutputSockets = s.scalar;
+    static defaultInputSockets = s.MATRIX;
+    static defaultOutputSockets = s.SCALAR;
 
     static getOutputName(): string {
         return '|X|';
     }
     // Only matrix -> scalar supported
     static inputToOutputTypeMap = {
-        'scalar': s.invalid,
-        'vector': s.invalid,
-        'matrix': s.scalar,
+        'scalar': s.INVALID,
+        'vector': s.INVALID,
+        'matrix': s.SCALAR,
     };
 
     static calculate(input: CalculationInput): any {

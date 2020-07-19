@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { SocketType, CompoundSocketType, sockets } from './sockets';
+import { SocketType, CompoundSocketType, sockets, compoundSocket } from './sockets';
 import * as util from '../util';
 import type { NodeEditor } from 'rete/types/editor';
 import type { Input } from 'rete/types/input';
@@ -12,30 +12,18 @@ export type InputSocketCompatibilityMap = { [lhs: string]: Set<SocketType> }
 export type UnaryInputToOutputSocketMap = { [input: string]: Set<SocketType> }
 export type BinaryInputToOutputSocketMap = { [lhs: string]: { [rhs: string]: Set<SocketType> } }
 
-export const s = Object.freeze({ // TODO better name (though brevity is convenient for compatibility matrices)
-    scalar:         new Set([SocketType.SCALAR]),
-    vector:         new Set([SocketType.VECTOR]),
-    matrix:         new Set([SocketType.MATRIX]),
-    scalarOrVector: new Set([SocketType.SCALAR, SocketType.VECTOR]),
-    scalarOrMatrix: new Set([SocketType.SCALAR, SocketType.MATRIX]),
-    vectorOrMatrix: new Set([SocketType.VECTOR, SocketType.MATRIX]),
-    anything:       new Set([SocketType.SCALAR, SocketType.VECTOR, SocketType.MATRIX]),
-    invalid:        new Set([SocketType.INVALID]),
-    ignore:         new Set([SocketType.IGNORE]),
-});
-
 export function socketTypesToCompoundSocket(typeList: Set<SocketType>): CompoundSocketType {
     if (!(typeList instanceof Set)) {
         throw new Error('socketTypesToCompoundSocket: Input should be of type Set');
     }
     switch (true) {
-    case _.isEqual(typeList, s.scalar):         return CompoundSocketType.SCALAR;
-    case _.isEqual(typeList, s.vector):         return CompoundSocketType.VECTOR;
-    case _.isEqual(typeList, s.matrix):         return CompoundSocketType.MATRIX;
-    case _.isEqual(typeList, s.scalarOrVector): return CompoundSocketType.SCALAR_OR_VECTOR;
-    case _.isEqual(typeList, s.scalarOrMatrix): return CompoundSocketType.SCALAR_OR_MATRIX;
-    case _.isEqual(typeList, s.vectorOrMatrix): return CompoundSocketType.VECTOR_OR_MATRIX;
-    case _.isEqual(typeList, s.anything):       return CompoundSocketType.ANYTHING;
+    case _.isEqual(typeList, compoundSocket.SCALAR):           return CompoundSocketType.SCALAR;
+    case _.isEqual(typeList, compoundSocket.VECTOR):           return CompoundSocketType.VECTOR;
+    case _.isEqual(typeList, compoundSocket.MATRIX):           return CompoundSocketType.MATRIX;
+    case _.isEqual(typeList, compoundSocket.SCALAR_OR_VECTOR): return CompoundSocketType.SCALAR_OR_VECTOR;
+    case _.isEqual(typeList, compoundSocket.SCALAR_OR_MATRIX): return CompoundSocketType.SCALAR_OR_MATRIX;
+    case _.isEqual(typeList, compoundSocket.VECTOR_OR_MATRIX): return CompoundSocketType.VECTOR_OR_MATRIX;
+    case _.isEqual(typeList, compoundSocket.ANYTHING):         return CompoundSocketType.ANYTHING;
     default: throw new Error(`Could not determine socket name from list "${Array.from(typeList).join(',')}"`);
     }
 }
@@ -43,13 +31,13 @@ export function socketTypesToCompoundSocket(typeList: Set<SocketType>): Compound
 // TODO There should be a way to avoid this...
 export function getSocketTypes(socket: Socket): Set<SocketType> {
     switch (socket.name) {
-    case 'Scalar value':     return s.scalar;
-    case 'Vector value':     return s.vector;
-    case 'Matrix value':     return s.matrix;
-    case 'Scalar or Vector': return s.scalarOrVector;
-    case 'Scalar or Matrix': return s.scalarOrMatrix;
-    case 'Vector or Matrix': return s.vectorOrMatrix;
-    case 'Anything':         return s.anything;
+    case 'Scalar value':     return compoundSocket.SCALAR;
+    case 'Vector value':     return compoundSocket.VECTOR;
+    case 'Matrix value':     return compoundSocket.MATRIX;
+    case 'Scalar or Vector': return compoundSocket.SCALAR_OR_VECTOR;
+    case 'Scalar or Matrix': return compoundSocket.SCALAR_OR_MATRIX;
+    case 'Vector or Matrix': return compoundSocket.VECTOR_OR_MATRIX;
+    case 'Anything':         return compoundSocket.ANYTHING;
     default: throw new Error(`Could not find socket type for name "${socket.name}"`);
     }
 }
@@ -151,7 +139,6 @@ function _removeIoConnectionsIfIncompatible(editor: NodeEditor, io: IO, isInput:
 export default {
     SocketType,
     CompoundSocketType,
-    s,
     socketTypesToCompoundSocket,
     getSocketTypes,
     updateIoType,

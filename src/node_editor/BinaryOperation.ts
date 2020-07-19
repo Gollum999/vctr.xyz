@@ -2,8 +2,8 @@ import _ from 'lodash';
 import { vec3, mat4 } from 'gl-matrix';
 import Rete from 'rete';
 
-import { SocketType, sockets } from './sockets';
-import util, { s, InputSocketCompatibilityMap, BinaryInputToOutputSocketMap } from './operation_util';
+import { SocketType, sockets, compoundSocket as s } from './sockets';
+import util, { InputSocketCompatibilityMap, BinaryInputToOutputSocketMap } from './operation_util';
 import { WarningControl, CalculationError } from './WarningControl';
 import { BinaryOperationNodeType } from './node_util';
 import type { NodeEditor } from 'rete/types/editor';
@@ -16,9 +16,9 @@ type CalculationInput = { value: any, type: string };
 export class BinaryOperation {
     static symbol: string | null = null;
     // TODO these should be "allowed" instead of "default"; when updating types, intersect with this, and remove connection if result is empty
-    static defaultLhsSockets = s.anything;
-    static defaultRhsSockets = s.anything;
-    static defaultOutputSockets = s.anything;
+    static defaultLhsSockets = s.ANYTHING;
+    static defaultRhsSockets = s.ANYTHING;
+    static defaultOutputSockets = s.ANYTHING;
     static lhsToRhsTypeMap: InputSocketCompatibilityMap | null = null;
     static rhsToLhsTypeMap: InputSocketCompatibilityMap | null = null;
     static inputToOutputTypeMap: BinaryInputToOutputSocketMap | null = null;
@@ -103,7 +103,7 @@ export class BinaryOperation {
         // console.log('TEST updateOutputSocketTypes expectedOutputTypes =', expectedOutputTypes);
         if (expectedOutputTypes.has(SocketType.INVALID)) {
             throw new Error(`Cannot update output socket for "${editorNode.name}", input combination ("${lhsTypes}" and "${rhsTypes}") is invalid`);
-        } else if (_.isEqual(expectedOutputTypes, s.ignore)) {
+        } else if (_.isEqual(expectedOutputTypes, s.IGNORE)) {
             // console.log(`TEST updateOutputSocketTypes expected output for "${editorNode.name}" is 'ignore', skipping (from "${lhsTypes}" "${rhsTypes}")`);
             return;
         }
@@ -137,13 +137,13 @@ export class BinaryOperation {
         }
 
         // console.log(allExpectedTypes);
-        if (_.isEqual(allExpectedTypes, s.invalid)) {
+        if (_.isEqual(allExpectedTypes, s.INVALID)) {
             throw new Error(`Invalid type combination ${allExpectedTypes} (from "${lhsTypeList}" "${rhsTypeList}")`);
         } else {
             allExpectedTypes.delete(SocketType.INVALID);
         }
-        if (_.isEqual(allExpectedTypes, s.ignore)) {
-            return s.ignore;
+        if (_.isEqual(allExpectedTypes, s.IGNORE)) {
+            return s.IGNORE;
         } else {
             allExpectedTypes.delete(SocketType.IGNORE);
         }
@@ -157,13 +157,13 @@ export class AddOperation extends BinaryOperation {
     static symbol = '+';
 
     // Input and output socket types must always be in sync
-    static lhsToRhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix };
-    static rhsToLhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix };
+    static lhsToRhsTypeMap = { 'scalar': s.SCALAR, 'vector': s.VECTOR, 'matrix': s.MATRIX };
+    static rhsToLhsTypeMap = { 'scalar': s.SCALAR, 'vector': s.VECTOR, 'matrix': s.MATRIX };
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,  'vector': s.invalid, 'matrix': s.invalid },
-        'vector':   { 'scalar': s.invalid, 'vector': s.vector,  'matrix': s.invalid },
-        'matrix':   { 'scalar': s.invalid, 'vector': s.invalid, 'matrix': s.matrix  },
+        'scalar':   { 'scalar': s.SCALAR,  'vector': s.INVALID, 'matrix': s.INVALID },
+        'vector':   { 'scalar': s.INVALID, 'vector': s.VECTOR,  'matrix': s.INVALID },
+        'matrix':   { 'scalar': s.INVALID, 'vector': s.INVALID, 'matrix': s.MATRIX  },
     };
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
@@ -185,13 +185,13 @@ export class SubtractOperation extends BinaryOperation {
     static symbol = '-';
 
     // Input and output socket types must always be in sync
-    static lhsToRhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix };
-    static rhsToLhsTypeMap = { 'scalar': s.scalar, 'vector': s.vector, 'matrix': s.matrix };
+    static lhsToRhsTypeMap = { 'scalar': s.SCALAR, 'vector': s.VECTOR, 'matrix': s.MATRIX };
+    static rhsToLhsTypeMap = { 'scalar': s.SCALAR, 'vector': s.VECTOR, 'matrix': s.MATRIX };
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,  'vector': s.invalid, 'matrix': s.invalid },
-        'vector':   { 'scalar': s.invalid, 'vector': s.vector,  'matrix': s.invalid },
-        'matrix':   { 'scalar': s.invalid, 'vector': s.invalid, 'matrix': s.matrix  },
+        'scalar':   { 'scalar': s.SCALAR,  'vector': s.INVALID, 'matrix': s.INVALID },
+        'vector':   { 'scalar': s.INVALID, 'vector': s.VECTOR,  'matrix': s.INVALID },
+        'matrix':   { 'scalar': s.INVALID, 'vector': s.INVALID, 'matrix': s.MATRIX  },
     };
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
@@ -212,13 +212,13 @@ export class SubtractOperation extends BinaryOperation {
 export class MultiplyOperation extends BinaryOperation {
     static symbol = '*';
 
-    static lhsToRhsTypeMap = { 'scalar': s.anything, 'vector': s.scalar,         'matrix': s.anything       };
-    static rhsToLhsTypeMap = { 'scalar': s.anything, 'vector': s.scalarOrMatrix, 'matrix': s.scalarOrMatrix };
+    static lhsToRhsTypeMap = { 'scalar': s.ANYTHING, 'vector': s.SCALAR,           'matrix': s.ANYTHING         };
+    static rhsToLhsTypeMap = { 'scalar': s.ANYTHING, 'vector': s.SCALAR_OR_MATRIX, 'matrix': s.SCALAR_OR_MATRIX };
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,   'vector': s.vector,  'matrix': s.matrix  },
-        'vector':   { 'scalar': s.vector,   'vector': s.invalid, 'matrix': s.invalid },
-        'matrix':   { 'scalar': s.matrix,   'vector': s.vector,  'matrix': s.matrix  },
+        'scalar':   { 'scalar': s.SCALAR,   'vector': s.VECTOR,  'matrix': s.MATRIX  },
+        'vector':   { 'scalar': s.VECTOR,   'vector': s.INVALID, 'matrix': s.INVALID },
+        'matrix':   { 'scalar': s.MATRIX,   'vector': s.VECTOR,  'matrix': s.MATRIX  },
     };
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
@@ -258,18 +258,18 @@ export class MultiplyOperation extends BinaryOperation {
 
 export class DivideOperation extends BinaryOperation {
     static symbol = '/';
-    static defaultLhsSockets = s.anything;
-    static defaultRhsSockets = s.scalar;
-    static defaultOutputSockets = s.anything;
+    static defaultLhsSockets = s.ANYTHING;
+    static defaultRhsSockets = s.SCALAR;
+    static defaultOutputSockets = s.ANYTHING;
 
     // RHS is static
     static lhsToRhsTypeMap = null;
     static rhsToLhsTypeMap = null;
     static inputToOutputTypeMap = {
         // lhsType: { rhsType: [outputTypes] }
-        'scalar':   { 'scalar': s.scalar,   'vector': s.invalid, 'matrix': s.invalid },
-        'vector':   { 'scalar': s.vector,   'vector': s.invalid, 'matrix': s.invalid },
-        'matrix':   { 'scalar': s.matrix,   'vector': s.invalid, 'matrix': s.invalid },
+        'scalar':   { 'scalar': s.SCALAR,   'vector': s.INVALID, 'matrix': s.INVALID },
+        'vector':   { 'scalar': s.VECTOR,   'vector': s.INVALID, 'matrix': s.INVALID },
+        'matrix':   { 'scalar': s.MATRIX,   'vector': s.INVALID, 'matrix': s.INVALID },
     };
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
@@ -293,9 +293,9 @@ export class DivideOperation extends BinaryOperation {
 
 export class DotOperation extends BinaryOperation {
     static symbol = '·';
-    static defaultLhsSockets = s.vector;
-    static defaultRhsSockets = s.vector;
-    static defaultOutputSockets = s.scalar;
+    static defaultLhsSockets = s.VECTOR;
+    static defaultRhsSockets = s.VECTOR;
+    static defaultOutputSockets = s.SCALAR;
 
     // Socket types are static
     static lhsToRhsTypeMap = null;
@@ -312,9 +312,9 @@ export class DotOperation extends BinaryOperation {
 
 export class CrossOperation extends BinaryOperation {
     static symbol = '×';
-    static defaultLhsSockets = s.vector;
-    static defaultRhsSockets = s.vector;
-    static defaultOutputSockets = s.vector;
+    static defaultLhsSockets = s.VECTOR;
+    static defaultRhsSockets = s.VECTOR;
+    static defaultOutputSockets = s.VECTOR;
 
     // Socket types are static
     static lhsToRhsTypeMap = null;
@@ -332,9 +332,9 @@ export class CrossOperation extends BinaryOperation {
 
 export class AngleOperation extends BinaryOperation {
     static symbol = '∠';
-    static defaultLhsSockets = s.vector;
-    static defaultRhsSockets = s.vector;
-    static defaultOutputSockets = s.scalar;
+    static defaultLhsSockets = s.VECTOR;
+    static defaultRhsSockets = s.VECTOR;
+    static defaultOutputSockets = s.SCALAR;
 
     // Socket types are static
     static lhsToRhsTypeMap = null;
@@ -355,9 +355,9 @@ export class AngleOperation extends BinaryOperation {
 
 export class ProjectionOperation extends BinaryOperation {
     static symbol = null;
-    static defaultLhsSockets = s.vector;
-    static defaultRhsSockets = s.vector;
-    static defaultOutputSockets = s.vector;
+    static defaultLhsSockets = s.VECTOR;
+    static defaultRhsSockets = s.VECTOR;
+    static defaultOutputSockets = s.VECTOR;
 
     // Socket types are static
     static lhsToRhsTypeMap = null;
@@ -382,9 +382,9 @@ export class ProjectionOperation extends BinaryOperation {
 
 export class ExponentOperation extends BinaryOperation {
     static symbol = null;
-    static defaultLhsSockets = s.scalar;
-    static defaultRhsSockets = s.scalar;
-    static defaultOutputSockets = s.scalar;
+    static defaultLhsSockets = s.SCALAR;
+    static defaultRhsSockets = s.SCALAR;
+    static defaultOutputSockets = s.SCALAR;
 
     // Socket types are static
     static lhsToRhsTypeMap = null;

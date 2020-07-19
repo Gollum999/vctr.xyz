@@ -30,6 +30,18 @@ export const sockets = Object.freeze({
     [CompoundSocketType.ANYTHING]: new Rete.Socket('Anything'),
 });
 
+export const compoundSocket = Object.freeze({
+    SCALAR:           new Set([SocketType.SCALAR]),
+    VECTOR:           new Set([SocketType.VECTOR]),
+    MATRIX:           new Set([SocketType.MATRIX]),
+    SCALAR_OR_VECTOR: new Set([SocketType.SCALAR, SocketType.VECTOR]),
+    SCALAR_OR_MATRIX: new Set([SocketType.SCALAR, SocketType.MATRIX]),
+    VECTOR_OR_MATRIX: new Set([SocketType.VECTOR, SocketType.MATRIX]),
+    ANYTHING:         new Set([SocketType.SCALAR, SocketType.VECTOR, SocketType.MATRIX]),
+    INVALID:          new Set([SocketType.INVALID]),
+    IGNORE:           new Set([SocketType.IGNORE]),
+});
+
 // These are displayed when hovering over a socket of each type
 (sockets.scalar as any).hint = '';
 (sockets.vector as any).hint = '';
