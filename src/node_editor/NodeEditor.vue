@@ -194,6 +194,12 @@ function _updateOperationSockets(editor: NodeEditor, engineNode: DataNode, edito
     operation.updateOutputSocketTypes(editor, editorNode);
 }
 
+enum ProcessState {
+    IDLE,
+    PROCESSING,
+    INTERRUPTED,
+}
+
 export default Vue.extend({
     name: 'NodeEditor',
     data() {
@@ -215,6 +221,7 @@ export default Vue.extend({
 
             currentlyHandlingHistoryAction: false,
             showingAdvancedRenderControls: true,
+            processState: ProcessState.IDLE,
 
             // TODO switch to use Rete Area Plugin?
             minZoom: 0.1,
@@ -611,21 +618,34 @@ export default Vue.extend({
 
             this.showingError = false;
 
-            // Intentionally not awaiting 'abort'; make sure both promises get scheduled next to each other, so there is no
-            // chance for another 'process' to get ordered after the 'abort' below (which can happen if there are multiple
-            // 'triggerEngineProcess'es already scheduled and we 'await' the 'abort').  This prevents warning logs from Rete.
-            this.engine.abort(); // Stop old job if running
+            if (this.processState !== ProcessState.IDLE) {
+                this.processState = ProcessState.INTERRUPTED;
+                return false;
+            }
+            this.processState = ProcessState.PROCESSING;
+            await this.engine.abort(); // Stop old job if running
             const status = await this.engine.process(this.editor.toJSON());
 
-            if (status === 'success') {
-                this.saveState();
-
-                EventBus.$emit('node_engine_processed', this.editor.toJSON());
-                return true;
-            } else if (status === 'aborted' || status === undefined) {
-                return false;
+            // Casting to suppress TypeScript error - I guess it expects functions to be reentrant?
+            if ((this.processState as any) === ProcessState.PROCESSING) {
+                this.processState = ProcessState.IDLE;
+                if (status === 'success') {
+                    this.saveState();
+                    EventBus.$emit('node_engine_processed', this.editor.toJSON());
+                    return true;
+                } else if (status === 'aborted' || status === undefined) {
+                    return false;
+                } else {
+                    throw new Error(`Unexpected result from Rete.Engine.process: ${status}`);
+                }
+            } else if ((this.processState as any) === ProcessState.INTERRUPTED) {
+                this.processState = ProcessState.IDLE;
+                // Someone else triggered a 'process' while we were processing; try again
+                // TODO this is not ideal... need to wait for previous processes to finish before we can try again
+                // TODO the whole point of abort() is to avoid this kind of thing, but that still results in warnings and everything else I have tried has weird races
+                return this.triggerEngineProcess();
             } else {
-                throw new Error(`Unexpected result from Rete.Engine.process: ${status}`);
+                throw new Error(`Node engine in invalid state ${this.processState}`);
             }
         },
 
@@ -654,7 +674,7 @@ export default Vue.extend({
                         const resetOriginAction = new actions.FieldChangeAction(engineNode.data[ADVANCED_RENDER_CONTROLS_KEY], [0, 0, 0], val => {
                             engineNode.data[ADVANCED_RENDER_CONTROLS_KEY] = val;
                             // Make sure changes are processed
-                            this.editor.trigger('process'); // TODO I could maybe go through vue component to make sure this happens automatically
+                            this.triggerEngineProcess();
                         });
                         actionStack.push(resetOriginAction);
 
