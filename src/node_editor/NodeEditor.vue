@@ -384,7 +384,6 @@ export default Vue.extend({
             const nodes = JSON.parse(event.clipboardData.getData('application/json'));
             console.log(nodes);
             let rootPosition = null;
-            // TODO these need to be a single history action
             for (const nodeDescription of nodes) {
                 const node = await this.nodeFactory.createNode(nodeDescription.type);
                 node.data = nodeDescription.data;
@@ -400,6 +399,7 @@ export default Vue.extend({
                     this.editor.addNode(node);
                 }
             }
+            history.squashTopActions(nodes.length);
         },
 
         recenterView() {
