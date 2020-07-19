@@ -1,3 +1,5 @@
+import _ from 'lodash';
+import { union } from '../util';
 import type { Input, Engine as NodeEngine, NodeEditor, Node } from 'rete';
 import type { Input as DataInput, Output as DataOutput, Node as DataNode } from 'rete/types/core/data';
 import type { IOs } from 'rete/types/engine/component';
@@ -59,7 +61,10 @@ export const AdvancedOperationNodeType = Object.freeze(new Set([
     BinaryOperationNodeType.ANGLE,
     BinaryOperationNodeType.PROJECTION,
 ]));
-// TODO assert that all values covered above?
+console.assert(_.isEqual(
+    union(Object.values(ValueNodeType) as Array<string>, [...BasicOperationNodeType.values()], [...AdvancedOperationNodeType.values()]),
+    new Set(Object.values(NodeType)),
+));
 
 export const ADVANCED_RENDER_CONTROLS_KEY = 'pos';
 
