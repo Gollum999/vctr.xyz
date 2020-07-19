@@ -114,7 +114,7 @@ $node-width: 100px
     grid-template-columns: [inputs] auto [controls] auto [outputs] auto [end]
     grid-template-rows: auto
   &.selected
-    filter: brightness(120%)
+    filter: brightness(130%)
   .debug-node-id
     position: absolute
     top: 4px
@@ -169,7 +169,7 @@ $socket-size: 12px
       .v-input__control
         min-height: 0
         &:focus-within
-          filter: brightness(120%)
+          filter: brightness(130%)
       .v-input__slot
         padding: 0
 
