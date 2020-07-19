@@ -743,14 +743,15 @@ export default Vue.extend({
         });
 
         this.editor.on('nodecreated', node => {
-            // TODO why am I doing this to every node instead of only the one that was just created?
-            Array.prototype.map.call(document.getElementsByClassName('node'), nodeView => {
-                nodeView.addEventListener('contextmenu', (event: MouseEvent) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    this.contextMenuPos = { x: event.clientX, y: event.clientY };
-                    this.showContextMenu = true;
-                });
+            const nodeEl = document.getElementById(`node-${node.id}`);
+            if (nodeEl == null) {
+                throw new Error(`Failed to add context menu to node ${node.id}`);
+            }
+            nodeEl.addEventListener('contextmenu', (event: MouseEvent) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.contextMenuPos = { x: event.clientX, y: event.clientY };
+                this.showContextMenu = true;
             });
         });
 
