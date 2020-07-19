@@ -761,10 +761,7 @@ export default Vue.extend({
             this.postLoad();
 
             // Do not trigger any of these events until after the initial load is done
-            // TODO still not perfect, does not prevent multiple changes from user getting queued up; is there something like Javas 'synchronized' keyword?
             this.editor.on(['process', 'nodecreated', 'noderemoved'], this.triggerEngineProcess);
-            // TODO handleConnectionChanged also does this, so no need to do it twice
-            await this.triggerEngineProcess(); // Process at least once to make sure the viewports are updated
 
             this.editor.on(['connectioncreated', 'connectionremoved'], this.handleConnectionChanged);
             this.handleConnectionChanged(); // Run once to set up socket types
