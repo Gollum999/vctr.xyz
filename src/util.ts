@@ -97,10 +97,12 @@ export function intersection<T>(x: Set<T>, y: Set<T>): Set<T> {
     return new Set([...x].filter(val => y.has(val)));
 }
 
-export function union<T>(setA: Iterable<T>, setB: Iterable<T>): Set<T> {
-    let _union = new Set(setA);
-    for (let elem of setB) {
-        _union.add(elem);
+export function union<T>(first: Iterable<T>, ...rest: Array<Iterable<T>>): Set<T> {
+    let _union = new Set(first);
+    for (const otherSet of rest) {
+        for (const elem of otherSet) {
+            _union.add(elem);
+        }
     }
     return _union;
 }
