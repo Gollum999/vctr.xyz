@@ -245,6 +245,7 @@ export default Vue.extend({
 
             this.editor.on('connectioncreated', c => history.add(new actions.AddConnectionAction(this.editor, c)));
             this.editor.on('connectionremoved', c => history.add(new actions.RemoveConnectionAction(this.editor, c)));
+            this.editor.on(['nodetranslated', 'translated', 'zoomed'], this.saveState);
         },
 
         addAndRepositionNode(node: Node) {
