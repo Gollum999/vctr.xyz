@@ -34,6 +34,9 @@ const defaultNodeEditorSettings = {
     defaultScalarColor: '#7676dd',
     defaultVectorColor: '#ff4444',
     defaultMatrixColor: '#44ffff',
+    defaultScalarVisibility: false,
+    defaultVectorVisibility: true,
+    defaultMatrixVisibility: false,
     showAdvancedRenderSettings: false,
 };
 

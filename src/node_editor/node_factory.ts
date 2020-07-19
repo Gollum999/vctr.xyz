@@ -47,17 +47,17 @@ export default class NodeFactory {
             }
             switch (nodeType) {
             case ValueNodeType.SCALAR: return {
-                'color': { color: this.getNewNodeColor(ValueNodeType.SCALAR), visible: false },
+                'color': { color: this.getNewNodeColor(ValueNodeType.SCALAR), visible: this.settings.values.defaultScalarVisibility },
                 'value': [1],
                 [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
             };
             case ValueNodeType.VECTOR: return {
-                'color': { color: this.getNewNodeColor(ValueNodeType.VECTOR), visible: true },
+                'color': { color: this.getNewNodeColor(ValueNodeType.VECTOR), visible: this.settings.values.defaultVectorVisibility  },
                 'value': [1, 1, 1],
                 [ADVANCED_RENDER_CONTROLS_KEY]: [0, 0, 0],
             };
             case ValueNodeType.MATRIX: return {
-                'color': { color: this.getNewNodeColor(ValueNodeType.MATRIX), visible: false },
+                'color': { color: this.getNewNodeColor(ValueNodeType.MATRIX), visible: this.settings.values.defaultMatrixVisibility  },
                 'value': [
                     1, 0, 0, 0,
                     0, 1, 0, 0,

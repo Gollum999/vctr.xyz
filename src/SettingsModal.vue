@@ -17,7 +17,7 @@
 
       <v-tab-item>
         <v-subheader class="text--secondary">Common Settings</v-subheader>
-        <v-switch class="first-switch" color="primary" v-model="viewportSettings.values.showAxis" label="Show axis" hide-details />
+        <v-switch class="first-input" color="primary" v-model="viewportSettings.values.showAxis" label="Show axis" hide-details />
         <v-switch color="primary" v-model="viewportSettings.values.showGrid" label="Show grid" hide-details />
 
         <v-divider class="mt-4" />
@@ -65,19 +65,29 @@
       <!-- TODO size jumps a bit after changing to this tab -->
       <v-tab-item>
         <!-- TODO add settings to default 'visible' state per value type -->
-        <v-switch color="primary" v-model="nodeEditorSettings.values.useRandomColors" label="Use random colors" />
+        <v-subheader class="text--secondary">Default colors</v-subheader>
+        <v-switch class="mb-4 first-input" color="primary" v-model="nodeEditorSettings.values.useRandomColors" label="Use random colors" hide-details />
         <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
                               v-model="nodeEditorSettings.values.defaultScalarColor">
-          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Default scalar color</span>
+          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Scalar</span>
         </color-picker-setting>
         <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
                               v-model="nodeEditorSettings.values.defaultVectorColor">
-          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Default vector color</span>
+          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Vector</span>
         </color-picker-setting>
         <color-picker-setting :disabled="nodeEditorSettings.values.useRandomColors" disableAlpha
                               v-model="nodeEditorSettings.values.defaultMatrixColor">
-          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Default matrix color</span>
+          <span :class="{ 'text--disabled': nodeEditorSettings.values.useRandomColors }">Matrix</span>
         </color-picker-setting>
+
+        <v-divider class="mt-4" />
+        <v-subheader class="mt-2 text--secondary">Default visibility</v-subheader>
+        <v-checkbox class="visible-checkbox first-input" v-model="nodeEditorSettings.values.defaultScalarVisibility"
+                    color="white" on-icon="mdi-eye" off-icon="mdi-eye-off" :ripple="false" label="Scalar" hide-details />
+        <v-checkbox class="visible-checkbox" v-model="nodeEditorSettings.values.defaultVectorVisibility"
+                    color="white" on-icon="mdi-eye" off-icon="mdi-eye-off" :ripple="false" label="Vector" hide-details />
+        <v-checkbox class="visible-checkbox" v-model="nodeEditorSettings.values.defaultMatrixVisibility"
+                    color="white" on-icon="mdi-eye" off-icon="mdi-eye-off" :ripple="false" label="Matrix" hide-details />
       </v-tab-item>
 
     </v-tabs>
@@ -165,7 +175,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.v-input.v-input--switch.first-switch {
+.v-input.first-input {
     margin-top: 0;
 }
 .close-button {
@@ -177,6 +187,9 @@ export default Vue.extend({
 .v-tab {
     display: flex;
     flex-direction: column;
+}
+.visible-checkbox {
+    margin-left: 14px;
 }
 </style>
 
