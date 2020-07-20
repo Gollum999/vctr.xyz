@@ -2,7 +2,7 @@
 // TODO why is dark theme not applying?
 v-card.node(dark hover :id="`node-${node.id}`" :class="[selected(), node.name.toLowerCase()] | kebab")
   v-text-field.node-title(dense hide-details flat solo v-model="title" @blur="onTitleBlur" @keyup.enter="$event.target.blur()" size="10")
-  .debug-node-id {{node.id}}
+  // .debug-node-id {{node.id}}
 
   .node-body
     // Inputs
