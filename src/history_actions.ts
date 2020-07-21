@@ -45,14 +45,13 @@ export class FieldChangeAction extends Action {
 }
 
 // Add/RemoveConnectionAction are copied (and slightly modified) from rete-history-plugin
-function reassignConnection(connection: Connection) {
-    const { input, output } = connection;
-
-    const oldConn = output.connections.find(c => c.input === input);
-    if (oldConn == null) {
-        throw new Error(`Connection was null for input ${input}`);
+function findNewConnection(oldConnection: Connection): Connection {
+    const { input, output } = oldConnection;
+    const newConnection = output.connections.find(c => c.input === input);
+    if (newConnection == null) {
+        throw new Error(`Could not find new connection from ${oldConnection}`);
     }
-    return oldConn;
+    return newConnection;
 }
 
 class ConnectionActionHelper {
@@ -62,14 +61,10 @@ class ConnectionActionHelper {
         this.connection = connection;
     }
     add() {
-        console.log('ConnectionActionHelper connecting', this.editor, this.connection);
         this.editor.connect(this.connection.output, this.connection.input);
-        // console.log('ConnectionActionHelper reassigning connection', this.connection);
-        this.connection = reassignConnection(this.connection);
     }
     remove() {
-        console.log('ConnectionActionHelper removing', this.editor, this.connection);
-        this.editor.removeConnection(this.connection);
+        this.editor.removeConnection(findNewConnection(this.connection));
     }
 }
 
