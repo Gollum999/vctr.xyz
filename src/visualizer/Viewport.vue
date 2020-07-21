@@ -158,6 +158,11 @@ export default Vue.extend({
         camera.layers.set(0); // All views share the default layer 0
         camera.layers.enable(this.VIEW_VALUES[this.view].layer);
         camera.layers.disable(HIDDEN_LAYER); // Reserve layer 31 for hiding things
+        if (this.view === 'top') {
+            // Looking straight down works fine when the camera is initially created, but when we serialize it, something gets jacked up.
+            // Since CameraControls uses `lookAt`, it relies on `up` for the correct camera rotation.
+            camera.up = new THREE.Vector3(0, 0, -1);
+        }
 
         this.updateGridVisibility(this.settings.values.showGrid);
 
