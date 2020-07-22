@@ -54,17 +54,14 @@ export default {
     },
     methods: {
         onShowAdvancedControlsChanged(val) {
-            // console.log('CHANGE', this.nodeEditorSettings.values);
             EventBus.$emit('show-advanced-controls-toggled', val);
         },
         onDrag(size) {
             EventBus.$emit('split-resized', size);
         },
         onDragStart(size) {
-            console.log(`split drag start ${size}`);
         },
         onDragEnd(size) {
-            console.log(`split drag end ${size}`);
         },
     },
 };

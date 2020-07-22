@@ -48,7 +48,6 @@
 </template>
 
 <script lang="ts">
-/* import * as THREE from 'three'; */
 import Vue from 'vue';
 
 import * as settings from '../settings';
@@ -123,20 +122,16 @@ export default Vue.extend({
 
     mounted() {
         EventBus.$on('node_engine_processed', (editorJson: { [key: string]: any }) => {
-            console.log('QuadViewport handling process event');
             this.vectors = [];
             this.matrices = [];
             for (const key in editorJson.nodes) {
                 const node = editorJson.nodes[key];
-                /* console.log('adding node', node, 'to be rendered'); */
                 if (node.name === 'Vector') {
                     this.vectors.push(new VectorView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos));
                 } else if (node.name === 'Matrix') {
                     this.matrices.push(new MatrixView(node.data.value, node.data.color.visible ? node.data.color.color : null, node.data.pos));
                 }
             }
-            // console.log('QuadViewport rendering vectors:', this.vectors);
-            // console.log('QuadViewport rendering matrices:', this.matrices);
         });
 
         this.$nextTick(() => { // TODO have to do next tick because of the same bug that causes flashing when shrinking; remove this whenever I fix that
@@ -146,12 +141,9 @@ export default Vue.extend({
 
     methods: {
         expandViewport(view: ViewType) {
-            console.log('QuadViewport expanding', view);
             if (this.expandedView) {
-                console.log(`un-expanding ${view}`);
                 this.expandedView = null;
             } else {
-                console.log(`expanding ${view}`);
                 this.expandedView = view;
             }
 
@@ -163,12 +155,10 @@ export default Vue.extend({
         },
 
         isHidden(view: ViewType) {
-            /* console.log('checking', view, 'for hidden', (this.expandedView !== null && this.expandedView !== view)); */
             return (this.expandedView !== null && this.expandedView !== view);
         },
 
         isExpanded(view: ViewType) {
-            /* console.log('checking', view, 'for expanded', this.expandedView === view); */
             return this.expandedView === view;
         },
 
@@ -180,7 +170,6 @@ export default Vue.extend({
         handleResize({width, height}: Size) {
             // HACK: Viewports do not render anything when they have sub-pixel widths, so force integer sizes
             // TODO something causes flashing when shrinking
-            console.log('resizing viewports...');
             [ViewType.TOP, ViewType.FRONT].forEach(view => {
                 const viewport = (this.$refs[`viewport_${view}`] as Vue).$el;
                 const parent = viewport.parentElement;

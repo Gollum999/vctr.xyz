@@ -12,7 +12,6 @@ export class ColorControl extends Rete.Control {
 
     constructor(emitter: Emitter<DefaultEvents & CoreEvents>, key: string, rowIdx: number) {
         super(key);
-        // console.log(`ColorControl constrtuctor, key: ${key}, row idx: ${rowIdx}`, this, this._vue, this.vueContext);
         this.props = { emitter, dataKey: key, rowIdx };
     }
 
@@ -20,7 +19,6 @@ export class ColorControl extends Rete.Control {
         if (this.vueContext == null) {
             throw new Error('ColorControl Vue context was null');
         }
-        // console.log(`ColorControl setValue to ${val}`);
         this.vueContext.color = val;
     }
 };

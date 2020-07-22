@@ -29,7 +29,6 @@ export default class UnaryOperationComponent extends Rete.Component {
         warningControl.setWarning('');
 
         const inputValue = nodeUtil.getInputValue('input', inputs, engineNode.data);
-        // console.log('UnaryOperationComponent worker', this.operation, inputValue);
         if (_.isNil(inputValue)) {
             return;
         }
@@ -45,7 +44,6 @@ export default class UnaryOperationComponent extends Rete.Component {
             }
         }
 
-        // console.log(inputValue);
         let result;
         try {
             result = this.operation.calculate({type: determineType(inputValue), value: inputValue});
@@ -67,7 +65,6 @@ export default class UnaryOperationComponent extends Rete.Component {
             // Float32Array serializes as an object instead of a regular array; force types to be consistent
             result = Array.from(result);
         }
-        // console.log('UnaryOperationComponent result:', result);
         outputs['output'] = result;
     }
 };

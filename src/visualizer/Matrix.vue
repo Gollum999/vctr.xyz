@@ -50,14 +50,12 @@ export default Vue.extend({
             const vectorsPerAxis: number = this.fieldSize * 2.0 * this.density; // Include both sides
             const bounds = Math.floor(vectorsPerAxis) / 2.0;
             const spacing = 1.0 / this.density;
-            console.log('fieldVectors vectorsPerAxis:', vectorsPerAxis, 'bounds:', bounds, 'spacing:', spacing);
 
             const vectors = [];
             // TODO Is there a way to simplify this with a single matrix multiplication?
             for (let xIdx = -bounds; xIdx <= bounds; xIdx += 1) {
                 for (let yIdx = -bounds; yIdx <= bounds; yIdx += 1) {
                     for (let zIdx = -bounds; zIdx <= bounds; zIdx += 1) {
-                        /* console.log('processing x:', xIdx, 'y:', yIdx, 'z:', zIdx); */
                         const out = vec3.create();
                         const baseVec = vec3.fromValues(xIdx * spacing, yIdx * spacing, zIdx * spacing);
                         const transposed = mat4.create();
@@ -67,18 +65,13 @@ export default Vue.extend({
                             // 0-length vectors cause console warnings because the matrix can't be inverted for rendering
                             continue;
                         }
-                        /* console.log('adding vector', out, baseVec, this.value); */
                         const pos = vec3.create();
                         vectors.push(new FieldVector(out, vec3.add(pos, this.pos, baseVec)));
                     }
                 }
             }
-            /* console.log('returning fieldVectors:', vectors); */
             return vectors;
         },
-    },
-    mounted() {
-        /* console.log('Matrix mounted:', this.displayType, this.value, this.color, this.vectorScale, this.density, this.fieldSize); */
     },
 });
 </script>

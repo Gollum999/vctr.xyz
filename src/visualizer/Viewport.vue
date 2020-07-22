@@ -1,6 +1,5 @@
 <template>
   <div ref="viewport" class="viewport">
-    <!-- v-if="settings.values.showGrid" -->
     <vgl-grid-helper
         :ref="`grid-${view}`"
         :rotation="VIEW_VALUES[view].gridRotation"
@@ -128,7 +127,6 @@ export default Vue.extend({
     computed: {
         orbitPos(): string {
             var result = this.VIEW_VALUES[this.view].initialCameraPos;
-            /* console.log(`Setting orbitPos for "${this.view}" to "${result.radius} ${result.phi} ${result.theta}"`); */
             return `${result.radius} ${result.phi} ${result.theta}`; // TODO use proper types from three.js instead of magic strings
         },
 
@@ -152,8 +150,6 @@ export default Vue.extend({
     },
 
     mounted() {
-        // console.log(`Viewport mounted ${this.view} ${this.sceneName}`, this, this.updateCanvasSize);
-
         const camera = (this.$refs.camera as any).inst;
         camera.layers.set(0); // All views share the default layer 0
         camera.layers.enable(this.VIEW_VALUES[this.view].layer);
@@ -196,12 +192,7 @@ export default Vue.extend({
                 if (iframe == null || iframe.contentWindow == null) {
                     throw new Error('Renderer iframe contentWindow was null');
                 }
-                // TODO internet says this will not work in IE, need to do block below?  depends if bug affects more than just Firefox
-                /* console.log('Viewport forcing resize event for VueGL renderer'); */
                 iframe.contentWindow.dispatchEvent(new Event('resize'));
-                // var resizeEvent = window.document.createEvent('UIEvents');
-                // resizeEvent .initUIEvent('resize', true, false, window, 0);
-                // window.dispatchEvent(resizeEvent);
             };
         }
 
@@ -212,7 +203,6 @@ export default Vue.extend({
         });
         EventBus.$on('split-resized', this.updateCanvasSize);
         EventBus.$on('render', this.render);
-        /* this.$on('expand-viewport', this.updateCanvasSize); // This needs to happen for all viewports when any expanded or collapsed */
     },
 
     methods: {
@@ -226,7 +216,6 @@ export default Vue.extend({
                 throw new Error('Viewport controls were null');
             }
             // TODO perspective camera does not save zoom
-            // console.log(`Saving ${this.view} camera state to browser-local storage`, this.controls.toJSON());
             window.localStorage.setItem(`camera_${this.view}`, this.controls.toJSON());
         },
 
@@ -234,7 +223,6 @@ export default Vue.extend({
             if (this.controls == null) {
                 throw new Error('Viewport controls were null');
             }
-            // console.log(`Loading ${this.view} camera state from browser-local storage`);
             const cameraJson = window.localStorage.getItem(`camera_${this.view}`);
             if (cameraJson) {
                 this.controls.fromJSON(cameraJson);
@@ -242,7 +230,6 @@ export default Vue.extend({
         },
 
         updateScalars(editorJson: { [key: string]: any }): void {
-            /* console.log('Viewport re-drawing scalars'); */
             this.scalars = Object.values(editorJson['nodes'] as Array<Node>)
                 .filter(node => node.name === 'Scalar')
                 .map(node => new ScalarView(
@@ -250,14 +237,12 @@ export default Vue.extend({
                     node.data.color.visible ? node.data.color.color : null,
                     node.data.pos,
                 ));
-            /* console.log('Viewport rendering scalars:', this.scalars); */
         },
 
         updateCanvasSize(): void {
             if (this.lastViewportSize === null) {
                 throw new Error('lastViewportSize was null');
             }
-            // console.log('updating canvas size', this.$refs.viewport.getBoundingClientRect(), this.lastViewportSize.width, this.lastViewportSize.height);
             this.canvasSize = {
                 x: this.lastViewportSize.width,
                 y: this.lastViewportSize.height,
@@ -296,14 +281,12 @@ export default Vue.extend({
         },
 
         render(): void {
-            // console.log('render', this.$refs, this.$refs.renderer, this.$refs.camera, this.scene);
             if (!_.isNil(this.scene)) {
                 (this.$refs.renderer as any).inst.render((this.scene as any).inst, (this.$refs.camera as any).inst);
             }
         },
 
         expandThis(): void {
-            console.log(`Expand viewport ${this.view}`);
             this.$emit('expand-viewport', this.view);
         },
     },
@@ -330,15 +313,7 @@ export default Vue.extend({
 </style>
 
 <style>
-/* #app .viewport canvas { */
-/*     height: 100%; */
-/* } */
 #app .viewport iframe {
     visibility: visible !important; /* This fixes getting 'resize' callbacks on Firefox */
-
-    /* These two make the resize behavior a bit more responsive/less jumpy on Firefox */
-    /* margin-right: initial; */
-    /* NOTE: This breaks ALL events with newer vue-gl versions. */
-    /* position: absolute; /* This positions the iframe on top of the canvas to avoid weird flow issues */
 }
 </style>

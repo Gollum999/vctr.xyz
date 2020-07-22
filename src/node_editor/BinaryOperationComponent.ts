@@ -48,7 +48,6 @@ export default class BinaryOperationComponent extends Rete.Component {
             }
         }
 
-        // console.log(lhsValue, rhsValue);
         let result;
         try {
             result = this.operation.calculate(

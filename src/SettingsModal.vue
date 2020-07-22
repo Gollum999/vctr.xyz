@@ -116,7 +116,6 @@ export default Vue.extend({
         'color-picker-setting': ColorPickerSetting,
     },
     data() {
-        // console.log('SettingsModal data() settingsUtil', settingsUtil);
         return {
             nodeEditorSettings: settingsUtil.nodeEditorSettings,
             viewportSettings: settingsUtil.viewportSettings,
@@ -153,21 +152,14 @@ export default Vue.extend({
             return (MAX_VECTORS_PER_SIDE / (this.viewportSettings.values.matrix.fieldSize * 2)).toFixed(1);
         },
     },
-    mounted() {
-        console.log('SettingsModal mounted');
-        console.log('  nodeEditorSettings: ', this.nodeEditorSettings);
-        console.log('  viewportSettings: ', this.viewportSettings);
-    },
     methods: {
         close() {
             this.$emit('settings-modal-closed');
         },
         updateNodeEditorSetting(key: string, value: any) {
-            console.log('SettingsModal updating nodeEditorSetting', key, value);
             this.nodeEditorSettings.update(key, value);
         },
         updateViewportSetting(key: string, value: any) {
-            console.log('SettingsModal updating viewportSetting', key, value);
             this.viewportSettings.update(key, value);
         },
     },

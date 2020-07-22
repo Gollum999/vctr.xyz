@@ -40,7 +40,6 @@ const defaultNodeEditorSettings = {
     showAdvancedRenderSettings: false,
 };
 
-// export type Settings = typeof defaultSettings;
 export type SettingsKey = 'viewport_settings' | 'node_editor_settings';
 export type ViewportSettings = typeof defaultViewportSettings;
 export type NodeEditorSettings = typeof defaultNodeEditorSettings;
@@ -58,13 +57,10 @@ export class SettingsStore<SettingsValues extends ViewportSettings | NodeEditorS
     }
 
     load() {
-        console.log(`Loading ${this.key}`);
         const settingsJson = window.localStorage.getItem(this.key);
         if (settingsJson) {
             this.values = _.merge({}, this.defaultValues, JSON.parse(settingsJson));
-            console.log(`Successfully loaded ${this.key}`, this.values);
         } else {
-            console.log(`Using default ${this.key}`);
             this.values = this.defaultValues;
         }
     }
@@ -77,7 +73,6 @@ export class SettingsStore<SettingsValues extends ViewportSettings | NodeEditorS
 
     update(key: string, value: any) {
         const fullKey = `values.${key}`;
-        console.log(`Updating setting ${this.key}.${fullKey} to ${value}`);
         if (!_.has(this, fullKey)) {
             throw new Error(`Invalid key: ${fullKey}`);
         }

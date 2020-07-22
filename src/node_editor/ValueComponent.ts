@@ -16,8 +16,6 @@ export class ValueComponent extends Rete.Component {
     }
 
     async builder(node: Node): Promise<Node> {
-        // console.log('ValueComponent builder: this: ', this, 'nodeType:', this.nodeType);
-
         const socket = ({
             [nodeUtil.ValueNodeType.SCALAR]: sockets.scalar,
             [nodeUtil.ValueNodeType.VECTOR]: sockets.vector,
@@ -51,10 +49,8 @@ export class ValueComponent extends Rete.Component {
         //   To check things like input state and component configuration, I either need to go through node.data or need to manually find the node
         //     through the editor by ID
         //   Also note that anything in data will be saved between sessions
-        // console.log('ValueComponent worker', node.name, '(', node.id, ')', node.data);
 
         const editorNode = nodeUtil.getEditorNode(this.editor, node);
-        // console.log('VECTOR', node, editorNode, inputs, editorNode.inputs);
         const valueControl = editorNode.controls.get('value') as ValueControl;
         if (_.isNil(valueControl)) {
             throw new Error('Could not find "value" control');
@@ -62,13 +58,11 @@ export class ValueComponent extends Rete.Component {
 
         if (nodeUtil.hasInput(inputs, 'value')) {
             const inputValue = nodeUtil.getInputValue('value', inputs, node.data);
-            // console.log('ValueComponent worker setting "value" from input to ', inputValue, typeof inputValue);
 
             node.data.value = inputValue.slice(); // Make a copy to avoid sharing the same object between nodes
             valueControl.setValue(inputValue);
             valueControl.setReadOnly(true);
         } else {
-            // console.log('ValueComponent worker, inputValue empty, setting "value" readonly = false');
             valueControl.setReadOnly(false);
         }
 
@@ -88,7 +82,6 @@ export class ValueComponent extends Rete.Component {
         }
 
         if (!_.isNil(node.data.value)) {
-            // console.log('ValueComponent worker setting output to ', node.data.value, typeof node.data.value);
             outputs['value'] = node.data.value.slice(); // Make a copy to avoid sharing the same object between nodes
         }
     }

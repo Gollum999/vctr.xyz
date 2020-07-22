@@ -78,11 +78,8 @@ export default Vue.extend({
     watch: {
         values: {
             handler: function (newVal: ValueWrapper, oldVal: ValueWrapper) {
-                /* console.log('ValueControlView value watcher, calling putData', this.dataKey, this.values, newVal, oldVal); */
                 if (this.dataKey) {
-                    /* console.log('ValueControlView putData key:', this.dataKey, 'values:', this.values, wrapperToArray(this.values)); */
                     this.putData(this.dataKey, wrapperToArray(this.values));
-                    /* console.log(this); */
                 }
             },
             deep: true,
@@ -91,23 +88,16 @@ export default Vue.extend({
 
     methods: {
         setValue(value: Array<number>) {
-            // console.log('ValueControlView setValue', value);
             if (_.isNil(value) || value.length !== EXPECTED_SIZE[this.nodeType]) {
                 this.values = this.defaultValues.slice();
-                // console.log('ValueControlView setValue DEFAULT to', this.values);
             } else {
                 this.values = arrayToWrapper(value);
-                // console.log('ValueControlView setValue from array to', this.values);
             }
         },
 
         onInput(newValue: string, idx: number) {
-            /* console.log('ValueControlView onInput old values:', this.values); */
             const newValues = this.values.map(i => ({...i})); // Make sure to deep copy the wrappers
             newValues[idx].val = parseFloat(newValue);
-            /* console.log('ValueControlView onInput new values:', newValues); */
-            /* console.log('ValueControlView onInput', newValue, idx, this.values, newValues); */
-            // console.log('ValueControlView emitting history', newValue, idx);
             const action = new FieldChangeAction(this.values, newValues, val => {
                 this.values = val;
                 this.emitter.trigger('process');
@@ -124,7 +114,6 @@ export default Vue.extend({
                 case ValueNodeType.MATRIX: return '[' + valueArray.join(', ') + ']'; // TODO could copy as 4x4 instead of 1x16
                 };
             })();
-            console.log('ValueControlView onCopy', event, valueArray, 'setting clipboard to "', text, '"');
             if (event.clipboardData == null) {
                 throw new Error('Clipboard data was null');
             }
@@ -135,7 +124,6 @@ export default Vue.extend({
             if (this.readOnly) {
                 return;
             }
-            console.log(`ValueControlView onPaste`, event);
             if (event.clipboardData == null) {
                 throw new Error('Clipboard data was null');
             }
@@ -155,9 +143,7 @@ export default Vue.extend({
 
     mounted() {
         const data = this.getData(this.dataKey);
-        // console.log('ValueControlView mounted, data = ', data);
         this.setValue(data);
-        // console.log('ValueControlView mounted, set this.values to ', this.values);
     },
 });
 </script>

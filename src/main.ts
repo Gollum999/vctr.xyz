@@ -17,7 +17,6 @@ Vue.config.productionTip = false;
 Vue.use(VueSplit);
 Vue.use(VueResize);
 
-console.log('Initializing VueGL components');
 Object.keys(VueGL).forEach(name => {
     Vue.component(name, (VueGL as any)[name]);
 });
@@ -30,10 +29,3 @@ new Vue({
     vuetify,
     template: '<App/>',
 });
-/*
- * // TODO maybe keep this in debug only
- * Vue.config.errorHandler = (err, vm, info) => {
- *     console.error('Error caught in global error handler');
- *     console.error((err, vm, info));
- * };
- */

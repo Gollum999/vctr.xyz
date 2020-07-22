@@ -56,7 +56,6 @@ export class UnaryOperation {
 
     static updateOutputSocketTypes(editor: NodeEditor, editorNode: Node) {
         if (!this.inputToOutputTypeMap) {
-            // console.log(`TEST updateOutputSocketTypes input to output type map is null, returning early (${editorNode.name})`);
             return;
         }
 
@@ -66,7 +65,6 @@ export class UnaryOperation {
         }
         const inputTypes = util.getSocketTypes(input.socket);
 
-        // console.log(`TEST updateOutputSocketTypes ${editorNode.name}`);
         const output = editorNode.outputs.get('output');
         if (output == null) {
             throw new Error('Output "output" not found');
@@ -78,22 +76,17 @@ export class UnaryOperation {
     }
 
     static getExpectedOutputTypes(inputTypeList: Set<SocketType>): Set<SocketType> {
-        // console.log(`TEST getExpectedOutputTypes "${inputTypeList}"`);
         if (this.inputToOutputTypeMap == null) {
             throw new Error('inputToOutputTypeMap was not defined');
         }
         const allExpectedTypes = new Set<SocketType>();
         for (const inputType of inputTypeList) {
-            // console.log(`TEST getExpectedOutputTypes inputType "${inputType}"`);
             const expectedOutputTypeList = this.inputToOutputTypeMap[inputType];
-            // console.log(`TEST getExpectedOutputTypes expected output type ${expectedOutputTypeList} from "${inputType}"`);
             for (const t of expectedOutputTypeList) {
-                // console.log(`TEST getExpectedOutputTypes Adding output type ${t} from "${inputType}"`);
                 allExpectedTypes.add(t);
             }
         }
 
-        // console.log(allExpectedTypes);
         if (_.isEqual(allExpectedTypes, s.INVALID)) {
             throw new Error(`Invalid type combination ${allExpectedTypes} (from "${inputTypeList}")`);
         } else {
@@ -104,7 +97,6 @@ export class UnaryOperation {
         } else {
             allExpectedTypes.delete(SocketType.IGNORE);
         }
-        // console.log(allExpectedTypes);
 
         return allExpectedTypes;
     }

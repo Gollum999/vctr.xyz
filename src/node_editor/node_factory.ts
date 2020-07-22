@@ -10,17 +10,12 @@ export default class NodeFactory {
     private readonly settings: settings.SettingsStore<settings.NodeEditorSettings>;
 
     constructor() {
-        console.log(ValueNodeType, UnaryOperationNodeType, BinaryOperationNodeType);
         this.components = Object.freeze({
             ...Object.fromEntries(Object.values(ValueNodeType).map(nodeType => [nodeType, new allComponents.ValueComponent(nodeType)])),
             ...Object.fromEntries(Object.values(UnaryOperationNodeType).map(nodeType => [nodeType, new allComponents.UnaryOperationComponent(nodeType)])),
             ...Object.fromEntries(Object.values(BinaryOperationNodeType).map(nodeType => [nodeType, new allComponents.BinaryOperationComponent(nodeType)])),
         });
-        console.log('NodeFactory', this.components);
         this.settings = settings.nodeEditorSettings;
-        // if (this.settings.values.key !== 'node_editor_settings') {
-        //     throw new Error(`Malformed settings object ${this.settings}`);
-        // }
     }
 
     getRandomColorHex(): string {
@@ -69,7 +64,6 @@ export default class NodeFactory {
             }
             return undefined;
         })();
-        console.log('creating with data', data);
 
         if (!Object.keys(this.components).includes(nodeType)) {
             throw new Error(`Cannot add node of invalid type ${nodeType}`);

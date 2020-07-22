@@ -12,11 +12,9 @@ export class MultiAction extends Action {
     // Actions should be in the order that they happen; undos will happen in reverse order
     constructor(private readonly actions: Array<Action>) {
         super();
-        // console.log('MultiAction constructor, actions:', actions);
         this.actions = actions;
     }
     do() {
-        // console.log('MultiAction do', this.actions);
         for (const action of this.actions) {
             action.do();
         }
@@ -27,7 +25,6 @@ export class MultiAction extends Action {
         }
     }
     redo() {
-        // console.log('MultiAction redo', this.actions);
         for (const action of this.actions) {
             action.redo();
         }
@@ -57,7 +54,6 @@ function findNewConnection(oldConnection: Connection): Connection {
 
 class ConnectionActionHelper {
     constructor(private readonly editor: NodeEditor, private connection: Connection) {
-        console.log('ConnectionActionHelper constructor', editor, connection);
         this.editor = editor;
         this.connection = connection;
     }
@@ -208,24 +204,19 @@ class AdvancedRenderControlsActionHelper {
     private connectionActions: Array<RemoveConnectionAction>;
 
     constructor(editor: NodeEditor, node: Node, inputName: string) {
-        console.log('AdvancedRenderControlsActionHelper constructor', node.id);
         this.editor = editor;
         this.node = node;
         this.inputName = inputName;
         this.connectionActions = [];
     }
     add() {
-        console.log('AdvancedRenderControlsActionHelper add to node:', this.node.id, this.node, this.node.controls, this.node.inputs, this.node.outputs);
         // Restore all of the old connections
         for (const action of this.connectionActions) {
-            // console.log('AdvancedRenderControlsActionHelper undoing connection action', action);
             action.undo();
         }
         this.connectionActions = [];
     }
     remove() {
-        console.log('AdvancedRenderControlsActionHelper remove from node:', this.node.id, this.node);
-
         // Remove all connections
         const input = this.node.inputs.get(this.inputName);
         if (input == null) {

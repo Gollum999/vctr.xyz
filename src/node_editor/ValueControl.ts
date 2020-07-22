@@ -12,7 +12,6 @@ export class ValueControl extends Rete.Control {
     public readonly vueContext: InstanceType<typeof ValueControlView> | null = null; // TODO public is a hack
 
     constructor(nodeType: ValueNodeType, emitter: Emitter<DefaultEvents & CoreEvents>, key: string, rowIdx: number) {
-        // console.log('ValueControl constructor', key, nodeType);
         super(key);
         this.props = { emitter, dataKey: key, rowIdx, nodeType: nodeType };
     }
@@ -21,16 +20,13 @@ export class ValueControl extends Rete.Control {
         if (this.vueContext == null) {
             throw new Error('ValueControl Vue context was null');
         }
-        // console.log(`ValueControl setValue setting to ${val} (from ${this.vueContext.values})`);
         this.vueContext.setValue(val);
-        // console.log('set vueContext.values to :', this.vueContext.values);
     }
 
     setReadOnly(readOnly: boolean) {
         if (this.vueContext == null) {
             throw new Error('ValueControl Vue context was null');
         }
-        // console.log(`ValueControl setReadOnly ${readOnly}`);
         this.vueContext.readOnly = readOnly;
     }
 };

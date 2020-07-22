@@ -42,8 +42,6 @@ export class BinaryOperation {
     }
 
     static getNewSocketTypesFromInputs(lhsInput: Input, rhsInput: Input): InputTypesPair {
-        // console.log(`TEST getNewSocketTypesFromInputs ${editorNode.name}"`);
-
         // TODO this still isn't great.  _getNewSocketTypesFromInput should always filter down, then
         //      util.removeInputConnectionsIfIncompatible should remove if empty.
         // First, determine initial types for each socket based on the types connected to them (or the defaults)
@@ -86,7 +84,6 @@ export class BinaryOperation {
 
     static updateOutputSocketTypes(editor: NodeEditor, editorNode: Node) {
         if (!this.inputToOutputTypeMap) {
-            // console.log(`TEST updateOutputSocketTypes input to output type map is null, returning early (${editorNode.name})`);
             return;
         }
 
@@ -98,16 +95,12 @@ export class BinaryOperation {
         const lhsTypes = util.getSocketTypes(lhs.socket);
         const rhsTypes = util.getSocketTypes(rhs.socket);
 
-        // console.log(`TEST updateOutputSocketTypes ${editorNode.name}`);
         const expectedOutputTypes = this.getExpectedOutputTypes(lhsTypes, rhsTypes);
-        // console.log('TEST updateOutputSocketTypes expectedOutputTypes =', expectedOutputTypes);
         if (expectedOutputTypes.has(SocketType.INVALID)) {
             throw new Error(`Cannot update output socket for "${editorNode.name}", input combination ("${lhsTypes}" and "${rhsTypes}") is invalid`);
         } else if (_.isEqual(expectedOutputTypes, s.IGNORE)) {
-            // console.log(`TEST updateOutputSocketTypes expected output for "${editorNode.name}" is 'ignore', skipping (from "${lhsTypes}" "${rhsTypes}")`);
             return;
         }
-        // console.log(`TEST updateOutputSocketTypes updating output for "${editorNode.name}" to`, expectedOutputTypes, '" (from "', lhsTypes, '" "', rhsTypes, ')');
         const output = editorNode.outputs.get('result');
         if (output == null) {
             throw new Error('Output "result" not found');
@@ -119,24 +112,19 @@ export class BinaryOperation {
     }
 
     static getExpectedOutputTypes(lhsTypeList: Set<SocketType>, rhsTypeList: Set<SocketType>): Set<SocketType> {
-        // console.log(`TEST getExpectedOutputTypes "${lhsTypeList}" "${rhsTypeList}"`);
         if (this.inputToOutputTypeMap == null) {
             throw new Error('inputToOutputTypeMap was not defined');
         }
         const allExpectedTypes = new Set<SocketType>();
         for (const lhs of lhsTypeList) {
             for (const rhs of rhsTypeList) {
-                // console.log(`TEST getExpectedOutputTypes lhs "${lhs}" rhs "${rhs}"`);
                 const expectedOutputTypeList = this.inputToOutputTypeMap[lhs][rhs];
-                // console.log(`TEST getExpectedOutputTypes expected output type ${expectedOutputTypeList} from "${lhs}" "${rhs}"`);
                 for (const t of expectedOutputTypeList) {
-                    // console.log(`TEST getExpectedOutputTypes Adding output type ${t} from "${lhs}" "${rhs}"`);
                     allExpectedTypes.add(t);
                 }
             }
         }
 
-        // console.log(allExpectedTypes);
         if (_.isEqual(allExpectedTypes, s.INVALID)) {
             throw new Error(`Invalid type combination ${allExpectedTypes} (from "${lhsTypeList}" "${rhsTypeList}")`);
         } else {
@@ -147,7 +135,6 @@ export class BinaryOperation {
         } else {
             allExpectedTypes.delete(SocketType.IGNORE);
         }
-        // console.log(allExpectedTypes);
 
         return allExpectedTypes;
     }
@@ -167,7 +154,6 @@ export class AddOperation extends BinaryOperation {
     };
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
-        // console.log('AddOperation', lhs, rhs);
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
             return [lhs.value[0] + rhs.value[0]];
         } else if (lhs.type === 'vector' && rhs.type === 'vector') {
@@ -195,7 +181,6 @@ export class SubtractOperation extends BinaryOperation {
     };
 
     static calculate(lhs: CalculationInput, rhs: CalculationInput): any {
-        // console.log(lhs, rhs);
         if (lhs.type === 'scalar' && rhs.type === 'scalar') {
             return [lhs.value[0] - rhs.value[0]];
         } else if (lhs.type === 'vector' && rhs.type === 'vector') {

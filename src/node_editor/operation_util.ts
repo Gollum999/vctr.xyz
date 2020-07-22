@@ -43,25 +43,20 @@ export function getSocketTypes(socket: Socket): Set<SocketType> {
 }
 
 export function updateIoType(io: IO, socketTypes: Set<SocketType>): void {
-    // console.log('TEST updateIoType ', io.node.name, io.name, 'to', socketTypes, typeof socketTypes);
     const compoundSocket = socketTypesToCompoundSocket(socketTypes);
     const newSocket = sockets[compoundSocket];
     if (_.isNil(newSocket)) {
         throw new Error(`Could not find socket named ${compoundSocket}`);
     }
     io.socket = newSocket;
-    // console.log('TEST new io:');
-    // console.log(io);
 
     if (io.node == null) {
         throw new Error(`IO node was null: ${io}`);
     }
     io.node.update(); // TODO may want to pull this out to worker() to only do once for performance
-    // console.log('TEST updateIoType END');
 }
 
 export function getInputTypes(input: Input): Set<SocketType> | null {
-    // console.log(input);
     console.assert(input.connections.length <= 1);
     if (_.isEmpty(input.connections)) {
         return null; // TODO probably better to return empty list?
@@ -75,15 +70,10 @@ export function getNewSocketTypesFromInput(
     typesFromInputSocket: Set<SocketType>,
     defaultTypes: Set<SocketType>,
 ): Set<SocketType> {
-    // console.log(`TEST _getNewSocketTypesFromInput ${input.node.name} "${typesFromInputConnection}" "${defaultTypes}"`);
     if (_.isNil(typesFromInputConnection)) { // TODO allowing this to be null is a bit annoying
-        // const newTypes = util.intersection(getSocketTypes(input.socket), defaultTypes);
         return defaultTypes;
     } else if (!_.isEqual(typesFromInputConnection, typesFromInputSocket)) {
-        // console.log(`TEST updating ${input.node.name} socket type from "${getSocketTypes(input.socket)}" to "${typesFromInputConnection}"`);
-        // console.log('TEST defaultTypes:', defaultTypes);
         const newTypes = util.intersection(typesFromInputConnection, defaultTypes);
-        // console.log('TEST newTypes:', newTypes);
         if (!_.isEmpty(newTypes)) {
             return newTypes;
         }

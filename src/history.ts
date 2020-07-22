@@ -14,10 +14,8 @@ export class History {
 
     add(action: Action): void {
         if (this.disabledCount) {
-            console.log('Not adding', action, 'because history is currently disabled');
             return;
         }
-        console.log('Adding history action', action);
         this.produced.push(action);
         this.reserved = [];
     }
@@ -51,12 +49,10 @@ export class History {
     }
 
     canUndo(): boolean {
-        console.log('canUndo: ', this.produced.length);
         return this.produced.length > 0;
     }
 
     canRedo(): boolean {
-        console.log('canRedo: ', this.reserved.length);
         return this.reserved.length > 0;
     }
 
@@ -72,12 +68,10 @@ export class History {
     disable(): void {
         // Why not just use a boolean?  This lets me have multiple scopes of disabling at once that overlap
         ++this.disabledCount;
-        // console.log('HISTORY DISABLE', this.disabledCount);
     }
 
     enable(): void {
         --this.disabledCount;
-        // console.log('HISTORY ENABLE', this.disabledCount);
         if (this.disabledCount < 0) {
             throw new Error('History disabled more than enabled');
         }

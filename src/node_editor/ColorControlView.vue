@@ -43,12 +43,9 @@ export default Vue.extend({
 
     watch: {
         colorPickerShowing(showing: boolean) {
-            /* console.log('colorPickerShowing CHANGED', showing, this.color); */
             if (showing) {
-                /* console.log('colorPicker opened', this.color, this.prevColor); */
                 this.prevColor = Object.assign({}, this.color);
             } else {
-                // console.log('colorPicker closed, emitting history', this.color, this.prevColor);
                 history.add(new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
             }
         },
@@ -59,7 +56,6 @@ export default Vue.extend({
             if (this.dataKey) {
                 this.putData(this.dataKey, this.makeData(newVal, this.color));
             }
-            // console.log('colorPicker visible changed, emitting history', newVal);
             history.add(new FieldChangeAction(oldVal, newVal, (visible) => { this.visible = visible; }));
 
             // TODO the reactivity is nice, but will get very laggy if there is any mildly complex logic.  since the color has no effect on any other state, could just use a separate "re-render but don't process everything" event
@@ -73,7 +69,6 @@ export default Vue.extend({
                 if (oldVal === null) {
                     return; // Avoid triggering history when first loading node
                 }
-                /* console.log('color watcher', this.dataKey, this.color, oldVal, newVal); */
                 if (this.dataKey) {
                     this.putData(this.dataKey, this.makeData(this.visible, newVal));
                 }
@@ -87,7 +82,6 @@ export default Vue.extend({
     },
 
     mounted() {
-        /* console.log('ColorControlView MOUNTED', this.color, this.getData(this.dataKey)); */
         if (!this.dataKey) {
             throw new Error('dataKey was null??');
         }
@@ -95,7 +89,6 @@ export default Vue.extend({
         this.color = data.color; // TODO breaking this out to make sure I have reactivity; is there a better way?
         this.visible = data.visible;
 
-        /* console.log('ColorControlView mounted', this.dataKey, this.color); */
         this.putData(this.dataKey, this.makeData(this.visible, this.color));
     },
 
@@ -108,10 +101,8 @@ export default Vue.extend({
         },
         colorPickerToggled(showing: boolean) {
             if (showing) {
-                /* console.log('colorPicker opened', this.color, this.prevColor); */
                 this.prevColor = this.color;
             } else {
-                // console.log('colorPicker toggled, emitting history', showing, this.color, this.prevColor);
                 history.add(new FieldChangeAction(this.prevColor, this.color, (color) => { this.color = color; }));
             }
         },
@@ -129,7 +120,6 @@ export default Vue.extend({
     align-items: center;
 }
 .visible-checkbox {
-    /* grid-column: controls; */
     display: inline-block;
     margin-top: 0;
     padding-top: 0;

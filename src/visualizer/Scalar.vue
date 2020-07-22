@@ -43,7 +43,6 @@ export default Vue.extend({
         value:         { type: Number, required: true },
         color:         { type: String, default: '#000000' },
         canvasSize:    { type: Object as PropType<CanvasSize>, required: true },
-        // canvasSize:    { type: Object, required: true },
         lineThickness: { type: Number, default: 0.1 },
         numSegments:   { type: Number, default: 12.0 },
         segmentRatio:  { type: Number, default: 0.65 },
@@ -52,11 +51,9 @@ export default Vue.extend({
     watch: {
         // For some reason, if 'uniforms' is a computed property, uniforms in shader do not seem to react to changes
         value(newVal: number, oldVal: number) {
-            /* console.log('value updated', oldVal, newVal); */
             this.uniforms.radius.value = Math.abs(newVal);
         },
         color(newVal: string, oldVal: string) {
-            console.log('Scalar color updated', oldVal, newVal);
             const rgb = util.hexToRgb(newVal);
             if (rgb === null) {
                 throw new Error(`Could not convert string "${newVal}" to RGB`);
@@ -67,7 +64,6 @@ export default Vue.extend({
             this.uniforms.posOffset.value = newVal;
         },
         lineThickness(newVal: number, oldVal: number) {
-            /* console.log('lineThickness updated', oldVal, newVal); */
             this.uniforms.lineThickness.value = newVal;
         },
         canvasSize(newVal: CanvasSize, oldVal: CanvasSize) {
@@ -175,7 +171,6 @@ export default Vue.extend({
     },
 
     mounted() {
-        // console.log('Scalar mounted:', this.displayType, this.color, this.pos, this.value, this.layer, this.$refs);
         (this.$refs[`scalar-mesh-${this.scalarKey}`] as any).inst.layers.set(this.layer);
         (this.$refs[`scalar-mat-${this.scalarKey}-${ScalarRenderStyle.SPHERE}`] as any).inst.wireframe = true;
     },

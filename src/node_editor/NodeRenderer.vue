@@ -75,16 +75,10 @@ export default {
 #app
   .node
     .v-text-field
-      // border: 1px solid #555555
-      // border-radius: 6px
-      // flex: 0 1 auto // Fixes extra-wide number inputs in Firefox
       font-size: 12px
 </style>
 
 <style lang="sass" scoped>
-// @import "@material/card/mdc-card.scss"
-
-// @import "../../node_modules/rete-vue-render-plugin/src/vars"
 $socket-size: 12px
 $socket-margin: 4px
 $node-width: 100px
@@ -141,7 +135,6 @@ $node-width: 100px
     text-align: left
     margin-left: $socket-size/2 + $socket-margin
   .control
-    // padding: $socket-margin $socket-size/2 + $socket-margin
     grid-column: controls
     display: contents
   .output

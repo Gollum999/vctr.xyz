@@ -97,7 +97,6 @@ import type { NodeView } from 'rete/types/view/node';
 import ConnectionPlugin from 'rete-connection-plugin';
 import VueRenderPlugin from 'rete-vue-render-plugin';
 import NodeRenderer from './NodeRenderer.vue';
-// import { Engine, ComponentWorker } from 'rete/build/rete-engine.min'
 import { EventBus } from '../EventBus';
 import * as settings from '../settings';
 import * as util from '../util';
@@ -145,11 +144,6 @@ function getOperation(nodeName: string): Operation {
 function updateAllSockets(engine: Engine, editor: NodeEditor) {
     const graphTraveler = new GraphTraveler(engine, editor);
     graphTraveler.applyToAllNodes((engineNode, editorNode) => {
-        // console.log('updateAllSockets', editorNode, engineNode, editorNode.id);
-        // console.log(engineNode.inputs);
-        // console.log(engineNode.outputs);
-        // console.log(editorNode.inputs);
-        // console.log(editorNode.outputs);
         if (!Object.values(ValueNodeType).includes(engineNode.name as ValueNodeType)) {
             const operation = getOperation(engineNode.name);
             if (!_.isNil(operation)) {
@@ -161,14 +155,9 @@ function updateAllSockets(engine: Engine, editor: NodeEditor) {
 
 function _updateOperationSockets(editor: NodeEditor, engineNode: DataNode, editorNode: Node, operation: Operation) {
     const inputArray = Array.from(editorNode.inputs);
-    // console.log(inputArray);
-
-    // const hasDynamicInputSockets = !_.isNil(operation.lhsToRhsTypeMap) || !_.isNil(operation.rhsToLhsTypeMap);
-    // const hasDynamicOutputSocket = !_.isNil(operation.inputToOutputTypeMap);
 
     // TODO can probably be more efficient here
     const anyConnectionEmpty = (inputArray.some(([name, input]) => {
-        // console.log(`TEST ${editorNode.name} connection empty, flagging for update`);
         return _.isEmpty(input.connections);
     }));
 
@@ -183,9 +172,7 @@ function _updateOperationSockets(editor: NodeEditor, engineNode: DataNode, edito
     }));
 
     const needsUpdateFromInputs = anyConnectionEmpty || anySocketTypeMismatch;
-    // console.log('TEST', editorNode.name, 'needs input update?', needsUpdateFromInputs);
     if (needsUpdateFromInputs) {
-    // if (true) {
         // First, update each input socket based on its connection and based on what types the current operation allows
         operation.updateInputSocketTypes(editor, editorNode);
     }
@@ -219,7 +206,6 @@ export default Vue.extend({
             editor: null! as NodeEditor,
             engine: null! as Engine,
 
-            currentlyHandlingHistoryAction: false,
             showingAdvancedRenderControls: true,
             processState: ProcessState.IDLE,
 
@@ -263,7 +249,6 @@ export default Vue.extend({
             }
 
             node.position = this.getNewNodePos(node, nodeView);
-            console.log('Added node at position', node.position);
 
             // Normally addNode triggers this update, but since I updated the position *after* adding the node, I need to do it manually
             nodeView.update();
@@ -273,7 +258,6 @@ export default Vue.extend({
         },
 
         async addNode(nodeType: string) {
-            console.log(`Add node (type ${nodeType})`);
             this.addAndRepositionNode(await this.nodeFactory.createNode(nodeType));
         },
 
@@ -328,7 +312,6 @@ export default Vue.extend({
         },
 
         onUndo() {
-            console.log('UNDO');
             try {
                 history.disable();
                 history.undo();
@@ -345,13 +328,7 @@ export default Vue.extend({
         },
 
         onRedo() {
-            console.log('REDO');
             history.redo();
-            // this.currentlyHandlingHistoryAction = true;
-            // this.editor.trigger('redo');
-            // this.$nextTick(() => {
-            //     this.currentlyHandlingHistoryAction = false;
-            // });
         },
 
         serializeNode(node: Node, originPos: [number, number]): SerializedNode {
@@ -363,7 +340,6 @@ export default Vue.extend({
         },
 
         onCut(event: ClipboardEvent) {
-            console.log('NodeEditor.onCut', event);
             if (event.clipboardData == null) {
                 throw new Error('Clipboard data was null');
             }
@@ -372,7 +348,6 @@ export default Vue.extend({
         },
 
         onCopy(event: ClipboardEvent) {
-            console.log('NodeEditor.onCopy', event, this.editor.selected);
             if (event.clipboardData == null) {
                 throw new Error('Clipboard data was null');
             }
@@ -385,17 +360,14 @@ export default Vue.extend({
         },
 
         async onPaste(event: ClipboardEvent) {
-            console.log('NodeEditor.onPaste', event);
             if (event.clipboardData == null) {
                 throw new Error('Clipboard data was null');
             }
             const nodes = JSON.parse(event.clipboardData.getData('application/json'));
-            console.log(nodes);
             let rootPosition = null;
             for (const nodeDescription of nodes) {
                 const node = await this.nodeFactory.createNode(nodeDescription.type);
                 node.data = nodeDescription.data;
-                // console.log('PASTING', nodeDescription, node);
                 if (!rootPosition) { // TODO currently assuming that the first node is the one that was used for origin pos
                     // Use the standard node positioning logic for the "root" of the pasted nodes
                     console.assert(_.isEqual(nodeDescription.posOffset, [0, 0]));
@@ -448,12 +420,10 @@ export default Vue.extend({
                 x: (nodeEditorWidth / 2) - (editorMidpointX * scale),
                 y: (nodeEditorHeight / 2) - (editorMidpointY * scale),
             };
-            console.log('recenterView set view transform to:', this.editor.view.area.transform);
             this.editor.view.area.update();
         },
 
         clearAllNodes() {
-            console.log('clearAllNodes');
             if (window.confirm('Are you sure you want to clear all nodes?')) {
                 const clearAllNodesAction = new actions.MultiAction([
                     new actions.RemoveAllConnectionsAction(this.editor),
@@ -468,19 +438,14 @@ export default Vue.extend({
         },
 
         async loadNodes(): Promise<void> {
-            // const savedEditorJson = null;
             const savedEditorJson = window.localStorage.getItem('node_editor');
 
             if (savedEditorJson) {
-                console.log('LOADING:', savedEditorJson);
                 const success = await this.editor.fromJSON(JSON.parse(savedEditorJson));
-                console.log('LOADED:', this.editor);
                 if (!success) {
-                    console.log('Could not load from local storage, creating demo nodes instead');
                     await this.createDemoNodes();
                 }
             } else {
-                console.log('Creating demo nodes');
                 await this.createDemoNodes();
             }
         },
@@ -535,14 +500,11 @@ export default Vue.extend({
         },
 
         saveState() {
-            console.log('Saving editor state to browser-local storage', this.editor.toJSON());
             window.localStorage.setItem('node_editor', JSON.stringify(this.editor.toJSON()));
             window.localStorage.setItem('node_editor_view_transform', JSON.stringify(this.editor.view.area.transform));
         },
 
         async loadState(): Promise<void> {
-            console.log('Loading node editor from local storage');
-
             const viewTransform = window.localStorage.getItem('node_editor_view_transform');
             if (viewTransform) {
                 this.editor.view.area.transform = JSON.parse(viewTransform);
@@ -614,8 +576,6 @@ export default Vue.extend({
         },
 
         async triggerEngineProcess(): Promise<boolean> {
-            console.log('NodeEditor triggerEngineProcess', this.editor.toJSON());
-
             this.showingError = false;
 
             if (this.processState !== ProcessState.IDLE) {
@@ -650,7 +610,6 @@ export default Vue.extend({
         },
 
         async handleConnectionChanged() {
-            console.log('NodeEditor handleConnectionChanged');
             // Engine updates must come first because it effects the node data that we iterate over
             if (await this.triggerEngineProcess()) {
                 updateAllSockets(this.engine, this.editor);
@@ -658,12 +617,10 @@ export default Vue.extend({
         },
 
         addOrRemoveAdvancedControls(add: boolean) {
-            console.log('adding or removing advanced render controls', add);
             const actionStack = [];
             const graphTraveler = new GraphTraveler(this.engine, this.editor);
             graphTraveler.applyToAllNodes((engineNode, editorNode) => {
                 if (editorNode.inputs.has(ADVANCED_RENDER_CONTROLS_KEY)) {
-                    console.log('NodeEditor advanced render controls handler', engineNode, editorNode);
                     if (add) {
                         const renderControlsAction = new actions.AddAdvancedRenderControlsAction(this.editor, editorNode, ADVANCED_RENDER_CONTROLS_KEY);
                         actionStack.push(renderControlsAction);
@@ -678,7 +635,6 @@ export default Vue.extend({
                         });
                         actionStack.push(resetOriginAction);
 
-                        // console.log('Pushing RemoveAdvancedRenderControlsAction', this.editor, engineNode);
                         const renderControlsAction = new actions.RemoveAdvancedRenderControlsAction(this.editor, editorNode, ADVANCED_RENDER_CONTROLS_KEY);
                         actionStack.push(renderControlsAction);
                     }
@@ -686,7 +642,6 @@ export default Vue.extend({
             });
 
             const updateSettingAction = new actions.FieldChangeAction(!add, add, val => {
-                // console.log('saving settings from NodeEditor field change', val);
                 this.settings.update('showAdvancedRenderSettings', val);
                 this.$nextTick(() => { // Fix connection paths - do next tick to give newly added connections time to be added to the DOM
                     for (const connectionView of this.editor.view.connections.values()) {
@@ -701,8 +656,6 @@ export default Vue.extend({
     },
 
     mounted() {
-        console.log('NodeEditor mounted', this.editor, this.engine);
-
         this.nodeFactory = new NodeFactory();
 
         this.container = document.getElementById('rete')!;
@@ -718,10 +671,6 @@ export default Vue.extend({
             },
             component: NodeRenderer,
         });
-        console.log('NodeEditor mounted, plugins list:', this.editor.plugins);
-        console.log('NodeEditor mounted, events:', this.editor.events);
-        // console.log('NodeEditor mounted, connectionremoved:', this.editor.events['connectionremoved']);
-        // console.log('NodeEditor mounted, connectionremoved handlers:', this.editor.events['connectionremoved'].handlers);
 
         this.engine = new Rete.Engine(this.version);
 
