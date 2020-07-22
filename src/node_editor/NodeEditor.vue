@@ -478,7 +478,7 @@ export default Vue.extend({
                     'display_title': 'Output',
                 }),
             ]);
-            vecLhs.position = [30, 80];
+            vecLhs.position = [30, 60];
             vecRhs.position = [30, 240];
             add.position = [320, 150];
             vecSum.position = [490, 70];
