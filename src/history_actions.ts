@@ -9,7 +9,8 @@ export class Action {
 }
 
 export class MultiAction extends Action {
-    constructor(private readonly actions: Array<Action>) { // Actions should be in the order that they happen; undos will happen in reverse order
+    // Actions should be in the order that they happen; undos will happen in reverse order
+    constructor(private readonly actions: Array<Action>) {
         super();
         // console.log('MultiAction constructor, actions:', actions);
         this.actions = actions;

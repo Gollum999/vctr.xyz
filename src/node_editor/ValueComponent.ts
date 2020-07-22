@@ -31,7 +31,7 @@ export class ValueComponent extends Rete.Component {
         node.addInput(new Rete.Input('value', 'Value', socket));
         node.addControl(new ValueControl(this.nodeType, this.editor, 'value', 1));
 
-        // rete-vue-render-plugin is the only thing that relies on socket being non-null, and I have my own NodeRenderer
+        // rete-vue-render-plugin is the only thing that relies on socket being non-null, and I have my own NodeRenderer, so null is fine
         node.addInput(new Rete.Input('color_label', 'Color', (null as any)));
         node.addControl(new ColorControl(this.editor, 'color', 2));
 

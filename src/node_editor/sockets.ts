@@ -43,6 +43,7 @@ export const compoundSocket = Object.freeze({
 });
 
 // These are displayed when hovering over a socket of each type
+// TODO This doesn't work anymore; package update might have broken it (but I don't care enough to try to fix it)
 (sockets.scalar as any).hint = '';
 (sockets.vector as any).hint = '';
 (sockets.matrix as any).hint = '';
@@ -51,6 +52,7 @@ export const compoundSocket = Object.freeze({
 (sockets.vectorOrMatrix as any).hint = 'Connection types will be determined after an input has been connected';
 (sockets.anything as any).hint = 'Connection types will be determined after an input has been connected';
 
+// Define how socket types are allowed to interact
 sockets.scalar.combineWith(sockets.scalarOrVector);
 sockets.vector.combineWith(sockets.scalarOrVector);
 sockets.scalarOrVector.combineWith(sockets.scalar);

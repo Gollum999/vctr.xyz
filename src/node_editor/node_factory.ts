@@ -74,9 +74,6 @@ export default class NodeFactory {
         if (!Object.keys(this.components).includes(nodeType)) {
             throw new Error(`Cannot add node of invalid type ${nodeType}`);
         }
-        // return this.components[nodeType].createNode(data);
-        const result = this.components[nodeType].createNode(data);
-        console.log('RESULT', result);
-        return result;
+        return this.components[nodeType].createNode(data);
     };
 }

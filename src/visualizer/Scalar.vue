@@ -55,13 +55,6 @@ export default Vue.extend({
             /* console.log('value updated', oldVal, newVal); */
             this.uniforms.radius.value = Math.abs(newVal);
         },
-        /* color: {
-         *     deep: true,
-         *     handler(newVal: string, oldVal: string) {
-         *         console.log('Scalar color updated', oldVal, newVal);
-         *         this.uniforms.color.value = colorObjToArray(util.hexToRgb(newVal));
-         *     },
-         * }, */
         color(newVal: string, oldVal: string) {
             console.log('Scalar color updated', oldVal, newVal);
             const rgb = util.hexToRgb(newVal);
@@ -87,10 +80,9 @@ export default Vue.extend({
             if (this.displayType === ScalarRenderStyle.SPHERE) {
                 return Math.abs(this.value);
             } else if (this.displayType === ScalarRenderStyle.CIRCLE) {
-                // TODO be careful of near plane clipping
-                // TODO also need to account for "chords" that can cause clipping since sphere mesh is not a perfect circle
+                // Be careful of near plane clipping
+                // Also make sure to account for "chords" that can cause clipping since sphere mesh is not a perfect circle
                 // TODO a "billboard" plane is probably the better solution
-                /* console.log('calculating geo radius', this); */
                 const PADDING = 0.5; // A little bit extra to prevent clipping due to camera distortion at close distances
                 return Math.abs(this.value) + this.lineThickness / 2.0 + PADDING;
             } else {

@@ -6,9 +6,6 @@
   <div class="fill">
     <vgl-namespace class="fill">
       <vgl-scene name="main_scene" ref="scene" class="fill vgl-scene">
-        <!-- <template v-for="(v, idx) in vectors"> -->
-        <!--   {{idx}} {{v}} {{v.value}} {{v.color}} -->
-        <!-- </template> -->
         <vgl-arrow-helper v-for="(v, idx) in renderVectors"
             :key="`vector-${idx}`"
             :position="`${v.pos[0]} ${v.pos[1]} ${v.pos[2]}`"
@@ -95,10 +92,11 @@ export default Vue.extend({
 
     data() {
         return {
+            vec3, // For use in render
+
             settings: settings.viewportSettings,
             vectors: [] as Array<VectorView>,
             matrices: [] as Array<MatrixView>,
-            vec3: vec3, // For use in render
             expandedView: null as ViewType | null,
         };
     },
