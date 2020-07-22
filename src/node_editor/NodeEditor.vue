@@ -194,7 +194,7 @@ export default Vue.extend({
             BasicOperationNodeType,
             AdvancedOperationNodeType,
 
-            version: 'vecviz@0.1.0', // Make sure to update this if introducing changes that would break saved node editor state
+            version: 'vctr@1.0.0', // Make sure to update this if introducing changes that would break saved node editor state
             settings: settings.nodeEditorSettings,
             history, // For checking whether to disable undo/redo buttons // TODO is it better to do this or add a computed property?
 
@@ -656,6 +656,7 @@ export default Vue.extend({
     },
 
     mounted() {
+        console.log('Version:', this.version);
         this.nodeFactory = new NodeFactory();
 
         this.container = document.getElementById('rete')!;
