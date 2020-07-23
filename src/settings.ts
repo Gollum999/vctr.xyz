@@ -31,9 +31,9 @@ const defaultViewportSettings = {
 const defaultNodeEditorSettings = {
     useRandomColors: false,
     // TODO Can I somehow use the class that vue-color uses?
-    defaultScalarColor: '#7676dd',
+    defaultScalarColor: '#7777dd',
     defaultVectorColor: '#ff4444',
-    defaultMatrixColor: '#44ffff',
+    defaultMatrixColor: '#22ee55',
     defaultScalarVisibility: false,
     defaultVectorVisibility: true,
     defaultMatrixVisibility: false,

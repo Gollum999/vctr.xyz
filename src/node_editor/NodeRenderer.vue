@@ -148,7 +148,7 @@ $node-width: 100px
 /* Global overrides for Rete style */
 $socket-color-scalar: #7777dd
 $socket-color-vector: #ff4444
-$socket-color-matrix: #44ffff
+$socket-color-matrix: #22ee55
 $socket-size: 12px
 
 #app
