@@ -17,6 +17,7 @@
       :ref="`scalar-mesh-${this.scalarKey}`"
       :geometry="`scalar-geo-${this.scalarKey}`"
       :material="`scalar-mat-${this.scalarKey}-${this.displayType}`"
+      :position="`${pos[0]} ${pos[1]} ${pos[2]}`"
   />
 </div>
 </template>
@@ -60,9 +61,6 @@ export default Vue.extend({
             }
             this.uniforms.color.value = colorObjToArray(rgb);
         },
-        pos(newVal: vec3, oldVal: vec3) {
-            this.uniforms.posOffset.value = newVal;
-        },
         lineThickness(newVal: number, oldVal: number) {
             this.uniforms.lineThickness.value = newVal;
         },
@@ -98,25 +96,25 @@ export default Vue.extend({
             uniforms: {
                 radius:                         { value: Math.abs(this.value) },
                 color:                          { value: colorObjToArray(colorObj) },
-                posOffset:                      { value: this.pos },
                 canvasSize:                     { value: [this.canvasSize.x, this.canvasSize.y] },
                 lineThickness:                  { value: this.lineThickness },
                 numSegments:                    { value: this.numSegments },
                 segmentRatio:                   { value: this.segmentRatio },
                 lineThicknessScaleWithDistance: { value: true }, // TODO broken if 'false'
             },
-            vertexShader: `
-                uniform vec3 posOffset;
 
+            // TODO my shader doesn't account for perspective distortion, so the radius it shows becomes less accurate the farther it is from the origin
+            vertexShader: `
                 varying vec4 objectPos;
                 varying mat4 projMat;
 
                 void main() {
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + posOffset, 1.0);
-                    objectPos = projectionMatrix * modelViewMatrix * vec4(posOffset, 1.0);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    objectPos = projectionMatrix * modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
                     projMat = projectionMatrix;
                 }
             `,
+
             fragmentShader: `
                 varying vec4 objectPos;
                 varying mat4 projMat;
