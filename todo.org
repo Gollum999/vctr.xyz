@@ -51,57 +51,16 @@
  - Sphere
  - Plane
 *** Branching or other control flow?
-* Operation types
-| Operation | Supported input types                                            | s in           | v in            | m in            |
-|-----------+------------------------------------------------------------------+----------------+-----------------+-----------------|
-| +         | (s, s) -> s, (v, v) -> v, (m, m) -> m                            | s -> s         | v -> v          | m -> m          |
-| -         | s -> s?, v -> v?, m -> m?, (s, s) -> s, (v, v) -> v, (m, m) -> m | s?, s -> s     | v?, v -> v      | m?, m -> m      |
-| *         | (s, s) -> s, (v, s) -> v, (s, v) -> v, (m, m) -> m, (v, m) -> v? | s -> s, v -> v | s -> v, m -> v* | m -> m, v -> v* |
-| /         | (s, s) -> s, (v, s) -> v, (s, v) -> v?                           | s -> s, v -> v | s -> v          |                 |
-| ^         | (s, s) -> s                                                      | s -> s         |                 |                 |
-| %         | (s, s) -> s                                                      | s -> s         |                 |                 |
-| .         | (v, v) -> s                                                      |                | v -> s          |                 |
-| x         | (v, v) -> v                                                      |                | v -> v          |                 |
-** +
-  IN                              OUT
-| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
-|-----------+---+---+---+---+---+-----------+---+---+---+---|
-| S         |   | - | - | s |   | S         | s | - | - |   |
-| V         | - |   | - | v |   | V         | - | v | - |   |
-| M         | - | - |   | m |   | M         | - | - | m |   |
-| A         | s | v | m |   |   | A         |   |   |   | a |
-** -
-  IN                              OUT
-| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
-|-----------+---+---+---+---+---+-----------+---+---+---+---|
-| S         |   | - | - | s |   | S         | s | - | - |   |
-| V         | - |   | - | v |   | V         | - | v | - |   |
-| M         | - | - |   | m |   | M         | - | - | m |   |
-| A         | s | v | m |   |   | A         |   |   |   | a |
-** *
-  IN                               OUT
-| LHS \ RHS | S | V | M | A  |   | LHS \ RHS | S | V | M  | A |
-|-----------+---+---+---+----+---+-----------+---+---+----+---|
-| S         |   |   |   | a  |   | S         | s | v | m  |   |
-| V         |   | - |   | sm |   | V         | v | - | v  | v |
-| M         |   | - |   | sm |   | M         | m | - | m  | m |
-| A         | a | s | a |    |   | A         |   | v | vm | a |
-** /
-  IN                              OUT
-| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
-|-----------+---+---+---+---+---+-----------+---+---+---+---|
-| S         |   | - | - | s |   | S         | s | - | - |   |
-| V         |   | - | - | s |   | V         | v | - | - |   |
-| M         |   | - | - | s |   | M         | m | - | - |   |
-| A         | a | - | - | s |   | A         | a | - | - |   |
 * 2D mode?
 * Named save/load support
 * Misc viewport
-- [ ] Draggable quadrants
+- [ ] Draggable quadrant boundaries
+- [ ] Optional 4x1 layout instead of 2x2?
 * Misc node editor
-- More operation types
+- More operations
 - More hotkeys
-  - [X] Delete to delete nodes
+  - [X] Delete: delete nodes
+  - [ ] Ctrl-A: select all nodes
 ** Undo/redo support
  - [-] Current history plugin does not give access to undo stack, which prevents
    me from doing a couple things.  Maybe submit a patch to the plugin, or write
@@ -112,13 +71,15 @@
    - [X] "Collapse" multiple similar actions (node value updates, cascading
      socket type changes + connection changes, etc.)
    - [ ] Save undo/redo state between page loads?
+     - Every action must be serializable
    - [X] +Clear history stack on load to avoid being able to undo loading?+
      - (breaks saving between page loads if I go that way)
      - Just don't set up actions until after page loaded
-** Camera
+** View
  - [ ] Recenter view on page load?
  - [X] Recenter view try to fit all nodes
  - [ ] Right click pan to match viewport?
+   - This works but brings up context menu
  - [ ] Left click box select?
  - [X] When adding nodes, add to center of view and only reposition if node too close to center
 ** Nodes
@@ -130,16 +91,18 @@
  - [X] Custom node titles
  - [ ] Render node name in viewport?
  - [X] Custom paste handler
- - [ ] Slightly wider vector input (enough for 3 digits + decimal)
-   - [ ] Configurable?
+ - [ ] Configurable input width?
  - [X] Truncate input display values
- - [ ] Condense everything a bit more if possible
+ - [X] Condense everything a bit more if possible
+ - [ ] "Dense mode" layout to match other node editors, e.g. Blender: Outputs on top, controls in middle, inputs on bottom
+   - If input is connected, don't show intermediate values?
 ** Node types
  - [-] Render scalar values
    - [X] As circle
      - [X] Update on horizontal resize, or figure out how to write in such a way that viewport size doesn't matter
        - Can I somehow use the camera's current matrices?
    - [ ] As vector?
+   - [X] As sphere
  - [-] Render matrices?
    - [ ] grid w/ transform?
    - [X] vector field?
@@ -158,4 +121,5 @@
    - Tried using this and it didn't seem to work...
  - [X] [[https://rete.js.org/#/docs/plugins/history][History plugin]]
    - Undo/redo support!
-* Hosting/ads/etc
+* Ads/donation link
+* Help/about dialog?

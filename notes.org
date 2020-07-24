@@ -1,8 +1,51 @@
-To use custom SVG with md-icon:
- - All paths must be unioned if there is any overlap, since icon style uses 50% alpha
-   - For objects created from lines, must use "Stroke to path" before "Union"
- - Remove any extra layers or templates to avoid exporting clutter (even if they would be invisible)
- - Fill/stroke should be unset; they are applied with a "style" tag that overrides CSS
- - In Inkscape, export as "Optimized SVG" with "Enable viewboxing" checked
- - For some reason, need to apply custom style to get the icon centered properly
-   - Note that button circle size is 32x32, with a 24x24 icon inscribed
+* Operation types
+| Operation | Supported input types                                            | s in           | v in            | m in            |
+|-----------+------------------------------------------------------------------+----------------+-----------------+-----------------|
+| +         | (s, s) -> s, (v, v) -> v, (m, m) -> m                            | s -> s         | v -> v          | m -> m          |
+| -         | s -> s?, v -> v?, m -> m?, (s, s) -> s, (v, v) -> v, (m, m) -> m | s?, s -> s     | v?, v -> v      | m?, m -> m      |
+| *         | (s, s) -> s, (v, s) -> v, (s, v) -> v, (m, m) -> m, (v, m) -> v? | s -> s, v -> v | s -> v, m -> v* | m -> m, v -> v* |
+| /         | (s, s) -> s, (v, s) -> v, (s, v) -> v?                           | s -> s, v -> v | s -> v          |                 |
+| ^         | (s, s) -> s                                                      | s -> s         |                 |                 |
+| %         | (s, s) -> s                                                      | s -> s         |                 |                 |
+| .         | (v, v) -> s                                                      |                | v -> s          |                 |
+| x         | (v, v) -> v                                                      |                | v -> v          |                 |
+** +
+  IN                              OUT
+| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
+|-----------+---+---+---+---+---+-----------+---+---+---+---|
+| S         |   | - | - | s |   | S         | s | - | - |   |
+| V         | - |   | - | v |   | V         | - | v | - |   |
+| M         | - | - |   | m |   | M         | - | - | m |   |
+| A         | s | v | m |   |   | A         |   |   |   | a |
+** -
+  IN                              OUT
+| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
+|-----------+---+---+---+---+---+-----------+---+---+---+---|
+| S         |   | - | - | s |   | S         | s | - | - |   |
+| V         | - |   | - | v |   | V         | - | v | - |   |
+| M         | - | - |   | m |   | M         | - | - | m |   |
+| A         | s | v | m |   |   | A         |   |   |   | a |
+** *
+  IN                               OUT
+| LHS \ RHS | S | V | M | A  |   | LHS \ RHS | S | V | M  | A |
+|-----------+---+---+---+----+---+-----------+---+---+----+---|
+| S         |   |   |   | a  |   | S         | s | v | m  |   |
+| V         |   | - |   | sm |   | V         | v | - | v  | v |
+| M         |   | - |   | sm |   | M         | m | - | m  | m |
+| A         | a | s | a |    |   | A         |   | v | vm | a |
+** /
+  IN                              OUT
+| LHS \ RHS | S | V | M | A |   | LHS \ RHS | S | V | M | A |
+|-----------+---+---+---+---+---+-----------+---+---+---+---|
+| S         |   | - | - | s |   | S         | s | - | - |   |
+| V         |   | - | - | s |   | V         | v | - | - |   |
+| M         |   | - | - | s |   | M         | m | - | - |   |
+| A         | a | - | - | s |   | A         | a | - | - |   |
+* To use custom SVG with md-icon:
+- All paths must be unioned if there is any overlap, since icon style uses 50% alpha
+  - For objects created from lines, must use "Stroke to path" before "Union"
+- Remove any extra layers or templates to avoid exporting clutter (even if they would be invisible)
+- Fill/stroke should be unset; they are applied with a "style" tag that overrides CSS
+- In Inkscape, export as "Optimized SVG" with "Enable viewboxing" checked
+- For some reason, need to apply custom style to get the icon centered properly
+  - Note that button circle size is 32x32, with a 24x24 icon inscribed
