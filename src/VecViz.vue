@@ -21,7 +21,7 @@
     </v-dialog>
   </div>
 
-  <Split direction="vertical" :gutterSize="4" @onDragStart="onDragStart" @onDrag="onDrag" @onDragEnd="onDragEnd">
+  <Split direction="vertical" :gutterSize="4" @onDrag="onDrag">
     <SplitArea :size="50" :minSize="150">
       <QuadViewport />
     </SplitArea>
@@ -58,10 +58,6 @@ export default {
         },
         onDrag(size) {
             EventBus.$emit('split-resized', size);
-        },
-        onDragStart(size) {
-        },
-        onDragEnd(size) {
         },
     },
 };
