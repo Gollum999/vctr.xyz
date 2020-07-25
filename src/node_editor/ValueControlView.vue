@@ -10,6 +10,7 @@
     :value="item.val"
     :readonly="readOnly"
     @input="onInput($event, idx)"
+    @keydown="handleKeyDown"
     @copy.prevent.stop="onCopy"
     @paste.prevent.stop="onPaste($event)"
   />
@@ -103,6 +104,18 @@ export default Vue.extend({
                 this.emitter.trigger('process');
             });
             history.addAndDo(action);
+        },
+
+        handleKeyDown(event: KeyboardEvent) {
+            // Prevent the containing node from being deleted
+            if (event.key === 'Delete') {
+                event.stopPropagation();
+            }
+
+            // Undo/redo must be handled through global history
+            if (event.ctrlKey && (event.code === 'KeyZ' || event.code === 'KeyY')) {
+                event.preventDefault();
+            }
         },
 
         onCopy(event: ClipboardEvent) {
