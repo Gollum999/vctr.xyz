@@ -1,41 +1,30 @@
-# vector_visualizer
+# vctr.xyz
 
-> Web app to visualize vector operations, transformations, etc.
+**vctr.xyz** is a web app for visualizing linear algebra, vector
+transformations, etc.  
 
-## Project setup
-```
-npm install
-```
+It uses a dynamic node editing system that enables users to visualize a wide
+variety of operations, ranging from simple:
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+![Simple example](https://github.com/gollum999/vctr.xyz/blob/master/example1.png?raw=true)
 
-### Compiles and minifies for production
-```
-npm run build
-```
+to complex:
 
-### Run your tests
-```
-npm run test
-```
+![Complex example](https://github.com/gollum999/vctr.xyz/blob/master/example2.png?raw=true)
 
-### Lints and fixes files
-```
-npm run lint
-```
+## Contributing
 
-### Run your end-to-end tests
-```
-npm run test:e2e
-```
+This was my first "substantial" web project, and I'll be honest, some of the code is
+pretty gross.  Thus, I welcome any and all PRs as potential learning opportunities!
 
-### Run your unit tests
-```
-npm run test:unit
-```
+## Shout-outs
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Like any good project, **vctr.xyz** uses a bunch of open-source libraries, but
+ some of the most critical are:
+ 
+ - [Rete.js](https://github.com/retejs/rete)
+ - [VueGL](https://github.com/vue-gl/vue-gl)
+ - [Lodash](https://github.com/lodash/lodash)
+ - [three.js](https://github.com/mrdoob/three.js/)
+ 
+Huge thank you to the maintainers and contributors of the above projects!
