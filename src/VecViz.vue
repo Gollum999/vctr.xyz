@@ -5,7 +5,7 @@
         color="primary"
         :input-value="nodeEditorSettings.values.showAdvancedRenderSettings"
         @change="onShowAdvancedControlsChanged"
-        label="Show advanced controls"
+        label="Show 'Position' controls"
         hide-details
     />
 
