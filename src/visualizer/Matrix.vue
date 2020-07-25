@@ -2,14 +2,15 @@
 <div>
   <div v-if="displayType === 'vector-field'">
     <!-- TODO would it be more performant to calculate things like vector length and string versions inside of `fieldVectors`? -->
+    <!-- HACK: Capping vector head sizes at 0.0001 to prevent warnings in console from Three when rendering -->
     <vgl-arrow-helper v-for="(v, idx) in fieldVectors"
                       :key="`matrix-field-vector-${idx}`"
                       :position="`${v.pos[0]} ${v.pos[1]} ${v.pos[2]}`"
                       :dir="`${v.value[0]} ${v.value[1]} ${v.value[2]}`"
                       :color="color"
                       :length="`${vec3.length(v.value) * vectorScale}`"
-                      :head-length="settings.values.matrix.headSize"
-                      :head-width="settings.values.matrix.headSize"
+                      :head-length="Math.max(settings.values.matrix.headSize, 0.0001)"
+                      :head-width="Math.max(settings.values.matrix.headSize, 0.0001)"
     />
   </div>
 </div>

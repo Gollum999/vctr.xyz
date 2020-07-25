@@ -6,14 +6,15 @@
   <div class="fill">
     <vgl-namespace class="fill">
       <vgl-scene name="main_scene" ref="scene" class="fill vgl-scene">
+        <!-- HACK: Capping vector head sizes at 0.0001 to prevent warnings in console from Three when rendering -->
         <vgl-arrow-helper v-for="(v, idx) in renderVectors"
             :key="`vector-${idx}`"
             :position="`${v.pos[0]} ${v.pos[1]} ${v.pos[2]}`"
             :dir="`${v.value[0]} ${v.value[1]} ${v.value[2]}`"
             :color="v.color"
             :length="`${vec3.length(v.value)}`"
-            :head-length="settings.values.vector.headSize"
-            :head-width="settings.values.vector.headSize"
+            :head-length="Math.max(settings.values.vector.headSize, 0.0001)"
+            :head-width="Math.max(settings.values.vector.headSize, 0.0001)"
         />
         <Matrix v-for="(m, idx) in renderMatrices"
             :key="`matrix-${idx}`"
