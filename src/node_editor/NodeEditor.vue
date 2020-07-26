@@ -199,7 +199,7 @@ export default Vue.extend({
             settings: settings.nodeEditorSettings,
             history, // For checking whether to disable undo/redo buttons // TODO is it better to do this or add a computed property?
 
-            lastNodePosition: null as [number, number] | null,
+            lastNodeCreatedPosition: null as [number, number] | null,
             newNodesShouldBeCentered: true,
 
             nodeFactory: null! as NodeFactory,
@@ -254,7 +254,7 @@ export default Vue.extend({
             nodeView.update();
 
             this.newNodesShouldBeCentered = false;
-            this.lastNodePosition = [...node.position];
+            this.lastNodeCreatedPosition = [...node.position];
         },
 
         async addNode(nodeType: string) {
@@ -280,8 +280,8 @@ export default Vue.extend({
                 const desiredPosY = ((nodeEditorCenterY - editorY) / editorScale) - nodeHeight / 2;
                 return [desiredPosX, desiredPosY];
             } else {
-                if (this.lastNodePosition == null) {
-                    throw new Error('lastNodePosition was null');
+                if (this.lastNodeCreatedPosition == null) {
+                    throw new Error('lastNodeCreatedPosition was null');
                 }
                 const nodeOffset = 30;
                 const wrapMargin = 30;
@@ -294,8 +294,8 @@ export default Vue.extend({
                 editorViewRect.grow(-wrapMargin);
                 editorViewRect.right -= nodeWidth;
                 editorViewRect.bottom -= nodeHeight;
-                const xRelativeToView = this.lastNodePosition[0] + nodeOffset - editorViewRect.left;
-                const yRelativeToView = this.lastNodePosition[1] + nodeOffset - editorViewRect.top;
+                const xRelativeToView = this.lastNodeCreatedPosition[0] + nodeOffset - editorViewRect.left;
+                const yRelativeToView = this.lastNodeCreatedPosition[1] + nodeOffset - editorViewRect.top;
                 const desiredPosX = editorViewRect.left + xRelativeToView % editorViewRect.width();
                 const desiredPosY = editorViewRect.top + yRelativeToView % editorViewRect.height();
                 return [desiredPosX, desiredPosY];
