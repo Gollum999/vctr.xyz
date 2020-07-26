@@ -211,6 +211,7 @@ export default Vue.extend({
 
             showingAdvancedRenderControls: true,
             processState: ProcessState.IDLE,
+            pendingConnectionChange: false,
 
             // TODO switch to use Rete Area Plugin?
             minZoom: 0.1,
@@ -638,6 +639,7 @@ export default Vue.extend({
 
             this.editor.on(['nodetranslated', 'translated', 'zoomed'], this.saveState);
             this.editor.on(['process', 'nodecreated', 'noderemoved'], this.triggerEngineProcess);
+            EventBus.$on('node_engine_processed', this.handleProcessComplete);
 
             this.editor.on(['connectioncreated', 'connectionremoved'], this.handleConnectionChanged);
             this.handleConnectionChanged(); // Run once to set up socket types
@@ -657,12 +659,12 @@ export default Vue.extend({
             this.showingError = true;
         },
 
-        async triggerEngineProcess(): Promise<boolean> {
+        async triggerEngineProcess(): Promise<void> {
             this.showingError = false;
 
             if (this.processState !== ProcessState.IDLE) {
                 this.processState = ProcessState.INTERRUPTED;
-                return false;
+                return;
             }
             this.processState = ProcessState.PROCESSING;
             await this.engine.abort(); // Stop old job if running
@@ -674,9 +676,7 @@ export default Vue.extend({
                 if (status === 'success') {
                     this.saveState();
                     EventBus.$emit('node_engine_processed', this.editor.toJSON());
-                    return true;
                 } else if (status === 'aborted' || status === undefined) {
-                    return false;
                 } else {
                     throw new Error(`Unexpected result from Rete.Engine.process: ${status}`);
                 }
@@ -684,7 +684,8 @@ export default Vue.extend({
                 this.processState = ProcessState.IDLE;
                 // Someone else triggered a 'process' while we were processing; try again
                 // TODO this is not ideal... need to wait for previous processes to finish before we can try again
-                // TODO the whole point of abort() is to avoid this kind of thing, but that still results in warnings and everything else I have tried has weird races
+                // TODO the whole point of abort() is to avoid this kind of thing, but that still results in warnings and everything
+                //      else I have tried has weird races
                 return this.triggerEngineProcess();
             } else {
                 throw new Error(`Node engine in invalid state ${this.processState}`);
@@ -693,8 +694,14 @@ export default Vue.extend({
 
         async handleConnectionChanged() {
             // Engine updates must come first because it effects the node data that we iterate over
-            if (await this.triggerEngineProcess()) {
+            this.pendingConnectionChange = true;
+            this.triggerEngineProcess();
+        },
+
+        handleProcessComplete() {
+            if (this.pendingConnectionChange) {
                 updateAllSockets(this.engine, this.editor);
+                this.pendingConnectionChange = false;
             }
         },
 
