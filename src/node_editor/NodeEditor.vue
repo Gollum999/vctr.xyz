@@ -710,10 +710,10 @@ export default Vue.extend({
             });
         });
 
-        (async () => {
+        window.addEventListener('load', async () => {
             await this.loadState();
             this.setUpPostLoadEvents();
-        })();
+        });
 
         // Using body for these because that will be the active element after a node has been selected (not sure if that is necessary?)
         document.body.addEventListener('keydown', event => {
