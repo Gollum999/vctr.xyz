@@ -238,7 +238,6 @@ export default Vue.extend({
 
             this.editor.on('connectioncreated', c => history.add(new actions.AddConnectionAction(this.editor, c)));
             this.editor.on('connectionremoved', c => history.add(new actions.RemoveConnectionAction(this.editor, c)));
-            this.editor.on(['nodetranslated', 'translated', 'zoomed'], this.saveState);
         },
 
         addAndRepositionNode(node: Node) {
@@ -514,7 +513,7 @@ export default Vue.extend({
             await this.loadNodes();
         },
 
-        postLoad() {
+        setUpPostLoadEvents() {
             // Do not set up undo/redo callbacks until after finished loading to prevent user from undoing load
             this.setUpBasicHistoryActions();
 
@@ -559,6 +558,12 @@ export default Vue.extend({
             this.engine.on('warn', (exc: string | Error) => {
                 console.warn('Warning from Rete engine:', exc);
             });
+
+            this.editor.on(['nodetranslated', 'translated', 'zoomed'], this.saveState);
+            this.editor.on(['process', 'nodecreated', 'noderemoved'], this.triggerEngineProcess);
+
+            this.editor.on(['connectioncreated', 'connectionremoved'], this.handleConnectionChanged);
+            this.handleConnectionChanged(); // Run once to set up socket types
         },
 
         // HACK: 'error' type declared as "string | Error", but that does not match the source code.  'any' is a workaround.
@@ -707,14 +712,7 @@ export default Vue.extend({
 
         (async () => {
             await this.loadState();
-
-            this.postLoad();
-
-            // Do not trigger any of these events until after the initial load is done
-            this.editor.on(['process', 'nodecreated', 'noderemoved'], this.triggerEngineProcess);
-
-            this.editor.on(['connectioncreated', 'connectionremoved'], this.handleConnectionChanged);
-            this.handleConnectionChanged(); // Run once to set up socket types
+            this.setUpPostLoadEvents();
         })();
 
         // Using body for these because that will be the active element after a node has been selected (not sure if that is necessary?)
