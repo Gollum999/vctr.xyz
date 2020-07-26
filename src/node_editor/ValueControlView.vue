@@ -96,9 +96,15 @@ export default Vue.extend({
             }
         },
 
+        // TODO This is still a bit buggy.  Probably need to pull out input with validation into separate component
         onInput(newValue: string, idx: number) {
             const newValues = this.values.map(i => ({...i})); // Make sure to deep copy the wrappers
-            newValues[idx].val = parseFloat(newValue);
+            let val = parseFloat(newValue);
+            if (isNaN(val)) {
+                val = 0.0;
+            }
+            newValues[idx].val = val;
+
             const action = new FieldChangeAction(this.values, newValues, val => {
                 this.values = val;
                 this.emitter.trigger('process');
