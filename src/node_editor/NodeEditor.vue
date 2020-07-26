@@ -115,6 +115,7 @@ import vuetify from '../plugins/vuetify';
 type Operation = typeof unary.UnaryOperation | typeof binary.BinaryOperation;
 
 interface SerializedNode {
+    oldId: number,
     type: string,
     data: object,
     posOffset: [number, number],
@@ -332,10 +333,28 @@ export default Vue.extend({
 
         serializeNode(node: Node, originPos: [number, number]): SerializedNode {
             return {
+                oldId: node.id,
                 type: node.name,
                 data: node.data,
                 posOffset: [node.position[0] - originPos[0], node.position[1] - originPos[1]],
             };
+        },
+
+        serializeConnections() {
+            // TODO might be easier to always track from one "side" rather than putting these in a set
+            //      that would also potentially allow me to use the toJSON/fromJSON that Rete has already implemented
+            const selectedConnections = new Set(this.editor.selected.list.map(node => node.getConnections().filter(connection => {
+                const inputSelected = (connection.input.node && this.editor.selected.contains(connection.input.node));
+                const outputSelected = (connection.output.node && this.editor.selected.contains(connection.output.node));
+                return inputSelected && outputSelected;
+            })).flat());
+
+            return [...selectedConnections].map(connection => {
+                return {
+                    'input': [connection.input.key, connection.input.node!.id],
+                    'output': [connection.output.key, connection.output.node!.id],
+                };
+            });
         },
 
         onCut(event: ClipboardEvent) {
@@ -352,9 +371,11 @@ export default Vue.extend({
             }
             if (this.editor.selected.list.length) {
                 const originPos = this.editor.selected.list[0].position; // TODO I think best would be to find the node closest to center of selected
-                event.clipboardData.setData('application/json', JSON.stringify(this.editor.selected.list.map(node => {
-                    return this.serializeNode(node, originPos);
-                })));
+                const serialized = JSON.stringify({
+                    'nodes': this.editor.selected.list.map(node => this.serializeNode(node, originPos)),
+                    'connections': this.serializeConnections(),
+                });
+                event.clipboardData.setData('application/json', serialized);
             }
         },
 
@@ -362,10 +383,20 @@ export default Vue.extend({
             if (event.clipboardData == null) {
                 throw new Error('Clipboard data was null');
             }
-            const nodes = JSON.parse(event.clipboardData.getData('application/json'));
+            const serialized = JSON.parse(event.clipboardData.getData('application/json'));
+
+            const nodes = serialized['nodes'];
+            const connections = serialized['connections'];
+            if (nodes == null || connections == null) {
+                return;
+            }
+
+            const oldToNewNodeId = new Map();
             let rootPosition = null;
+            let accumulateSelection = false;
             for (const nodeDescription of nodes) {
                 const node = await this.nodeFactory.createNode(nodeDescription.type);
+                oldToNewNodeId.set(nodeDescription.oldId, node.id);
                 node.data = nodeDescription.data;
                 if (!rootPosition) { // TODO currently assuming that the first node is the one that was used for origin pos
                     // Use the standard node positioning logic for the "root" of the pasted nodes
@@ -377,8 +408,38 @@ export default Vue.extend({
                     node.position = [rootPosition[0] + nodeDescription.posOffset[0], rootPosition[1] + nodeDescription.posOffset[1]];
                     this.editor.addNode(node);
                 }
+
+                // Select pasted nodes
+                this.editor.selectNode(node, accumulateSelection);
+                accumulateSelection = true;
             }
-            history.squashTopActions(nodes.length);
+
+            for (const {input: inputDesc, output: outputDesc} of connections) {
+                const [inputKey, inputNodeOldId] = inputDesc;
+                const [outputKey, outputNodeOldId] = outputDesc;
+                const inputNodeId = oldToNewNodeId.get(inputNodeOldId);
+                const outputNodeId = oldToNewNodeId.get(outputNodeOldId);
+                const inputNode = this.editor.nodes.find(node => node.id === inputNodeId);
+                const outputNode = this.editor.nodes.find(node => node.id === outputNodeId);
+                if (!inputNode) {
+                    throw new Error(`Could not find input node with id ${inputNodeId}`);
+                }
+                if (!outputNode) {
+                    throw new Error(`Could not find output node with id ${outputNodeId}`);
+                }
+                const input = inputNode.inputs.get(inputKey);
+                const output = outputNode.outputs.get(outputKey);
+                if (!input) {
+                    throw new Error(`Could not find input with key ${inputKey}`);
+                }
+                if (!output) {
+                    throw new Error(`Could not find output with key ${outputKey}`);
+                }
+                // TODO connection data?
+                this.editor.connect(output, input);
+            }
+
+            history.squashTopActions(nodes.length + connections.length);
         },
 
         recenterView() {
