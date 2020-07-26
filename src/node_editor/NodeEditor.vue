@@ -202,6 +202,8 @@ export default Vue.extend({
             lastNodeCreatedPosition: null as [number, number] | null,
             newNodesShouldBeCentered: true,
 
+            dragNodesAction: null as actions.DragNodesAction | null,
+
             nodeFactory: null! as NodeFactory,
             container: null! as HTMLElement,
             editor: null! as NodeEditor,
@@ -226,15 +228,29 @@ export default Vue.extend({
         setUpBasicHistoryActions() {
             this.editor.on('nodecreated', node => history.add(new actions.AddNodeAction(this.editor, node)));
             this.editor.on('noderemoved', node => history.add(new actions.RemoveNodeAction(this.editor, node)));
+
+            this.editor.on('nodeselected', node => {
+                this.dragNodesAction = new actions.DragNodesAction(this.editor);
+            });
             this.editor.on('nodetranslated', ({ node, prev }) => {
                 if (_.isEqual(node.position, prev)) {
                     return;
                 }
-                if (history.last instanceof actions.DragNodeAction && history.last.node === node) {
-                    history.last.update(node);
-                } else {
-                    history.add(new actions.DragNodeAction(this.editor, node, prev));
+                if (this.dragNodesAction === null) {
+                    // This event will be triggered when undoing/redoing node moves
+                    return;
                 }
+                this.dragNodesAction.update(node);
+            });
+            this.editor.on('nodedraged', node => {
+                if (this.dragNodesAction === null) {
+                    throw new Error('dragNodesAction was null!');
+                }
+                if (this.dragNodesAction.anyNodeMoved()) {
+                    // If nothing has moved (i.e. the node was clicked and immediately released), skip this action
+                    history.add(this.dragNodesAction);
+                }
+                this.dragNodesAction = null;
             });
 
             this.editor.on('connectioncreated', c => history.add(new actions.AddConnectionAction(this.editor, c)));

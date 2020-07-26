@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Connection } from 'rete/types/connection';
 import { NodeEditor } from 'rete/types/editor';
 import { Node } from 'rete/types/node';
@@ -153,33 +154,43 @@ export class RemoveNodeAction extends NodeAction {
 }
 
 type Position = [number, number];
-export class DragNodeAction extends NodeAction {
-    private readonly prevPos: Position;
-    private newPos: Position;
+export class DragNodesAction extends Action {
+    private readonly editor: NodeEditor;
+    private readonly oldPositions: Map<number, Position>;
+    private newPositions: Map<number, Position>;
 
-    constructor(editor: NodeEditor, node: Node, prevPos: Position) {
-        super(editor, node);
-
-        this.prevPos = [...prevPos];
-        this.newPos = [...node.position];
+    constructor(editor: NodeEditor) {
+        super();
+        this.editor = editor;
+        this.oldPositions = new Map(this.editor.selected.list.map(node => [node.id, [...node.position]]));
+        this.newPositions = new Map(this.oldPositions.entries());
     }
 
-    _translate(position: Position) {
-        const node = this.editor.view.nodes.get(this.node);
-        if (node == null) {
-            throw new Error(`View node was null: ${this.node}`);
+    _translate(positionMap: Map<number, Position>) {
+        for (const [nodeId, position] of positionMap) {
+            const node = this.editor.nodes.find(node => node.id === nodeId);
+            if (node == null) {
+                throw new Error(`Could not find node with id ${nodeId}`);
+            }
+            const nodeView = this.editor.view.nodes.get(node);
+            if (nodeView == null) {
+                throw new Error(`Could not find node view with id ${nodeId}`);
+            }
+            nodeView.translate(...position);
         }
-        node.translate(...position);
     }
 
     undo() {
-        this._translate(this.prevPos);
+        this._translate(this.oldPositions);
     }
     redo() {
-        this._translate(this.newPos);
+        this._translate(this.newPositions);
     }
     update(node: Node) {
-        this.newPos = [...node.position];
+        this.newPositions.set(node.id, [...node.position]);
+    }
+    anyNodeMoved() {
+        return [...this.oldPositions.entries()].some(([oldId, oldPos]) => !_.isEqual(oldPos, this.newPositions.get(oldId)));
     }
 }
 
