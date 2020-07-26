@@ -84,6 +84,9 @@ export class History {
     }
 
     squashTopActions(count: number): void {
+        if (count === 1) {
+            return; // Nothing to do
+        }
         console.assert(count >= 2, 'Not enough actions to squash');
         const actions = [];
         for (let i = 0; i < count; ++i) {
