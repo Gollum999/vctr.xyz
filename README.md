@@ -4,13 +4,11 @@
 transformations, etc.  
 
 It uses a dynamic node editing system that enables users to visualize a wide
-variety of operations, ranging from simple:
+variety of operations:
 
-![Simple example](https://github.com/gollum999/vctr.xyz/blob/master/example1.png?raw=true)
-
-to complex:
-
-![Complex example](https://github.com/gollum999/vctr.xyz/blob/master/example2.png?raw=true)
+ranging from simple...|...to complex 
+---|---
+![Simple example](https://github.com/Gollum999/vctr.xyz/raw/master/static/examples/example1.png) | ![Complex example](https://github.com/Gollum999/vctr.xyz/raw/master/static/examples/example2.png)
 
 ## Contributing
 
