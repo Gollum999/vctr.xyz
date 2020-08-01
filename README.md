@@ -1,4 +1,6 @@
-# vctr.xyz
+# vctr.xyz - Vector Playground
+
+We're live at [vctr.xyz](https://vctr.xyz)!
 
 **vctr.xyz** is a web app for visualizing linear algebra, vector
 transformations, etc.  
