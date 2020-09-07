@@ -5,19 +5,19 @@
 
     <div class="buttons-container">
       <div class="buttons-group left buttons-add-nodes">
-        <v-btn fab x-small type="button" title="Add scalar" @click="addNode('Scalar')">
-          <v-icon>$vuetify.icons.scalar</v-icon>
+        <v-btn fab type="button" title="Add scalar" @click="addNode('Scalar')" :width="buttonSize" :height="buttonSize">
+          <v-icon :size="iconSize">$vuetify.icons.scalar</v-icon>
         </v-btn>
-        <v-btn fab x-small type="button" title="Add vector" @click="addNode('Vector')">
-          <v-icon>$vuetify.icons.vector</v-icon>
+        <v-btn fab type="button" title="Add vector" @click="addNode('Vector')" :width="buttonSize" :height="buttonSize">
+          <v-icon :size="iconSize">$vuetify.icons.vector</v-icon>
         </v-btn>
-        <v-btn fab x-small type="button" title="Add matrix" @click="addNode('Matrix')">
-          <v-icon>$vuetify.icons.matrix</v-icon>
+        <v-btn fab type="button" title="Add matrix" @click="addNode('Matrix')" :width="buttonSize" :height="buttonSize">
+          <v-icon :size="iconSize">$vuetify.icons.matrix</v-icon>
         </v-btn>
         <v-menu open-on-hover :close-on-content-click="false">
           <template v-slot:activator="{ on: showMenu }">
-            <v-btn fab x-small type="button" title="Add operation" v-on="showMenu">
-              <v-icon>$vuetify.icons.operation</v-icon>
+            <v-btn fab type="button" title="Add operation" v-on="showMenu" :width="buttonSize" :height="buttonSize">
+              <v-icon :size="iconSize">$vuetify.icons.operation</v-icon>
             </v-btn>
           </template>
 
@@ -39,7 +39,7 @@
                   <v-list-item-title>Advanced</v-list-item-title>
                 </v-list-item-content>
               </template>
-              <v-list-item v-for="nodeType in AdvancedOperationNodeType" :key="nodeType" @click="addNode(nodeType)" >
+              <v-list-item v-for="nodeType in AdvancedOperationNodeType" :key="nodeType" @click="addNode(nodeType)">
                 {{nodeType}}
               </v-list-item>
             </v-list-group>
@@ -49,20 +49,20 @@
       </div>
 
       <div class="buttons-group center buttons-history">
-        <v-btn fab ripple x-small type="button" title="Undo" :disabled="!history.canUndo()" @click="onUndo">
-          <v-icon>undo</v-icon>
+        <v-btn fab type="button" title="Undo" :disabled="!history.canUndo()" @click="onUndo" :width="buttonSize" :height="buttonSize">
+          <v-icon :size="iconSize">undo</v-icon>
         </v-btn>
-        <v-btn fab x-small type="button" title="Redo" :disabled="!history.canRedo()" @click="onRedo">
-          <v-icon>redo</v-icon>
+        <v-btn fab type="button" title="Redo" :disabled="!history.canRedo()" @click="onRedo" :width="buttonSize" :height="buttonSize">
+          <v-icon :size="iconSize">redo</v-icon>
         </v-btn>
       </div>
 
       <div class="buttons-group right buttons-delete-nodes">
-        <v-btn fab x-small type="button" title="Recenter view" @click="recenterView">
-          <v-icon>center_focus_weak</v-icon>
+        <v-btn fab type="button" title="Recenter view" @click="recenterView" :width="buttonSize" :height="buttonSize">
+          <v-icon :size="iconSize">center_focus_weak</v-icon>
         </v-btn>
-        <v-btn fab x-small type="button" title="Clear all nodes" @click="clearAllNodes">
-          <v-icon>delete</v-icon>
+        <v-btn fab type="button" title="Clear all nodes" @click="clearAllNodes" :width="buttonSize" :height="buttonSize">
+          <v-icon :size="iconSize">delete</v-icon>
         </v-btn>
       </div>
 
@@ -223,6 +223,15 @@ export default Vue.extend({
             showingError: false,
             errorText: '',
         };
+    },
+
+    computed: {
+        buttonSize() {
+            return (this as any).$vuetify.breakpoint.smAndDown ? 20 : 32;
+        },
+        iconSize() {
+            return (this as any).$vuetify.breakpoint.smAndDown ? 14 : 24;
+        },
     },
 
     methods: {

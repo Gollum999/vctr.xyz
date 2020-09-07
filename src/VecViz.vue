@@ -1,5 +1,5 @@
 <template>
-<div class="vec-viz">
+<div class="vec-viz-outer">
   <div class="top-settings-container">
     <v-switch
         color="primary"
@@ -21,14 +21,16 @@
     </v-dialog>
   </div>
 
-  <Split direction="vertical" :gutterSize="4" @onDrag="onDrag">
-    <SplitArea :size="50" :minSize="150">
-      <QuadViewport />
-    </SplitArea>
-    <SplitArea class="bottom-split" :size="50" :minSize="150">
-      <NodeEditor />
-    </SplitArea>
-  </Split>
+  <div class="vec-viz">
+    <Split direction="vertical" :gutterSize="4" @onDrag="onDrag">
+      <SplitArea :size="50" :minSize="150">
+        <QuadViewport />
+      </SplitArea>
+      <SplitArea class="bottom-split" :size="50" :minSize="150">
+        <NodeEditor />
+      </SplitArea>
+    </Split>
+  </div>
 </div>
 </template>
 
@@ -71,18 +73,20 @@ export default {
 .bottom-split {
     overflow-y: hidden;
 }
-.vec-viz {
+.vec-viz-outer {
     position: relative;
+    padding: 18px 60px 60px;
+    /* centering */
     margin-left: auto;
     margin-right: auto;
 }
+@media screen and (max-width: 720px) {
+    .vec-viz-outer {
+        padding: 18px 20px 60px;
+    }
+}
 .top-settings-container {
-    /* TODO probably a better way to position this but I am a CSS noob */
-    position: absolute;
-    width: 100%;
-    top: -6px;
-    left: 0px;
-    transform: translateY(-100%);
+    margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -96,17 +100,17 @@ export default {
     text-decoration: none;
 }
 
-@media screen and (max-height: 920px) {
-    .vec-viz { height: 800px; }
+@media screen and (max-height: 720px) {
+    .vec-viz { height: 600px; }
 }
-@media screen and (min-height: 921px) {
+@media screen and (min-height: 721px) {
     .vec-viz { height: calc(100vh - 120px); } /* 60px on top + bottom */
 }
 
-@media screen and (max-width: 720px) {
-    .vec-viz { width: 600px; }
+@media screen and (max-width: 440px) {
+    .vec-viz { width: 400px; }
 }
-@media screen and (min-width: 721px) and (max-width: 1720px) {
+@media screen and (min-width: 441px) and (max-width: 1720px) {
     .vec-viz { width: calc(100vw - 120px); } /* 60px on left + right */
 }
 @media screen and (min-width: 1721px) {
