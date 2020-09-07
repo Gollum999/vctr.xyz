@@ -850,9 +850,12 @@ export default Vue.extend({
   overflow-y: hidden
   .buttons-container
     pointer-events: none
+    display: flex
+    justify-content: space-between
     .buttons-group
       display: inline-block
-      width: 33%
+      flex: 1
+      white-space: nowrap
       &.left
         text-align: left
       &.center

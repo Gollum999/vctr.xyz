@@ -1,7 +1,8 @@
 <template>
-<div class="vec-viz-outer">
+<div :class="['vec-viz-outer', {small: $vuetify.breakpoint.smAndDown}]">
   <div class="top-settings-container">
     <v-switch
+        :class="[{shrink: $vuetify.breakpoint.smAndDown}]"
         color="primary"
         :input-value="nodeEditorSettings.values.showAdvancedRenderSettings"
         @change="onShowAdvancedControlsChanged"
@@ -11,8 +12,8 @@
 
     <v-dialog v-model="showSettingsDialog" class="settings-dialog-container" width="600">
         <template v-slot:activator="{ on: showDialog }">
-        <v-btn class="settings-button" v-on="showDialog">
-            <v-icon>settings</v-icon>
+        <v-btn class="settings-button" :x-small="$vuetify.breakpoint.smAndDown" v-on="showDialog">
+            <v-icon :x-small="$vuetify.breakpoint.smAndDown">settings</v-icon>
             Settings
         </v-btn>
         </template>
@@ -21,7 +22,7 @@
     </v-dialog>
   </div>
 
-  <div class="vec-viz">
+  <div :class="['vec-viz', {small: $vuetify.breakpoint.smAndDown}]">
     <Split direction="vertical" :gutterSize="4" @onDrag="onDrag">
       <SplitArea :size="50" :minSize="150">
         <QuadViewport />
@@ -66,24 +67,16 @@ export default {
 </script>
 
 <style scoped>
+.shrink {
+    transform: scale(0.75);
+    transform-origin: left;
+}
 .split {
     border: 1px solid #616161;
     border-bottom: 2px solid #616161; /* HACK: put a bottom border despite NodeEditor's hidden overflow */
 }
 .bottom-split {
     overflow-y: hidden;
-}
-.vec-viz-outer {
-    position: relative;
-    padding: 18px 60px 60px;
-    /* centering */
-    margin-left: auto;
-    margin-right: auto;
-}
-@media screen and (max-width: 720px) {
-    .vec-viz-outer {
-        padding: 18px 20px 60px;
-    }
 }
 .top-settings-container {
     margin-bottom: 6px;
@@ -100,18 +93,30 @@ export default {
     text-decoration: none;
 }
 
+.vec-viz-outer {
+    position: relative;
+    padding: 18px 60px 60px; /* 60px - 42px for header on top */
+    /* centering */
+    margin-left: auto;
+    margin-right: auto;
+}
+.vec-viz-outer.small {
+    padding: 6px 20px 20px;
+}
 @media screen and (max-height: 720px) {
     .vec-viz { height: 600px; }
 }
 @media screen and (min-height: 721px) {
-    .vec-viz { height: calc(100vh - 120px); } /* 60px on top + bottom */
+    .vec-viz       { height: calc(100vh - 120px); } /* 60px on top + bottom */
+    .vec-viz.small { height: calc(100vh - 56px); } /* 36px on top + 20px on bottom */
 }
 
-@media screen and (max-width: 440px) {
-    .vec-viz { width: 400px; }
+@media screen and (max-width: 400px) {
+    .vec-viz { width: 360px; } /* stuff will start getting really janky if we go smaller than this */
 }
-@media screen and (min-width: 441px) and (max-width: 1720px) {
-    .vec-viz { width: calc(100vw - 120px); } /* 60px on left + right */
+@media screen and (min-width: 401px) and (max-width: 1720px) {
+    .vec-viz       { width: calc(100vw - 120px); } /* 60px on left + right */
+    .vec-viz.small { width: calc(100vw - 40px);  } /* 20px on left + right */
 }
 @media screen and (min-width: 1721px) {
     .vec-viz { width: 1600px; }
