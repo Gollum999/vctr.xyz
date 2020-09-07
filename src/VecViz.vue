@@ -1,5 +1,7 @@
 <template>
 <div :class="['vec-viz-outer', {small: $vuetify.breakpoint.smAndDown}]">
+  <GithubCorner url="https://github.com/Gollum999/vctr.xyz" :size='$vuetify.breakpoint.smAndDown ? 20 : 60'
+                cornerColor="#272727" gitColor="white" />
   <div class="top-settings-container">
     <v-switch
         :class="[{shrink: $vuetify.breakpoint.smAndDown}]"
@@ -36,6 +38,7 @@
 </template>
 
 <script>
+import GithubCorner from 'vue-github-corners';
 import QuadViewport from './visualizer/QuadViewport';
 import NodeEditor from './node_editor/NodeEditor';
 import SettingsModal from './SettingsModal';
@@ -54,6 +57,7 @@ export default {
         QuadViewport,
         NodeEditor,
         SettingsModal,
+        GithubCorner,
     },
     methods: {
         onShowAdvancedControlsChanged(val) {
