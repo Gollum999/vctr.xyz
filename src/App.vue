@@ -1,12 +1,18 @@
 <template>
   <v-app id="app">
+    <GithubCorner url="https://github.com/Gollum999/vctr.xyz" :size='$vuetify.breakpoint.smAndDown ? 20 : 60'
+                  cornerColor="#272727" gitColor="white" />
     <router-view/>
   </v-app>
 </template>
 
 <script>
+import GithubCorner from 'vue-github-corners';
 export default {
     name: 'App',
+    components: {
+        GithubCorner,
+    },
 };
 </script>
 
