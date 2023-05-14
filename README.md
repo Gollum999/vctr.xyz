@@ -17,6 +17,17 @@ ranging from simple...|...to complex
 This was my first "substantial" web project, and I'll be honest, some of the code is
 pretty gross.  Thus, I welcome any and all PRs as potential learning opportunities!
 
+### Quick start
+``` bash
+npm install        # setup project
+npm run serve      # compiles and hot-reloads for development
+npm run build      # compiles and minifies for production
+npm run lint       # lints and fixes files
+npm run test       # run tests
+npm run test:e2e   # run end-to-end tests
+npm run test:unit  # run unit tests
+```
+
 ## Shout-outs
 
 Like any good project, **vctr.xyz** uses a bunch of open-source libraries, but
