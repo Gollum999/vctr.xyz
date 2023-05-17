@@ -4,6 +4,9 @@
   "private": true,
   "description": "Web app to visualize vector operations, transformations, etc.",
   "author": "Tim Sanders <gollum9999@gmail.com>",
+  "engines": {
+    "node": "14"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
